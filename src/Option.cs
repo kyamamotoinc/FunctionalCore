@@ -1,5 +1,3 @@
-using System;
-
 namespace FunctionalCore
 {
     namespace FunctionalCore
@@ -15,7 +13,7 @@ namespace FunctionalCore
                 {
                     if (HasValue == false)
                     {
-                        throw new InvalidOperationException("Option has no value");
+                        throw new InvalidOperationException("No value available");
                     }
                     return _value;
                 }
@@ -48,6 +46,7 @@ namespace FunctionalCore
             }
 
             #region "For LINQ"
+
             public Option<U> Select<U>(Func<T, U> f)
             {
                 return Map(f);
@@ -79,7 +78,7 @@ namespace FunctionalCore
                 return this;
             }
 
-            public Option<T> TapEither(Action<Option<T>> act)
+            public Option<T> TapAll(Action<Option<T>> act)
             {
                 act(this);
                 return this;
@@ -101,6 +100,44 @@ namespace FunctionalCore
                     return Option<U>.None();
                 }
                 return Option<U>.Some(f(Value, other.Value));
+            }
+
+            public Option<U> Combine<R1, R2, U>(Option<R1> other1, Option<R2> other2, Func<T, R1, R2, U> f)
+            {
+                if (HasValue == false)
+                {
+                    return Option<U>.None();
+                }
+                if (other1.HasValue == false)
+                {
+                    return Option<U>.None();
+                }
+                if (other2.HasValue == false)
+                {
+                    return Option<U>.None();
+                }
+                return Option<U>.Some(f(Value, other1.Value, other2.Value));
+            }
+
+            public Option<U> Combine<R1, R2, R3, U>(Option<R1> other1, Option<R2> other2, Option<R3> other3, Func<T, R1, R2, R3, U> f)
+            {
+                if (HasValue == false)
+                {
+                    return Option<U>.None();
+                }
+                if (other1.HasValue == false)
+                {
+                    return Option<U>.None();
+                }
+                if (other2.HasValue == false)
+                {
+                    return Option<U>.None();
+                }
+                if (other3.HasValue == false)
+                {
+                    return Option<U>.None();
+                }
+                return Option<U>.Some(f(Value, other1.Value, other2.Value, other3.Value));
             }
 
             public T ValueOrDefault(T defaultValue)
