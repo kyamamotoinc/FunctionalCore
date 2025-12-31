@@ -74,7 +74,6 @@ namespace FunctionalCore
         }
         #endregion
 
-
         public Result<E, T> Tap(Action<T> act)
         {
             if (IsSuccess == false)
