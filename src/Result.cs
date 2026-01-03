@@ -72,7 +72,6 @@ namespace FunctionalCore
         }
         #endregion
 
-
         public Result<E, T> Tap(Action<Result<E,T>> act)
         {
             if (IsSuccess == false)
@@ -154,6 +153,7 @@ namespace FunctionalCore
             }
             return Result<E, U>.Ok(f(Value, other1.Value, other2.Value, other3.Value));
         }
+        
         public T ValueOrDefault(T defaultValue)
         {
             return IsSuccess ? Value : defaultValue;
