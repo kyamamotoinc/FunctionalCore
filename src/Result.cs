@@ -1,3 +1,5 @@
+using System;
+
 namespace FunctionalCore
 {
     public sealed class Result<E, T>
