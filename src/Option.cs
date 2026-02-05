@@ -31,7 +31,14 @@ namespace FunctionalCore
             _value = default;
         }
 
-        public static Option<T> Some(T value) => new Option<T>(value);
+        public static Option<T> Some(T value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            return new Option<T>(value);
+        }
 
         public static Option<T> None() => new Option<T>();
 
