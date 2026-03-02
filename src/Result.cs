@@ -47,9 +47,23 @@ namespace FunctionalCore
             _value = default;
         }
 
-        public static Result<E, T> Ok(T value) => new Result<E, T>(value);
+        public static Result<E, T> Ok(T value)
+        {
+            if (object.ReferenceEquals(value, null))
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            return new Result<E, T>(value);
+        }
 
-        public static Result<E, T> Fail(E errorData) => new Result<E, T>(errorData);
+        public static Result<E, T> Fail(E errorData)
+        {
+            if (object.ReferenceEquals(errorData, null))
+            {
+                throw new ArgumentNullException(nameof(errorData));
+            }
+            return new Result<E, T>(errorData);
+        }
 
         public Result<E, U> Map<U>(Func<T, U> f)
         {
