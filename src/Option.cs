@@ -33,7 +33,7 @@ namespace FunctionalCore
 
         public static Option<T> Some(T value)
         {
-            if (value == null)
+            if (object.ReferenceEquals(value, null))
             {
                 throw new ArgumentNullException(nameof(value));
             }
