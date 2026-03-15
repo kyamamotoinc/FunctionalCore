@@ -1,165 +1,231 @@
-using System;
-
 namespace FunctionalCore
 {
-    public sealed class Option<T>
+    /// <summary>
+    /// Represents an optional value.
+    /// 値が存在するかもしれないことを表す型。
+    /// </summary>
+    /// <typeparam name="T">Type of the value / 値の型</typeparam>
+    public readonly struct Option<T> : IEquatable<Option<T>>
     {
+        /// <summary>
+        /// Indicates whether a value exists.
+        /// 値が存在するかどうかを示す。
+        /// </summary>
         public bool HasValue { get; }
 
         private readonly T _value;
+
+        /// <summary>
+        /// Gets the value if it exists. Throws if no value exists.
+        /// 値が存在する場合に値を取得する。存在しない場合は例外を投げる。
+        /// </summary>
         public T Value
         {
             get
             {
-                if (HasValue == false)
+                if (!HasValue)
                 {
-                    throw new InvalidOperationException("No value available");
+                    throw new InvalidOperationException($"Option<{typeof(T).Name}> does not contain a value.");
                 }
                 return _value;
             }
         }
 
+        /// <summary>
+        /// Private constructor for Some(value).
+        /// 値あり(Some)用のプライベートコンストラクタ。
+        /// </summary>
         private Option(T value)
         {
+            ArgumentNullException.ThrowIfNull(value);
+
             HasValue = true;
             _value = value;
         }
 
-        private Option()
-        {
-            HasValue = false;
-            _value = default;
-        }
-
+        /// <summary>
+        /// Creates an Option with a value (Some).
+        /// 値あり(Some)の Option を作成する。
+        /// </summary>
         public static Option<T> Some(T value)
         {
-            if (object.ReferenceEquals(value, null))
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            ArgumentNullException.ThrowIfNull(value);
             return new Option<T>(value);
         }
 
-        public static Option<T> None() => new Option<T>();
+        /// <summary>
+        /// Creates an Option without a value (None).
+        /// 値なし(None)の Option を取得する。
+        /// </summary>
+        public static Option<T> None() => default;
 
-        public Option<U> Map<U>(Func<T, U> f)
+        /// <summary>
+        /// Applies a function to the value if it exists; otherwise returns None.
+        /// 値が存在する場合に関数を適用し、存在しない場合は None を返す。
+        /// </summary>
+        public Option<U> Map<U>(Func<T, U> selector)
         {
-            return HasValue ? Option<U>.Some(f(Value)) : Option<U>.None();
+            ArgumentNullException.ThrowIfNull(selector);
+
+            if (!HasValue)
+            {
+                return Option<U>.None();
+            }
+
+            var result = selector(_value);
+            return result is null ? Option<U>.None() : Option<U>.Some(result);
         }
 
-        public Option<U> Bind<U>(Func<T, Option<U>> f)
+        /// <summary>
+        /// Applies a function returning Option if a value exists; otherwise returns None.
+        /// 値が存在する場合に Option を返す関数を適用し、存在しない場合は None を返す。
+        /// </summary>
+        public Option<U> Bind<U>(Func<T, Option<U>> binder)
         {
-            return HasValue ? f(Value) : Option<U>.None();
+            ArgumentNullException.ThrowIfNull(binder);
+            return HasValue ? binder(Value) : Option<U>.None();
         }
 
-        #region "For LINQ"
-
-        public Option<U> Select<U>(Func<T, U> f)
+        /// <summary>
+        /// Matches Some/None and returns a value.
+        /// Some/None に応じて関数を適用し、値を返す。
+        /// </summary>
+        public U Match<U>(Func<T, U> funcOnSome, Func<U> funcOnNone)
         {
-            return Map(f);
+            ArgumentNullException.ThrowIfNull(funcOnSome);
+            ArgumentNullException.ThrowIfNull(funcOnNone);
+
+            return HasValue ? funcOnSome(Value) : funcOnNone();
         }
 
-        public Option<V> SelectMany<U, V>(Func<T, Option<U>> selector, Func<T, U, V> projector)
+        #region For LINQ
+
+        /// <summary>
+        /// LINQ Select: maps the value when present.
+        /// LINQ の Select として、値がある場合にマップする。
+        /// </summary>
+        public Option<U> Select<U>(Func<T, U> selector)
         {
-            return Bind(x => selector(x).Map(y => projector(x, y)));
+            ArgumentNullException.ThrowIfNull(selector);
+            return Map(selector);
         }
+
+        /// <summary>
+        /// LINQ SelectMany: binds and then projects a new value.
+        /// LINQ の SelectMany として、Bind と Map を組み合わせる。
+        /// </summary>
+        public Option<V> SelectMany<U, V>(
+            Func<T, Option<U>> binder,
+            Func<T, U, V> projector)
+        {
+            ArgumentNullException.ThrowIfNull(binder);
+            ArgumentNullException.ThrowIfNull(projector);
+
+            return Bind(x => binder(x).Map(y => projector(x, y)));
+        }
+
+        /// <summary>
+        /// Filters the value with a predicate. Returns None if predicate fails.
+        /// 値に対して条件を適用し、満たさない場合は None を返す。
+        /// </summary>
+        public Option<T> Where(Func<T, bool> predicate)
+        {
+            ArgumentNullException.ThrowIfNull(predicate);
+
+            if (!HasValue)
+            {
+                return this;
+            }
+
+            return predicate(_value) ? this : Option<T>.None();
+        }
+
         #endregion
 
-        public Option<T> Tap(Action<Option<T>> act)
+        /// <summary>
+        /// Performs an action if a value exists, then returns this Option.
+        /// 値が存在する場合に副作用を実行し、その後同じ Option を返す。
+        /// </summary>
+        public Option<T> Tap(Action<T> action)
         {
-            if (HasValue == false)
-            {
-                return this;
-            }
-            act(this);
-            return this;
-        }
+            ArgumentNullException.ThrowIfNull(action);
 
-        public Option<T> TapError(Action<Option<T>> act)
-        {
             if (HasValue)
             {
-                return this;
+                action(Value);
             }
-            act(this);
             return this;
         }
 
-        public Option<T> TapAll(Action<Option<T>> act)
+        /// <summary>
+        /// Performs an action if no value exists, then returns this Option.
+        /// 値が存在しない場合に副作用を実行し、その後同じ Option を返す。
+        /// </summary>
+        public Option<T> TapError(Action action)
         {
-            act(this);
+            ArgumentNullException.ThrowIfNull(action);
+
+            if (!HasValue)
+            {
+                action();
+            }
             return this;
         }
 
-        public U Match<U>(Func<T, U> funcOnSuccess, Func<U> funcOnFailure)
+        /// <summary>
+        /// Performs an action regardless of value existence, then returns this Option.
+        /// 値の有無に関わらず副作用を実行し、その後同じ Option を返す。
+        /// </summary>
+        public Option<T> TapBoth(Action<Option<T>> action)
         {
-            return HasValue ? funcOnSuccess(Value) : funcOnFailure();
+            ArgumentNullException.ThrowIfNull(action);
+
+            action(this);
+            return this;
         }
 
-        public Option<U> Combine<R, U>(Option<R> other, Func<T, R, U> f)
+        /// <summary>
+        /// Determines whether this instance and another are equal.
+        /// このインスタンスが別のインスタンスと等しいかどうかを判定する。
+        /// </summary>
+        public bool Equals(Option<T> other)
         {
-            if (HasValue == false)
-            {
-                return Option<U>.None();
-            }
-            if (other.HasValue == false)
-            {
-                return Option<U>.None();
-            }
-            return Option<U>.Some(f(Value, other.Value));
+            if (HasValue != other.HasValue) return false;
+            if (!HasValue) return true;
+            return EqualityComparer<T>.Default.Equals(_value, other._value);
         }
 
-        public Option<U> Combine<R1, R2, U>(Option<R1> other1, Option<R2> other2, Func<T, R1, R2, U> f)
+        /// <inheritdoc/>
+        public override bool Equals(object? obj)
         {
-            if (HasValue == false)
-            {
-                return Option<U>.None();
-            }
-            if (other1.HasValue == false)
-            {
-                return Option<U>.None();
-            }
-            if (other2.HasValue == false)
-            {
-                return Option<U>.None();
-            }
-            return Option<U>.Some(f(Value, other1.Value, other2.Value));
+            return obj is Option<T> other && Equals(other);
         }
 
-        public Option<U> Combine<R1, R2, R3, U>(Option<R1> other1, Option<R2> other2, Option<R3> other3, Func<T, R1, R2, R3, U> f)
+        /// <inheritdoc/>
+        public override int GetHashCode()
         {
-            if (HasValue == false)
-            {
-                return Option<U>.None();
-            }
-            if (other1.HasValue == false)
-            {
-                return Option<U>.None();
-            }
-            if (other2.HasValue == false)
-            {
-                return Option<U>.None();
-            }
-            if (other3.HasValue == false)
-            {
-                return Option<U>.None();
-            }
-            return Option<U>.Some(f(Value, other1.Value, other2.Value, other3.Value));
+            return HasValue ? _value?.GetHashCode() ?? 0 : 0;
         }
 
-        public T ValueOrDefault(T defaultValue)
+        /// <summary>
+        /// Returns a string representation of the option.
+        /// Option の内容を表す文字列を返す。
+        /// </summary>
+        public override string ToString()
         {
-            return HasValue ? Value : defaultValue;
+            return HasValue ? $"Some({_value})" : "None";
         }
 
-        public T ValueOrThrow(Func<Exception> toException)
-        {
-            if (HasValue)
-            {
-                return Value;
-            }
-            throw toException();
-        }
+        /// <summary>
+        /// Equality operator.
+        /// 等値演算子。
+        /// </summary>
+        public static bool operator ==(Option<T> left, Option<T> right) => left.Equals(right);
+
+        /// <summary>
+        /// Inequality operator.
+        /// 不等値演算子。
+        /// </summary>
+        public static bool operator !=(Option<T> left, Option<T> right) => !(left == right);
     }
 }
-
