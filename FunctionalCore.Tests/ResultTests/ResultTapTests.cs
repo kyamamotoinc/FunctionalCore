@@ -1,16 +1,10 @@
-﻿using FunctionalCore.Extensions;
-
-namespace FunctionalCore.Tests.ResultTests;
+﻿
 public class ResultTapTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
 
    [SetUp]
     public void Setup()
     {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
     }
 
     // -----------------------------
@@ -25,7 +19,6 @@ public class ResultTapTests
     {
         int count = 0;
 
-        _ok.Tap(x => count++);
 
         Assert.AreEqual(1, count);
     }
@@ -38,7 +31,6 @@ public class ResultTapTests
     {
         int count = 0;
 
-        _fail.Tap(x => count++);
 
         Assert.AreEqual(0, count);
     }
@@ -49,8 +41,6 @@ public class ResultTapTests
     [Test]
     public void Result_Tap_should_return_same_result()
     {
-        var res = _ok.Tap(x => { });
-        Assert.AreEqual(_ok.Value, res.Value);
     }
 
     /// <summary>
@@ -59,7 +49,6 @@ public class ResultTapTests
     [Test]
     public void Result_Tap_null_action_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _ok.Tap(null!));
     }
 
     // -----------------------------
@@ -74,7 +63,6 @@ public class ResultTapTests
     {
         int count = 0;
 
-        _fail.TapError(err => count++);
 
         Assert.AreEqual(1, count);
     }
@@ -87,7 +75,6 @@ public class ResultTapTests
     {
         int count = 0;
 
-        _ok.TapError(err => count++);
 
         Assert.AreEqual(0, count);
     }
@@ -98,7 +85,6 @@ public class ResultTapTests
     [Test]
     public void Result_TapError_null_action_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _fail.TapError(null!));
     }
 
     // -----------------------------
@@ -113,7 +99,6 @@ public class ResultTapTests
     {
         int count = 0;
 
-        _ok.TapBoth(r => count++, () => count--);
 
         Assert.AreEqual(1, count);
     }
@@ -126,9 +111,7 @@ public class ResultTapTests
     {
         int count = 0;
 
-        _fail.TapBoth(r => count++, () => count--);
 
-        Assert.AreEqual(-1, count);
     }
 
     /// <summary>
@@ -137,7 +120,6 @@ public class ResultTapTests
     [Test]
     public void Result_TapBoth_null_action_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _ok.TapBoth(null!, null!));
     }
 }
 

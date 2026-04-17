@@ -32,11 +32,6 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 
     private readonly T _value;
     /// <summary>
-    /// Gets the value if successful.
-    /// 成功時の値を取得する
-    ///
-    /// Throws if the result is failure.
-    /// 失敗時は例外を投げる
     /// </summary>
     public T Value
     {
@@ -77,6 +72,7 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// null is not allowed.
     /// nullは禁止
     /// </summary>
+    /// <param name="value">値</param>
     private Result(T value)
     {
         _isInitialized = true;
@@ -92,6 +88,7 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// null is not allowed.
     /// nullは禁止
     /// </summary>
+    /// <param name="error"></param>
     private Result(E error)
     {
         _isInitialized = true;
@@ -110,6 +107,8 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// Creates a success (Ok).
     /// 成功(Result.Ok)
     /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
     public static Result<E, T> Ok(T value)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -121,6 +120,8 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// Creates a failure.
     /// 失敗(Result.Fail)
     /// </summary>
+    /// <param name="error"></param>
+    /// <returns></returns>
     public static Result<E, T> Fail(E error)
     {
         ArgumentNullException.ThrowIfNull(error);
@@ -135,6 +136,9 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// If selector returns null, it throws.
     /// nullは許可されない（例外）
     /// </summary>
+    /// <typeparam name="U"></typeparam>
+    /// <param name="selector"></param>
+    /// <returns></returns>
     public Result<E, U> Map<U>(Func<T, U> selector)
     {
         ThrowIfNotInitialized();
@@ -150,6 +154,55 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 
         return Result<E, U>.Ok(value);
     }
+
+    /// <summary>
+    /// Applies a function returning Result if successful, otherwise returns failure
+    /// 成功時はResultを返す関数を適用し、失敗時はそのまま返す
+    /// </summary>
+    /// <typeparam name="U"></typeparam>
+    /// <param name="binder"></param>
+    /// <returns></returns>
+    public Result<E, U> Bind<U>(Func<T, Result<E, U>> binder)
+    {
+        ArgumentNullException.ThrowIfNull(binder);
+
+        return IsSuccess ? binder(_value) : Result<E, U>.Fail(_error);
+    }
+
+    #region For LINQ
+
+    /// <summary>
+    /// Maps value to a new Result. Supports LINQ query syntax.
+    /// 値をマップして新しいResultを返す。LINQ構文対応
+    /// </summary>
+    /// <typeparam name="U"></typeparam>
+    /// <param name="selector"></param>
+    /// <returns></returns>
+    public Result<E, U> Select<U>(Func<T, U> selector)
+    {
+        ArgumentNullException.ThrowIfNull(selector);
+
+        return Map(selector);
+    }
+
+    /// <summary>
+    /// Maps and flattens nested Results. Supports LINQ query syntax.
+    /// Resultを返す関数を適用しフラット化する。LINQ構文対応
+    /// </summary>
+    /// <typeparam name="U"></typeparam>
+    /// <typeparam name="V"></typeparam>
+    /// <param name="selector"></param>
+    /// <param name="projector"></param>
+    /// <returns></returns>
+    public Result<E, V> SelectMany<U, V>(Func<T, Result<E, U>> selector, Func<T, U, V> projector)
+    {
+        ArgumentNullException.ThrowIfNull(selector);
+        ArgumentNullException.ThrowIfNull(projector);
+
+        return Bind(x => selector(x).Map(y => projector(x, y)));
+    }
+
+    #endregion
 
     /// <summary>
     /// Maps only the error in case of failure.
