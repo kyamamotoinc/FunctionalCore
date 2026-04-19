@@ -9,6 +9,7 @@ public static class OptionLinq
     public static Option<U> Select<T, U>(this Option<T> option, Func<T, U> selector)
     {
         ArgumentNullException.ThrowIfNull(selector);
+
         return option.Map(selector);
     }
 
@@ -34,6 +35,7 @@ public static class OptionLinq
     public static Option<T> Where<T>(this Option<T> option, Func<T, bool> predicate)
     {
         ArgumentNullException.ThrowIfNull(predicate);
+
         return option.Ensure(predicate);
     }
 }

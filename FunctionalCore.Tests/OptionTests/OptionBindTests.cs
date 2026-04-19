@@ -23,7 +23,7 @@ public class OptionBindTests
     {
         var result = _some.Bind(x => Option<int>.Some(x + 1));
 
-        Assert.AreEqual(Option<int>.Some(6), result);
+        Assert.That(result, Is.EqualTo(Option<int>.Some(6)));
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public class OptionBindTests
     {
         var result = _some.Bind(x => Option<int>.None);
 
-        Assert.AreEqual(Option<int>.None, result);
+        Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ public class OptionBindTests
             return Option<int>.Some(x + 1);
         });
 
-        Assert.AreEqual(0, count);
+        Assert.That(count, Is.EqualTo(0));
     }
 
     /// <summary>
@@ -62,7 +62,7 @@ public class OptionBindTests
     {
         var result = _none.Bind(x => Option<int>.Some(x + 1));
 
-        Assert.AreEqual(Option<int>.None, result);
+        Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>

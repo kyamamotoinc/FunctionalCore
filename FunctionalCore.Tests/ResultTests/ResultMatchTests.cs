@@ -23,7 +23,7 @@ public class ResultMatchTests
             err => -1
         );
 
-        Assert.AreEqual(6, result);
+        Assert.That(result, Is.EqualTo(6));
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public class ResultMatchTests
                 return -1;
             });
 
-        Assert.AreEqual(0, count);
+        Assert.That(count, Is.EqualTo(0));
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ public class ResultMatchTests
             err => -1
         );
 
-        Assert.AreEqual(-1, result);
+        Assert.That(result, Is.EqualTo(-1));
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public class ResultMatchTests
             err => -1
         );
 
-        Assert.AreEqual(0, count);
+        Assert.That(count, Is.EqualTo(0));
     }
 
     /// <summary>

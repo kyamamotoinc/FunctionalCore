@@ -22,7 +22,7 @@ public class OptionMatchTests
             x => x + 1,
             () => -1);
 
-        Assert.AreEqual(6, opt);
+        Assert.That(opt, Is.EqualTo(6));
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ public class OptionMatchTests
                 return -1;
             });
 
-        Assert.AreEqual(0, count);
+        Assert.That(count, Is.EqualTo(0));
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ public class OptionMatchTests
             () => -1
         );
 
-        Assert.AreEqual(-1, opt);
+        Assert.That(opt, Is.EqualTo(-1));
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ public class OptionMatchTests
             },
             () => -1);
 
-        Assert.AreEqual(0, count);
+        Assert.That(count, Is.EqualTo(0));
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ public class OptionMatchTests
     [Test]
     public void Option_Some_Match_null_success_func_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _some.Match<int>(null, () => -1));
+        Assert.Throws<ArgumentNullException>(() => _ = _some.Match<int>(null!, () => -1));
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ public class OptionMatchTests
     [Test]
     public void Option_None_Match_null_failure_func_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _none.Match(x => x + 1, null));
+        Assert.Throws<ArgumentNullException>(() => _ = _none.Match(x => x + 1, null!));
     }
 
     /// <summary>
@@ -100,7 +100,7 @@ public class OptionMatchTests
     public void Option_Some_Match_success_func_returning_null_should_throw()
     {
         Assert.Throws<InvalidOperationException>(() => _ = _some.Match(
-            x => (string)null,
+            x => (string)null!,
             () => "fallback"
         ));
     }
@@ -113,7 +113,7 @@ public class OptionMatchTests
     {
         Assert.Throws<InvalidOperationException>(() => _ = _none.Match(
             x => "ok",
-            () => (string)null
+            () => (string)null!
         ));
     }
 }

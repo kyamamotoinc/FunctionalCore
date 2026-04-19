@@ -19,8 +19,8 @@ public class ResultMapTests
     public void Result_Ok_Map_should_return_selector_result()
     {
         var resOk2 = _ok.Map(x => x + 1);
-        Assert.AreEqual(6, resOk2.Value);
-        Assert.IsTrue(resOk2.IsSuccess);
+        Assert.That(resOk2.Value, Is.EqualTo(6));
+        Assert.That(resOk2.IsSuccess, Is.True);
     }
 
     /// <summary>
@@ -36,9 +36,9 @@ public class ResultMapTests
             return x + 1;
         });
 
-        Assert.AreEqual(0, count);
-        Assert.AreEqual("error", resFail2.Error);
-        Assert.IsFalse(resFail2.IsSuccess);
+        Assert.That(count, Is.EqualTo(0));
+        Assert.That(resFail2.Error, Is.EqualTo("error"));
+        Assert.That(resFail2.IsSuccess, Is.False);
     }
 
     /// <summary>
@@ -63,8 +63,8 @@ public class ResultMapTests
         _ok.Map(x => x + 1);
         _fail.Map(x => x + 1);
 
-        Assert.AreEqual(Result<string, int>.Ok(5), _ok);
-        Assert.AreEqual(Result<string, int>.Fail("error"), _fail);
+        Assert.That(_ok, Is.EqualTo(Result<string, int>.Ok(5)));
+        Assert.That(_fail, Is.EqualTo(Result<string, int>.Fail("error")));
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ public class ResultMapTests
     [Test]
     public void Result_Ok_Map_null_selector_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _ok.Map<string>(null));
+        Assert.Throws<ArgumentNullException>(() => _ = _ok.Map<string>(null!));
     }
 
     /// <summary>
@@ -82,6 +82,6 @@ public class ResultMapTests
     [Test]
     public void Result_Ok_Map_selector_returning_null_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = _ok.Map(x => (string)null));
+        Assert.Throws<InvalidOperationException>(() => _ = _ok.Map(x => (string)null!));
     }
 }

@@ -56,8 +56,6 @@ public readonly struct Option<T> : IEquatable<Option<T>>
     /// </summary>
     private Option(T value)
     {
-        ArgumentNullException.ThrowIfNull(value);
-
         HasValue = true;
         _value = value;
     }
@@ -112,6 +110,7 @@ public readonly struct Option<T> : IEquatable<Option<T>>
             return Option<U>.None;
 
         var value = selector(_value);
+
         return value is null ? Option<U>.None : Option<U>.Some(value);
     }
 
@@ -128,8 +127,6 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
         return HasValue ? binder(_value) : Option<U>.None;
     }
-
-    #region LINQ
 
     /// <summary>
     /// Pattern matches Option into a value.
@@ -153,7 +150,7 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Pattern matches Option into a value.
-    /// Optionを分岐処理し、値を生成する。
+    /// Optionを分岐処理し、アクションを実行する。
     ///
     /// Forces handling of both Some and None.
     /// Some / None の両方を処理させる。
@@ -185,8 +182,6 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
         return predicate(_value) ? this : Option<T>.None;
     }
-
-    #endregion
 
     /// <summary>
     /// Executes side-effect if value exists.
@@ -220,96 +215,6 @@ public readonly struct Option<T> : IEquatable<Option<T>>
             action();
 
         return this;
-    }
-
-    /// <summary>
-    /// Executes side-effect regardless of state.
-    /// 状態に関係なく副作用を実行する
-    ///
-    /// Does not change the Option.
-    /// 状態は変更しない
-    /// </summary>
-    public Option<T> TapBoth(Action<Option<T>> action)
-    {
-        ArgumentNullException.ThrowIfNull(action);
-
-        action(this);
-        return this;
-    }
-
-    /// <summary>
-    /// Filters the value using a predicate.
-    /// 条件を満たさない場合は None に変換する。
-    ///
-    /// Equivalent to validation.
-    /// バリデーションとして使用する
-    /// </summary>
-    public Option<T> Ensure(Func<T, bool> predicate)
-    {
-        ArgumentNullException.ThrowIfNull(predicate);
-
-        if (!HasValue)
-            return this;
-
-        return predicate(_value) ? this : Option<T>.None;
-    }
-
-    /// <summary>
-    /// Pattern matches Option into a value.
-    /// Optionを分岐処理し値を生成する。
-    ///
-    /// Forces handling of both Some and None.
-    /// Some / None の両方を処理させる
-    /// </summary>
-    public U Match<U>(Func<T, U> onSome, Func<U> onNone)
-    {
-        ArgumentNullException.ThrowIfNull(onSome);
-        ArgumentNullException.ThrowIfNull(onNone);
-
-        var value = HasValue ? onSome(_value) : onNone();
-
-        if (value is null)
-            throw new InvalidOperationException("Match must not return null.");
-
-        return value;
-    }
-
-    /// <summary>
-    /// Returns value if present, otherwise default(T).
-    /// 値が存在すればそれを返し、無ければ既定値
-    /// </summary>
-    public T GetValueOrDefault()
-    {
-        return HasValue ? _value : default!;
-    }
-
-    /// <summary>
-    /// Returns value if present, otherwise fallback.
-    /// 値が存在すればそれを返し、無ければ代替値
-    /// </summary>
-    public T GetValueOr(T defaultValue)
-    {
-        return HasValue ? _value : defaultValue;
-    }
-
-    /// <summary>
-    /// Returns this if Some, otherwise other.
-    /// Someなら自身、Noneなら代替
-    /// </summary>
-    public Option<T> Or(Option<T> other)
-    {
-        return HasValue ? this : other;
-    }
-
-    /// <summary>
-    /// Returns this if Some, otherwise factory result.
-    /// Someなら自身、Noneなら生成結果
-    /// </summary>
-    public Option<T> Or(Func<Option<T>> otherFactory)
-    {
-        ArgumentNullException.ThrowIfNull(otherFactory);
-
-        return HasValue ? this : otherFactory();
     }
 
     public override string ToString()
