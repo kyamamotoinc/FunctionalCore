@@ -16,7 +16,7 @@ public class OptionSomeTests
     [Test]
     public void Some_Value_should_return_inner_value()
     {
-        Assert.AreEqual(5, _some.Value);
+        Assert.That(_some.Value, Is.EqualTo(5));
     }
 
     /// <summary>
@@ -25,7 +25,7 @@ public class OptionSomeTests
     [Test]
     public void Some_HasValue_should_be_true()
     {
-        Assert.IsTrue(_some.HasValue);
+        Assert.That(_some.HasValue, Is.True);
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public class OptionSomeTests
     [Test]
     public void Some_Value_should_not_be_null()
     {
-        Assert.IsNotNull(_some.Value);
+        Assert.That(_some.Value, Is.Not.Null);
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ public class OptionSomeTests
     [Test]
     public void Some_null_should_throw_ArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>(() => Option<string>.Some(null));
+        Assert.Throws<ArgumentNullException>(() => Option<string>.Some(null!));
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ public class OptionSomeTests
     public void Some_with_same_value_should_be_equal()
     {
         var other = Option<int>.Some(5);
-        Assert.IsTrue(_some == other);
+        Assert.That(_some, Is.EqualTo(other));
     }
 
     /// <summary>
@@ -63,7 +63,7 @@ public class OptionSomeTests
     public void Some_with_different_value_should_not_be_equal()
     {
         var other = Option<int>.Some(10);
-        Assert.IsTrue(_some != other);
+        Assert.That(_some, Is.Not.EqualTo(other));
     }
 
     /// <summary>
@@ -72,6 +72,6 @@ public class OptionSomeTests
     [Test]
     public void Some_ToString_should_return_formatted_value()
     {
-        Assert.AreEqual("Some(5)", _some.ToString());
+        Assert.That(_some.ToString(), Is.EqualTo("Some(5)"));
     }
 }

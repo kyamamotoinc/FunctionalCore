@@ -20,17 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="FunctionalCore">
-      <HintPath>..\FunctionalCore\bin\Debug\net10.0\FunctionalCore.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ResultTests\Linq\" />
+    <ProjectReference Include="..\FunctionalCore\FunctionalCore.csproj" />
   </ItemGroup>
 
 </Project>

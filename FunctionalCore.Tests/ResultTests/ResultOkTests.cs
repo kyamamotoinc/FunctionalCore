@@ -17,7 +17,7 @@ public class ResultOkTests
     public void Result_Ok_should_return_inner_Value()
     {
         Assert.DoesNotThrow(() => _ = _ok.Value);
-        Assert.AreEqual(5, _ok.Value);
+        Assert.That(_ok.Value, Is.EqualTo(5));
     }
 
     /// <summary>
@@ -26,7 +26,7 @@ public class ResultOkTests
     [Test]
     public void Result_Ok_should_be_success()
     {
-        Assert.IsTrue(_ok.IsSuccess);
+        Assert.That(_ok.IsSuccess, Is.True);
     }
 
     /// <summary>
@@ -35,7 +35,7 @@ public class ResultOkTests
     [Test]
     public void Result_Ok_Value_should_not_be_null()
     {
-        Assert.IsNotNull(_ok.Value);
+        Assert.That(_ok.Value, Is.Not.Null);
     }
 
     /// <summary>
@@ -64,9 +64,9 @@ public class ResultOkTests
     {
         var other = Result<string, int>.Ok(5);
 
-        Assert.IsTrue(_ok == other);
-        Assert.IsTrue(_ok.Equals(other));
-        Assert.AreEqual(_ok.GetHashCode(), other.GetHashCode());
+        Assert.That(_ok == other, Is.True);
+        Assert.That(_ok.Equals(other), Is.True);
+        Assert.That(_ok.GetHashCode(), Is.EqualTo(other.GetHashCode()));
     }
 
     /// <summary>
@@ -77,8 +77,8 @@ public class ResultOkTests
     {
         var other = Result<string, int>.Ok(10);
 
-        Assert.AreNotEqual(_ok, other);
-        Assert.IsTrue(_ok != other);
+        Assert.That(_ok, Is.Not.EqualTo(other));
+        Assert.That(_ok != other, Is.True);
     }
 
     /// <summary>
@@ -87,6 +87,6 @@ public class ResultOkTests
     [Test]
     public void Ok_ToString_should_return_formatted_value()
     {
-        Assert.AreEqual("Ok(5)", _ok.ToString());
+        Assert.That(_ok.ToString(), Is.EqualTo("Ok(5)"));
     }
 }

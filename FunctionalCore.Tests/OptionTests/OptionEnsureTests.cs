@@ -22,7 +22,7 @@ public class OptionEnsureTests
     {
         var result = _some.Ensure(x => x > 0);
 
-        Assert.AreEqual(Option<int>.Some(5), result);
+        Assert.That(result, Is.EqualTo(Option<int>.Some(5)));
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ public class OptionEnsureTests
     {
         var result = _some.Ensure(x => x < 0);
 
-        Assert.AreEqual(Option<int>.None, result);
+        Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
@@ -50,8 +50,8 @@ public class OptionEnsureTests
             return true;
         });
 
-        Assert.AreEqual(0, count);
-        Assert.AreEqual(Option<int>.None, result);
+        Assert.That(count, Is.EqualTo(0));
+        Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>

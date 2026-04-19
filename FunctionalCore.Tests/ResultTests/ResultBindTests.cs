@@ -1,6 +1,4 @@
-﻿
-
-namespace FunctionalCore.Tests.ResultTests;
+﻿namespace FunctionalCore.Tests.ResultTests;
 
 
 public class ResultBindTests
@@ -22,8 +20,10 @@ public class ResultBindTests
     [Test]
     public void Result_Ok_Bind_should_return_binder_result()
     {
-        var res = _ok.Bind(x => Result<string, int>.Ok(x + 1));
-        Assert.AreEqual(6, res.Value);
+        var result = _ok.Bind(x => Result<string, int>.Ok(x + 1));
+
+        Assert.That(result.IsSuccess);
+        Assert.That(result.Value, Is.EqualTo(6));
     }
 
     /// <summary>
@@ -32,8 +32,8 @@ public class ResultBindTests
     [Test]
     public void Result_Ok_Bind_should_be_success()
     {
-        var res = _ok.Bind(x => Result<string, int>.Ok(x + 1));
-        Assert.IsTrue(res.IsSuccess);
+        var result = _ok.Bind(x => Result<string, int>.Ok(x + 1));
+        Assert.That(result.IsSuccess);
     }
 
     /// <summary>
@@ -42,8 +42,8 @@ public class ResultBindTests
     [Test]
     public void Result_Ok_Bind_can_return_failure()
     {
-        var res = _ok.Bind(x => Result<string, int>.Fail("bind error"));
-        Assert.AreEqual("bind error", res.Error);
+        var result = _ok.Bind(x => Result<string, int>.Fail("bind error"));
+        Assert.That(result.Error, Is.EqualTo("bind error"));
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public class ResultBindTests
             return Result<string, int>.Ok(x + 1);
         });
 
-        Assert.AreEqual(0, count);
+        Assert.That(count, Is.EqualTo(0));
     }
 
     /// <summary>
@@ -68,8 +68,8 @@ public class ResultBindTests
     [Test]
     public void Result_Fail_Bind_should_keep_error()
     {
-        var res = _fail.Bind(x => Result<string, int>.Ok(x + 1));
-        Assert.AreEqual("error", res.Error);
+        var result = _fail.Bind(x => Result<string, int>.Ok(x + 1));
+        Assert.That(result.Error, Is.EqualTo("error"));
     }
 
     /// <summary>
@@ -78,7 +78,6 @@ public class ResultBindTests
     [Test]
     public void Result_Ok_Bind_null_binder_should_throw()
     {
-        ;
         Assert.Throws<ArgumentNullException>(() => _ = _ok.Bind<string>(null!));
     }
 

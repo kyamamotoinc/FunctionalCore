@@ -1,4 +1,6 @@
-﻿namespace FunctionalCore.Tests.OptionTests;
+﻿using FunctionalCore.Extensions;
+
+namespace FunctionalCore.Tests.OptionTests;
 
 public class ResultOrTests
 {
@@ -22,7 +24,7 @@ public class ResultOrTests
 
         var result = _ok.Or(other);
 
-        Assert.AreEqual(_ok, result);
+        Assert.That(result, Is.EqualTo(_ok));
     }
 
     /// <summary>
@@ -35,7 +37,7 @@ public class ResultOrTests
 
         var result = _fail.Or(other);
 
-        Assert.AreEqual(other, result);
+        Assert.That(result, Is.EqualTo(other));
     }
 
     /// <summary>
@@ -48,7 +50,7 @@ public class ResultOrTests
 
         var result = _fail.Or(other);
 
-        Assert.IsFalse(result.IsSuccess);
+        Assert.That(result.IsSuccess, Is.False);
     }
 
     /// <summary>
@@ -61,7 +63,7 @@ public class ResultOrTests
 
         var result = _ok.Or(other);
 
-        Assert.AreEqual(5, result.Value);
+        Assert.That(result.Value, Is.EqualTo(5));
     }
 
     /// <summary>
@@ -78,8 +80,8 @@ public class ResultOrTests
             return Result<string, int>.Ok(10);
         });
 
-        Assert.AreEqual(0, count);
-        Assert.AreEqual(5, result.Value);
+        Assert.That(count, Is.EqualTo(0));
+        Assert.That(result.Value, Is.EqualTo(5));
     }
 
     /// <summary>
@@ -96,8 +98,8 @@ public class ResultOrTests
             return Result<string, int>.Ok(10);
         });
 
-        Assert.AreEqual(1, count);
-        Assert.AreEqual(10, result.Value);
+        Assert.That(count, Is.EqualTo(1));
+        Assert.That(result.Value, Is.EqualTo(10));
     }
 
     /// <summary>

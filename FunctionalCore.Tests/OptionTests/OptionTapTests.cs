@@ -29,7 +29,7 @@ public class OptionTapTests
 
         _some.Tap(x => count++);
 
-        Assert.AreEqual(1, count);
+        Assert.That(count, Is.EqualTo(1));
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public class OptionTapTests
 
         _none.Tap(x => count++);
 
-        Assert.AreEqual(0, count);
+        Assert.That(count, Is.EqualTo(0));
     }
 
     /// <summary>
@@ -52,7 +52,7 @@ public class OptionTapTests
     public void Option_Tap_should_return_same_option()
     {
         var opt = _some.Tap(x => { });
-        Assert.AreEqual(_some.Value, opt.Value);
+        Assert.That(opt.Value, Is.EqualTo(_some.Value));
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public class OptionTapTests
     [Test]
     public void Option_Tap_null_action_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _some.Tap(null));
+        Assert.Throws<ArgumentNullException>(() => _some.Tap(null!));
     }
 
     // -----------------------------
@@ -78,7 +78,7 @@ public class OptionTapTests
 
         _none.TapNone(() => count++);
 
-        Assert.AreEqual(1, count);
+        Assert.That(count, Is.EqualTo(1));
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ public class OptionTapTests
 
         _some.TapNone(() => count++);
 
-        Assert.AreEqual(0, count);
+        Assert.That(count, Is.EqualTo(0));
     }
 
     /// <summary>
@@ -101,7 +101,7 @@ public class OptionTapTests
     public void Option_TapNone_null_action_should_throw()
     {
         ;
-        Assert.Throws<ArgumentNullException>(() => _none.TapNone(null));
+        Assert.Throws<ArgumentNullException>(() => _none.TapNone(null!));
     }
 
     // -----------------------------
@@ -118,7 +118,7 @@ public class OptionTapTests
 
         _some.TapBoth(_ => count++);
 
-        Assert.AreEqual(1, count);
+        Assert.That(count, Is.EqualTo(1));
     }
 
     /// <summary>
@@ -131,7 +131,7 @@ public class OptionTapTests
 
         _none.TapBoth(_ => count++);
 
-        Assert.AreEqual(1, count);
+        Assert.That(count, Is.EqualTo(1));
     }
 
     /// <summary>
@@ -140,7 +140,7 @@ public class OptionTapTests
     [Test]
     public void Option_TapBoth_null_acion_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _some.TapBoth(null));
+        Assert.Throws<ArgumentNullException>(() => _some.TapBoth(null!));
 
     }
 }

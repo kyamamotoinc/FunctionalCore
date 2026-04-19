@@ -22,7 +22,7 @@ public class ResultGetValueOrTests
     {
         var value = _ok.GetValueOr(999);
 
-        Assert.AreEqual(5, value);
+        Assert.That(value, Is.EqualTo(5));
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ public class ResultGetValueOrTests
     {
         var value = _fail.GetValueOr(999);
 
-        Assert.AreEqual(999, value);
+        Assert.That(value, Is.EqualTo(999));
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ public class ResultGetValueOrTests
     {
         var value = _fail.GetValueOr(default);
 
-        Assert.AreEqual(default(int), value);
+        Assert.That(value, Is.EqualTo(default(int)));
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public class ResultGetValueOrTests
 
         var value = some.GetValueOr(999);
 
-        Assert.AreEqual(0, value);
+        Assert.That(value, Is.EqualTo(0));
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public class ResultGetValueOrTests
 
         var value = none.GetValueOr(fallback);
 
-        Assert.AreSame(fallback, value);
+        Assert.That(value, Is.SameAs(fallback));
     }
 
     /// <summary>
@@ -84,6 +84,6 @@ public class ResultGetValueOrTests
 
         var value = some.GetValueOr("fallback");
 
-        Assert.AreEqual("value", value);
+        Assert.That(value, Is.EqualTo("value"));
     }
 }

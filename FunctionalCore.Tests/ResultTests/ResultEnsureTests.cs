@@ -1,6 +1,5 @@
 ﻿namespace FunctionalCore.Tests.ResultTests;
 
-
 public class ResultEnsureTests
 {
     private Result<string, int> _ok;
@@ -19,9 +18,10 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ok_Ensure_true_should_keep_ok()
     {
-        var res = _ok.Ensure(x => x > 0, x => "invalid");
-        Assert.IsTrue(res.IsSuccess);
-        Assert.AreEqual(5, res.Value);
+        var result = _ok.Ensure(x => x > 0, x => "invalid");
+
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Value, Is.EqualTo(5));
     }
 
     /// <summary>
@@ -30,9 +30,10 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ok_Ensure_false_should_return_fail()
     {
-        var res = _ok.Ensure(x => x < 0, x => "invalid");
-        Assert.IsFalse(res.IsSuccess);
-        Assert.AreEqual("invalid", res.Error);
+        var result = _ok.Ensure(x => x < 0, x => "invalid");
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.Error, Is.EqualTo("invalid"));
     }
 
     /// <summary>
@@ -43,15 +44,15 @@ public class ResultEnsureTests
     {
         int count = 0;
 
-        var res = _fail.Ensure(x =>
+        var result = _fail.Ensure(x =>
         {
             count++;
             return true;
         }, x => "invalid");
 
-        Assert.AreEqual(0, count);
-        Assert.IsFalse(res.IsSuccess);
-        Assert.AreEqual("error", res.Error);
+        Assert.That(count, Is.EqualTo(0));
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.Error, Is.EqualTo("error"));
     }
 
     /// <summary>
@@ -60,7 +61,7 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ensure_null_predicate_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _ok.Ensure(null, x => "invalid"));
+        Assert.Throws<ArgumentNullException>(() => _ = _ok.Ensure(null!, x => "invalid"));
     }
 
     /// <summary>
@@ -69,7 +70,7 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ensure_null_error_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _ok.Ensure(x => false, null));
+        Assert.Throws<ArgumentNullException>(() => _ = _ok.Ensure(x => false, null!));
     }
 }
 

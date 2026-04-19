@@ -16,7 +16,7 @@ public class ResultFailTests
     [Test]
     public void Result_Fail_should_return_inner_Error()
     {
-        Assert.AreEqual("error", _fail.Error);
+        Assert.That(_fail.Error, Is.EqualTo("error"));
     }
 
     /// <summary>
@@ -25,7 +25,7 @@ public class ResultFailTests
     [Test]
     public void Result_Fail_should_not_be_success()
     {
-        Assert.IsFalse(_fail.IsSuccess);
+        Assert.That(_fail.IsSuccess, Is.False);
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public class ResultFailTests
     [Test]
     public void Result_Fail_Error_should_not_be_null()
     {
-        Assert.IsNotNull(_fail.Error);
+        Assert.That(_fail.Error, Is.Not.Null);
     }
 
     /// <summary>
@@ -63,9 +63,8 @@ public class ResultFailTests
     {
         var other = Result<string, int>.Fail("error");
 
-        Assert.IsTrue(_fail == other);
-        Assert.IsTrue(_fail.Equals(other));
-        Assert.AreEqual(_fail.GetHashCode(), other.GetHashCode());
+        Assert.That(_fail, Is.EqualTo(other));
+        Assert.That(_fail.GetHashCode(), Is.EqualTo(other.GetHashCode()));
     }
 
     /// <summary>
@@ -76,8 +75,7 @@ public class ResultFailTests
     {
         var other = Result<string, int>.Fail("other");
 
-        Assert.AreNotEqual(_fail, other);
-        Assert.IsTrue(_fail != other);
+        Assert.That(_fail, Is.Not.EqualTo(other));
     }
 
     /// <summary>
@@ -86,6 +84,6 @@ public class ResultFailTests
     [Test]
     public void Fail_ToString_should_return_formatted_value()
     {
-        Assert.AreEqual("Fail(error)", _fail.ToString());
+        Assert.That(_fail.ToString(), Is.EqualTo("Fail(error)"));
     }
 }

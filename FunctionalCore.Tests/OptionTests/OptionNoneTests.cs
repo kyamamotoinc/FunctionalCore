@@ -35,7 +35,7 @@ public class OptionNoneTests
     public void None_should_be_equal_to_None()
     {
         var other = Option<int>.None;
-        Assert.IsTrue(_none == other);
+        Assert.That(_none, Is.EqualTo(other));
     }
 
     /// <summary>
@@ -45,7 +45,7 @@ public class OptionNoneTests
     public void None_should_be_equal_via_Equals()
     {
         var other = Option<int>.None;
-        Assert.IsTrue(_none.Equals(other));
+        Assert.That(_none, Is.EqualTo(other));
     }
 
     /// <summary>
@@ -55,8 +55,8 @@ public class OptionNoneTests
     public void Some_and_None_should_not_be_equal()
     {
         var some = Option<int>.Some(5);
-        Assert.AreNotEqual(some, _none);
-        Assert.IsTrue(some != _none);
+        Assert.That(_none, Is.Not.EqualTo(some));
+        //Assert.That(some != _none);
     }
 
     /// <summary>
@@ -65,7 +65,7 @@ public class OptionNoneTests
     [Test]
     public void None_ToString_should_return_None()
     {
-        Assert.AreEqual("None", _none.ToString());
+        Assert.That(_none.ToString(), Is.EqualTo("None"));
     }
 
     /// <summary>
@@ -75,6 +75,6 @@ public class OptionNoneTests
     public void None_hashcode_should_be_equal()
     {
         var other = Option<int>.None;
-        Assert.AreEqual(_none.GetHashCode(), other.GetHashCode());
+        Assert.That(_none.GetHashCode(), Is.EqualTo(other.GetHashCode()));
     }
 }

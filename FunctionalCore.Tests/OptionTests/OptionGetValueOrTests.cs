@@ -1,4 +1,6 @@
-﻿namespace FunctionalCore.Tests.OptionTests;
+﻿using FunctionalCore.Extensions;
+
+namespace FunctionalCore.Tests.OptionTests;
 
 public class OptionGetValueOrTests
 {
@@ -20,7 +22,7 @@ public class OptionGetValueOrTests
     {
         var value = _some.GetValueOr(999);
 
-        Assert.AreEqual(5, value);
+        Assert.That(value, Is.EqualTo(5));
     }
 
     /// <summary>
@@ -31,7 +33,7 @@ public class OptionGetValueOrTests
     {
         var value = _none.GetValueOr(999);
 
-        Assert.AreEqual(999, value);
+        Assert.That(value, Is.EqualTo(999));
     }
 
     /// <summary>
@@ -42,7 +44,7 @@ public class OptionGetValueOrTests
     {
         var value = _none.GetValueOr(default);
 
-        Assert.AreEqual(default(int), value);
+        Assert.That(value, Is.EqualTo(default(int)));
     }
 
     /// <summary>
@@ -55,7 +57,7 @@ public class OptionGetValueOrTests
 
         var value = some.GetValueOr(999);
 
-        Assert.AreEqual(0, value);
+        Assert.That(value, Is.EqualTo(0));
     }
 
     /// <summary>
@@ -69,7 +71,7 @@ public class OptionGetValueOrTests
 
         var value = none.GetValueOr(fallback);
 
-        Assert.AreSame(fallback, value);
+        Assert.That(value, Is.SameAs(fallback));
     }
 
     /// <summary>
@@ -82,6 +84,6 @@ public class OptionGetValueOrTests
 
         var value = some.GetValueOr("fallback");
 
-        Assert.AreEqual("value", value);
+        Assert.That(value, Is.EqualTo("value"));
     }
 }
