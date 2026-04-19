@@ -13,16 +13,16 @@ public static class ResultExtensions
     /// Does not change the Option.
     /// 状態は変更しない
     /// </summary>
-    public static Result<E, T> TapBoth<E, T>(this Result<E, T> result, Action<T> onSome, Action onNone)
+    public static Result<E, T> TapBoth<E, T>(this Result<E, T> result, Action<T> onSuccess, Action onFailure)
     {
         result.ThrowIfNotInitialized();
-        ArgumentNullException.ThrowIfNull(onSome);
-        ArgumentNullException.ThrowIfNull(onNone);
+        ArgumentNullException.ThrowIfNull(onSuccess);
+        ArgumentNullException.ThrowIfNull(onFailure);
 
         if (result.IsSuccess)
-            onSome(result.Value);
+            onSuccess(result.Value);
         else
-            onNone();
+            onFailure();
 
         return result;
     }

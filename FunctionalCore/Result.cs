@@ -232,7 +232,7 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
         else
             onFailure(_error);
     }
-
+    
     /// <summary>
     /// Validates the value using a predicate. Converts to failure if the predicate fails.
     /// 値に条件を課し、違反時は失敗Resultへ変換

@@ -13,11 +13,15 @@ public static class OptionExtensions
     /// Does not change the Option.
     /// 状態は変更しない
     /// </summary>
-    public static Option<T> TapBoth<T>(this Option<T> option, Action<Option<T>> action)
+    public static Option<T> TapBoth<T>(this Option<T> option, Action<T> onSome, Action onNone)
     {
-        ArgumentNullException.ThrowIfNull(action);
+        ArgumentNullException.ThrowIfNull(onSome);
+        ArgumentNullException.ThrowIfNull(onNone);
+        if (option.HasValue)
+            onSome(option.Value);
+        else
+            onNone();
 
-        action(option);
         return option;
     }
 
