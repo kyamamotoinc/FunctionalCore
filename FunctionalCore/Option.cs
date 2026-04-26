@@ -88,7 +88,7 @@ public readonly struct Option<T> : IEquatable<Option<T>>
     /// 値が存在しない状態（None）
     ///
     /// This is the only way to represent "no value".
-    /// 「値がない」は必ずこれで表現する
+    /// 「値がない」は必ずこれで表現する。
     /// </summary>
     public static Option<T> None => _none;
 
@@ -119,7 +119,7 @@ public readonly struct Option<T> : IEquatable<Option<T>>
     /// Optionを返す関数を適用し、ネストを解消する。
     ///
     /// Unlike Map, this does not convert null automatically.
-    /// Mapとは異なり、nullの扱いは呼び出し側の責務
+    /// Mapとは異なり、nullの扱いは呼び出し側の責務。
     /// </summary>
     public Option<U> Bind<U>(Func<T, Option<U>> binder)
     {
@@ -149,7 +149,7 @@ public readonly struct Option<T> : IEquatable<Option<T>>
     }
 
     /// <summary>
-    /// Pattern matches Option into a value.
+    /// Pattern matches Option into a action.
     /// Optionを分岐処理し、アクションを実行する。
     ///
     /// Forces handling of both Some and None.
@@ -171,7 +171,7 @@ public readonly struct Option<T> : IEquatable<Option<T>>
     /// 条件を満たさない場合は None に変換する。
     ///
     /// Equivalent to validation.
-    /// バリデーションとして使用する
+    /// バリデーションとして使用する。
     /// </summary>
     public Option<T> Ensure(Func<T, bool> predicate)
     {
@@ -217,6 +217,11 @@ public readonly struct Option<T> : IEquatable<Option<T>>
         return this;
     }
 
+    /// <summary>
+    /// Returns the string representation of Option.
+    /// Option の文字列表現を返す。
+    /// </summary>
+    /// <returns></returns>
     public override string ToString()
     {
         return HasValue ? $"Some({_value})" : "None";

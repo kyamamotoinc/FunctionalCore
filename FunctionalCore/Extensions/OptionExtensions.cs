@@ -17,6 +17,7 @@ public static class OptionExtensions
     {
         ArgumentNullException.ThrowIfNull(onSome);
         ArgumentNullException.ThrowIfNull(onNone);
+
         if (option.HasValue)
             onSome(option.Value);
         else
@@ -45,7 +46,7 @@ public static class OptionExtensions
 
     /// <summary>
     /// Returns value if present, otherwise fallback.
-    /// 値が存在すればそれを返し、無ければ代替値
+    /// 値が存在すればそれを返し、無ければ代替値を返す。
     /// </summary>
     public static T GetValueOr<T>(this Option<T> option, T defaultValue)
     {
@@ -56,7 +57,7 @@ public static class OptionExtensions
 
     /// <summary>
     /// Returns this if Some, otherwise other.
-    /// Someなら自身、Noneなら代替
+    /// Someなら自身、Noneなら代替を返す。
     /// </summary>
     public static Option<T> Or<T>(this Option<T> option, Option<T> other)
     {
@@ -107,6 +108,7 @@ public static class OptionExtensions
     }
 
     #endregion
+
     #region Collections / コレクション
     /// <summary>
     /// Sequences a list of Options into a single Option of a list.

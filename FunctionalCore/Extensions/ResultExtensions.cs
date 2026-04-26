@@ -13,7 +13,7 @@ public static class ResultExtensions
     /// Does not change the Option.
     /// 状態は変更しない
     /// </summary>
-    public static Result<E, T> TapBoth<E, T>(this Result<E, T> result, Action<T> onSuccess, Action onFailure)
+    public static Result<E, T> TapBoth<E, T>(this Result<E, T> result, Action<T> onSuccess, Action<E> onFailure)
     {
         result.ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(onSuccess);
@@ -22,7 +22,7 @@ public static class ResultExtensions
         if (result.IsSuccess)
             onSuccess(result.Value);
         else
-            onFailure();
+            onFailure(result.Error);
 
         return result;
     }
@@ -226,6 +226,4 @@ public static class ResultExtensions
         return Result<E, IReadOnlyCollection<U>>.Ok(lst);
     }
     #endregion
-
-
 }

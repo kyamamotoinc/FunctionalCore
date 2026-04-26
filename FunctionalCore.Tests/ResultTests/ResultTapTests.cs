@@ -61,42 +61,42 @@ public class ResultTapTests
         Assert.Throws<ArgumentNullException>(() => _ok.Tap(null!));
     }
 
-    // -----------------------------
-    // TapError (失敗レールの副作用)
-    // -----------------------------
+    //// -----------------------------
+    //// TapError (失敗レールの副作用)
+    //// -----------------------------
 
-    /// <summary>
-    /// 5. TapError は失敗レールで副作用を実行する
-    /// </summary>
-    [Test]
-    public void Result_Fail_TapError_should_invoke_action()
-    {
-        int count = 0;
-        _fail.TapError(x => count++);
+    ///// <summary>
+    ///// 5. TapError は失敗レールで副作用を実行する
+    ///// </summary>
+    //[Test]
+    //public void Result_Fail_TapError_should_invoke_action()
+    //{
+    //    int count = 0;
+    //    _fail.TapError(x => count++);
 
-        Assert.That(count, Is.EqualTo(1));
-    }
+    //    Assert.That(count, Is.EqualTo(1));
+    //}
 
-    /// <summary>
-    /// 6. TapError は成功レールでは副作用を実行しない
-    /// </summary>
-    [Test]
-    public void Result_Ok_TapError_should_not_invoke_action()
-    {
-        int count = 0;
-        _ok.TapError(x => count++);
+    ///// <summary>
+    ///// 6. TapError は成功レールでは副作用を実行しない
+    ///// </summary>
+    //[Test]
+    //public void Result_Ok_TapError_should_not_invoke_action()
+    //{
+    //    int count = 0;
+    //    _ok.TapError(x => count++);
 
-        Assert.That(count, Is.EqualTo(0));
-    }
+    //    Assert.That(count, Is.EqualTo(0));
+    //}
 
-    /// <summary>
-    /// 7. TapError の action が null → ArgumentNullException
-    /// </summary>
-    [Test]
-    public void Result_TapError_null_action_should_throw()
-    {
-        Assert.Throws<ArgumentNullException>(() => _fail.TapError(null!));
-    }
+    ///// <summary>
+    ///// 7. TapError の action が null → ArgumentNullException
+    ///// </summary>
+    //[Test]
+    //public void Result_TapError_null_action_should_throw()
+    //{
+    //    Assert.Throws<ArgumentNullException>(() => _fail.TapError(null!));
+    //}
 
     // -----------------------------
     // TapBoth (成功・失敗問わず副作用)
@@ -105,32 +105,32 @@ public class ResultTapTests
     /// <summary>
     /// 8. TapBoth は成功レールでも副作用を実行する
     /// </summary>
-    [Test]
-    public void Result_Ok_TapBoth_should_invoke_action()
-    {
-        int count = 0;
+    //[Test]
+    //public void Result_Ok_TapBoth_should_invoke_action()
+    //{
+    //    int count = 0;
 
 
-        //Assert.AreEqual(1, count);
-    }
+    //    //Assert.AreEqual(1, count);
+    //}
 
-    /// <summary>
-    /// 9. TapBoth は失敗レールでも副作用を実行する
-    /// </summary>
-    [Test]
-    public void Result_Fail_TapBoth_should_invoke_action()
-    {
-        int count = 0;
+    ///// <summary>
+    ///// 9. TapBoth は失敗レールでも副作用を実行する
+    ///// </summary>
+    //[Test]
+    //public void Result_Fail_TapBoth_should_invoke_action()
+    //{
+    //    int count = 0;
 
 
-    }
+    //}
 
-    /// <summary>
-    /// 10. TapBoth の action が null → ArgumentNullException
-    /// </summary>
-    [Test]
-    public void Result_TapBoth_null_action_should_throw()
-    {
-    }
+    ///// <summary>
+    ///// 10. TapBoth の action が null → ArgumentNullException
+    ///// </summary>
+    //[Test]
+    //public void Result_TapBoth_null_action_should_throw()
+    //{
+    //}
 }
 

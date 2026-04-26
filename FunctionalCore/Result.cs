@@ -21,28 +21,33 @@
 /// </summary>
 public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 {
-    private readonly bool _isInitialized;
-
-    internal bool IsInitialized => _isInitialized;
+    //private readonly bool _isInitialized;
+    /// <summary>
+    /// Indicates whether the result is initialized.
+    /// Uninitialized results do not allow access to Value and Error.
+    /// 初期化済みかどうかを示す。
+    /// 未初期化のResultはValueとErrorにアクセスできない。
+    /// </summary>
+    internal bool IsInitialized { get; }//=> _isInitialized;
     /// <summary>
     /// Indicates whether the result is successful
-    /// 成功かどうかを示す
+    /// 成功かどうかを示す。
     /// </summary>
     public bool IsSuccess { get; }
 
     private readonly T _value;
     /// <summary>
     /// Gets the value if successful.
-    /// 成功時の値を取得する
+    /// 成功時の値を取得する。
     ///
     /// Throws if the result is failure.
-    /// 失敗時は例外を投げる
+    /// 失敗時は例外を投げる。
     /// </summary>
     public T Value
     {
         get
         {
-            ThrowIfNotInitialized();
+            this.ThrowIfNotInitialized();
             if (!IsSuccess)
                 throw new InvalidOperationException($"Result<{typeof(E).Name}, {typeof(T).Name}> does not contain a value.");
 
@@ -53,7 +58,7 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     private readonly E _error;
     /// <summary>
     /// Gets the error if failed.
-    /// 失敗時のエラーを取得する
+    /// 失敗時のエラーを取得する。
     ///
     /// Throws if the result is success.
     /// 成功時は例外を投げる
@@ -62,7 +67,7 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     {
         get
         {
-            ThrowIfNotInitialized();
+            this.ThrowIfNotInitialized();
             if (IsSuccess)
                 throw new InvalidOperationException($"Result<{typeof(E).Name}, {typeof(T).Name}> does not contain an error.");
 
@@ -72,14 +77,14 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 
     /// <summary>
     /// Creates a successful result.
-    /// 成功結果を生成する
+    /// 成功結果を生成する。
     ///
     /// null is not allowed.
     /// nullは禁止
     /// </summary>
     private Result(T value)
     {
-        _isInitialized = true;
+        IsInitialized = true;
         IsSuccess = true;
         _error = default!;
         _value = value;
@@ -87,28 +92,22 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 
     /// <summary>
     /// Creates a failed result.
-    /// 失敗結果を生成する
+    /// 失敗結果を生成する。
     ///
     /// null is not allowed.
     /// nullは禁止
     /// </summary>
     private Result(E error)
     {
-        _isInitialized = true;
+        IsInitialized = true;
         IsSuccess = false;
         _error = error;
         _value = default!;
     }
 
-    private void ThrowIfNotInitialized()
-    {
-        if (!_isInitialized)
-            throw new InvalidOperationException($"Result<{typeof(E).Name}, {typeof(T).Name}> is not initialized.");
-    }
-
     /// <summary>
     /// Creates a success (Ok).
-    /// 成功(Result.Ok)
+    /// 成功(Result.Ok)を生成する。
     /// </summary>
     public static Result<E, T> Ok(T value)
     {
@@ -119,7 +118,7 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 
     /// <summary>
     /// Creates a failure.
-    /// 失敗(Result.Fail)
+    /// 失敗(Result.Fail)を生成する。
     /// </summary>
     public static Result<E, T> Fail(E error)
     {
@@ -130,14 +129,14 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 
     /// <summary>
     /// Transforms the value if successful.
-    /// 成功時のみ値を変換する
+    /// 成功時のみ値を変換する。
     ///
     /// If selector returns null, it throws.
-    /// nullは許可されない（例外）
+    /// nullは許可されない。（例外を投げる）
     /// </summary>
     public Result<E, U> Map<U>(Func<T, U> selector)
     {
-        ThrowIfNotInitialized();
+        this.ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(selector);
 
         if (!IsSuccess)
@@ -162,7 +161,7 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// <returns>The Result with mapped error / 変換後の Result</returns>
     public Result<E1, T> MapError<E1>(Func<E, E1> errorMapper)
     {
-        ThrowIfNotInitialized();
+        this.ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(errorMapper);
 
         if (!IsSuccess)
@@ -179,14 +178,14 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 
     /// <summary>
     /// Applies a function returning Result and flattens the result.
-    /// Resultを返す関数を適用し、ネストを解消する
+    /// Resultを返す関数を適用し、ネストを解消する。
     ///
     /// This is used to chain operations that may fail.
     /// 失敗しうる処理を連結するために使う
     /// </summary>
     public Result<E, U> Bind<U>(Func<T, Result<E, U>> binder)
     {
-        ThrowIfNotInitialized();
+        this.ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(binder);
 
         return IsSuccess ? binder(_value) : Result<E, U>.Fail(_error);
@@ -194,7 +193,7 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 
     /// <summary>
     /// Matches success or failure and returns a value
-    /// 成功/失敗に応じた関数を適用し値を返す
+    /// 成功/失敗に応じた関数を適用し値を返す。
     /// </summary>
     /// <typeparam name="U"></typeparam>
     /// <param name="onSuccess"></param>
@@ -202,7 +201,7 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// <returns></returns>
     public U Match<U>(Func<T, U> onSuccess, Func<E, U> onFailure)
     {
-        ThrowIfNotInitialized();
+        this.ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(onSuccess);
         ArgumentNullException.ThrowIfNull(onFailure);
 
@@ -223,7 +222,7 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// <returns></returns>
     public void Match(Action<T> onSuccess, Action<E> onFailure)
     {
-        ThrowIfNotInitialized();
+        this.ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(onSuccess);
         ArgumentNullException.ThrowIfNull(onFailure);
 
@@ -235,26 +234,22 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     
     /// <summary>
     /// Validates the value using a predicate. Converts to failure if the predicate fails.
-    /// 値に条件を課し、違反時は失敗Resultへ変換
+    /// 値に条件を課し、違反時は失敗Resultへ変換する。
     /// </summary>
     /// <param name="predicate"></param>
     /// <param name="errorFactory">Function to create an error from the value when the predicate fails</param>
     /// <returns></returns>
     public Result<E, T> Ensure(Func<T, bool> predicate, Func<T, E> errorFactory)
     {
-        ThrowIfNotInitialized();
+        this.ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(predicate);
         ArgumentNullException.ThrowIfNull(errorFactory);
 
         if (!IsSuccess)
-        {
             return this;
-        }
 
         if (predicate(_value))
-        {
             return this;
-        }
 
         var error = errorFactory(_value);
         if (error is null)
@@ -271,13 +266,11 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// <returns></returns>
     public Result<E, T> Tap(Action<T> onSuccess)
     {
-        ThrowIfNotInitialized();
+        this.ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(onSuccess);
 
         if (!IsSuccess)
-        {
             return this;
-        }
         onSuccess(_value);
 
         return this;
@@ -291,21 +284,24 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// <returns></returns>
     public Result<E, T> TapError(Action<E> onFailure)
     {
-        ThrowIfNotInitialized();
+        this.ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(onFailure);
 
         if (IsSuccess)
-        {
             return this;
-        }
         onFailure(_error);
 
         return this;
     }
 
+    /// <summary>
+    /// Returns the string representation of Result.
+    /// Result の文字列表現を返す。
+    /// </summary>
+    /// <returns></returns>
     public override string ToString()
     {
-        if (!_isInitialized)
+        if (!IsInitialized)
             return $"Result<{typeof(E).Name}, {typeof(T).Name}>(uninitialized)";
         return IsSuccess ? $"Ok({_value})" : $"Fail({_error})";
     }
@@ -313,8 +309,8 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     #region Equality
     public bool Equals(Result<E, T> other)
     {
-        if (_isInitialized != other._isInitialized) return false;
-        if (!_isInitialized) return true; // 未初期化同士は等しいとみなす
+        if (IsInitialized != other.IsInitialized) return false;
+        if (!IsInitialized) return true; // 未初期化同士は等しいとみなす
         if (IsSuccess != other.IsSuccess) return false;
         if (IsSuccess) return EqualityComparer<T>.Default.Equals(_value, other._value);
 
@@ -328,7 +324,9 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 
     public override int GetHashCode()
     {
-        if (!_isInitialized) return 0;
+        if (!IsInitialized) 
+            return 0;
+
         unchecked
         {
             // 成功か失敗かで分岐し、それぞれの値をハッシュに含める
