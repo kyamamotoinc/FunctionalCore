@@ -1,6 +1,6 @@
 ﻿namespace FunctionalCore.Tests.ResultTests;
 
-public class ResultOkTests
+public class OkResultTests
 {
     private Result<string, int> _ok;
 

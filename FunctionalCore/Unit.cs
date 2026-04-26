@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace FunctionalCore;
+﻿namespace FunctionalCore;
 
 /// <summary>
 /// Represents the Unit type, a type that has only one possible value.

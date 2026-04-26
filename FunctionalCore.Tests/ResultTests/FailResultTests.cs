@@ -1,6 +1,6 @@
 ﻿namespace FunctionalCore.Tests.ResultTests;
 
-public class ResultFailTests
+public class FailResultTests
 {
     private Result<string, int> _fail;
 

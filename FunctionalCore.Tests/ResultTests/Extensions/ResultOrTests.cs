@@ -24,7 +24,7 @@ public class ResultOrTests
 
         var result = _ok.Or(other);
 
-        Assert.That(result, Is.EqualTo(_ok));
+        Assert.That(_ok, Is.EqualTo(result));
     }
 
     /// <summary>

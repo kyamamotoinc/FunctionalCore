@@ -1,5 +1,9 @@
 ﻿namespace FunctionalCore.Linq;
 
+/// <summary>
+/// Provides LINQ extension methods for Option<T>.
+/// Option<T>に対するLINQ拡張メソッドを提供する。
+/// </summary>
 public static class OptionLinq
 {
     /// <summary>

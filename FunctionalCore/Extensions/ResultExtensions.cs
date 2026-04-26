@@ -1,8 +1,8 @@
 ﻿namespace FunctionalCore.Extensions;
 
 /// <summary>
-/// Extension methods for Result<E, T>
-/// Result<E, T>用の拡張メソッド
+/// Provides extension methods for Result<E, T>.
+/// Result<E, T>に対する拡張メソッドを提供する。
 /// </summary>
 public static class ResultExtensions
 {

@@ -1,8 +1,8 @@
 ﻿namespace FunctionalCore.Extensions;
 
 /// <summary>
-/// Extension methods for Option<T>
-/// Option<T>用の拡張メソッド
+/// Provides extension methods for Option<T>
+/// Option<T>に対する拡張メソッドを提供する。
 /// </summary>
 public static class OptionExtensions
 {
