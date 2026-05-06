@@ -1,12 +1,16 @@
-﻿namespace FunctionalCore.Tests.ResultTests;
+﻿using FunctionalCore.AsyncExtensions;
 
-public class ResultBindTests
+namespace FunctionalCore.Tests.ResultTests;
+
+public class ResultBindAsyncTests
 {
     private Result<string, int> _ok;
     private Result<string, int> _fail;
 
+    private Task<Result<string, int>> _okTask => _ok.AsTask();
+    private Task<Result<string, int>> _failTask => _fail.AsTask();
 
-   [SetUp]
+    [SetUp]
     public void Setup()
     {
         _ok = Result<string, int>.Ok(5);
@@ -17,9 +21,9 @@ public class ResultBindTests
     /// 1. Ok.Bind は binder を実行し、Result を返す（成功→成功）
     /// </summary>
     [Test]
-    public void Result_Ok_Bind_should_return_binder_result()
+    public async Task Result_Ok_Bind_should_return_binder_result()
     {
-        var result = _ok.Bind(x => Result<string, int>.Ok(x + 1));
+        var result = await _okTask.BindAsync(x => Result<string, int>.Ok(x + 1).AsTask());
 
         Assert.That(result.IsSuccess);
         Assert.That(result.Value, Is.EqualTo(6));
@@ -29,9 +33,9 @@ public class ResultBindTests
     /// 2. Ok.Bind は成功のまま（成功→成功）
     /// </summary>
     [Test]
-    public void Result_Ok_Bind_should_be_success()
+    public async Task Result_Ok_Bind_should_be_success()
     {
-        var result = _ok.Bind(x => Result<string, int>.Ok(x + 1));
+        var result = await _okTask.BindAsync(x => Result<string, int>.Ok(x + 1).AsTask());
         Assert.That(result.IsSuccess);
     }
 
@@ -39,9 +43,9 @@ public class ResultBindTests
     /// 3. Ok.Bind が失敗を返す場合（成功→失敗）
     /// </summary>
     [Test]
-    public void Result_Ok_Bind_can_return_failure()
+    public async Task Result_Ok_Bind_can_return_failure()
     {
-        var result = _ok.Bind(x => Result<string, int>.Fail("bind error"));
+        var result = await _okTask.BindAsync(x => Result<string, int>.Fail("bind error").AsTask());
         Assert.That(result.Error, Is.EqualTo("bind error"));
     }
 
@@ -49,13 +53,13 @@ public class ResultBindTests
     /// 4. Fail.Bind は binder を実行しない
     /// </summary>
     [Test]
-    public void Result_Fail_Bind_should_not_invoke_binder()
+    public async Task Result_Fail_Bind_should_not_invoke_binder()
     {
         int count = 0;
-        var res = _fail.Bind(x =>
+        var res = await _failTask.BindAsync(x =>
         {
             count++;
-            return Result<string, int>.Ok(x + 1);
+            return Result<string, int>.Ok(x + 1).AsTask();
         });
 
         Assert.That(count, Is.EqualTo(0));
@@ -65,9 +69,9 @@ public class ResultBindTests
     /// 5. Fail.Bind は Error を保持する
     /// </summary>
     [Test]
-    public void Result_Fail_Bind_should_keep_error()
+    public async Task Result_Fail_Bind_should_keep_error()
     {
-        var result = _fail.Bind(x => Result<string, int>.Ok(x + 1));
+        var result = await _failTask.BindAsync(x => Result<string, int>.Ok(x + 1).AsTask());
         Assert.That(result.Error, Is.EqualTo("error"));
     }
 
@@ -75,9 +79,9 @@ public class ResultBindTests
     /// 6. binder が null の場合は ArgumentNullException
     /// </summary>
     [Test]
-    public void Result_Ok_Bind_null_binder_should_throw()
+    public async Task Result_Ok_Bind_null_binder_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _ok.Bind<string>(null!));
+        Assert.Throws<ArgumentNullException>(() => _ = Result<string, string>.Ok("Ok").AsTask().BindAsync(null!));
     }
 
     // 7. binder が null を返すケースは Resuil.Ok(null) が禁止されているため型レベルで不可能 → テスト対象外

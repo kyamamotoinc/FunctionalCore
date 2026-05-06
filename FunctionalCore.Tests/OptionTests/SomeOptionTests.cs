@@ -1,6 +1,6 @@
 ﻿namespace FunctionalCore.Tests.OptionTests;
 
-public class OptionSomeTests
+public class SomeOptionTests
 {
     private Option<int> _some;
 
@@ -34,7 +34,7 @@ public class OptionSomeTests
     [Test]
     public void Some_Value_should_not_be_null()
     {
-        Assert.That(_some.Value, Is.Not.Null);
+        Assert.That(_some.Value, Is.EqualTo(5));
     }
 
     /// <summary>

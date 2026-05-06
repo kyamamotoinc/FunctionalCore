@@ -1,6 +1,5 @@
 ﻿namespace FunctionalCore.Tests.OptionTests;
 
-
 public class OptionMapTests
 {
     private Option<int> _some;

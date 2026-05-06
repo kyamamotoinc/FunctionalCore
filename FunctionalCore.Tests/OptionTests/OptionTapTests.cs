@@ -1,7 +1,4 @@
-﻿
-using FunctionalCore.Extensions;
-
-namespace FunctionalCore.Tests.OptionTests;
+﻿namespace FunctionalCore.Tests.OptionTests;
 
 public class OptionTapTests
 {

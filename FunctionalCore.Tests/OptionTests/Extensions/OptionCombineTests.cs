@@ -1,16 +1,18 @@
 ﻿using FunctionalCore.Extensions;
 
-namespace FunctionalCore.Tests.OptionTests;
+namespace FunctionalCore.Tests.OptionTests.Extensions;
 
-public class OptionGetValueOrTests
+public class OptionCombineTests
 {
-    private Option<int> _some;
+    private Option<int> _some3;
+    private Option<int> _some5;
     private Option<int> _none;
 
     [SetUp]
     public void Setup()
     {
-        _some = Option<int>.Some(5);
+        _some3 = Option<int>.Some(3);
+        _some5 = Option<int>.Some(5);
         _none = Option<int>.None;
     }
 
@@ -20,9 +22,10 @@ public class OptionGetValueOrTests
     [Test]
     public void Some_GetValueOr_should_return_inner_value()
     {
-        var value = _some.GetValueOr(999);
+        var c = _some3.Combine(_some5, (x, y) => x + y);
 
-        Assert.That(value, Is.EqualTo(5));
+        Assert.IsTrue(c.HasValue);
+        Assert.That(c.Value, Is.EqualTo(8));
     }
 
     /// <summary>
@@ -31,9 +34,9 @@ public class OptionGetValueOrTests
     [Test]
     public void None_GetValueOr_should_return_fallback()
     {
-        var value = _none.GetValueOr(999);
+        var c = _some5.Combine(_none, (x, y) => x + y);
 
-        Assert.That(value, Is.EqualTo(999));
+        Assert.IsFalse(c.HasValue);
     }
 
     /// <summary>

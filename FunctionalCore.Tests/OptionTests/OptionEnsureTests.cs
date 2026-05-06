@@ -1,6 +1,4 @@
-﻿
-
-namespace FunctionalCore.Tests.OptionTests;
+﻿namespace FunctionalCore.Tests.OptionTests;
 
 public class OptionEnsureTests
 {

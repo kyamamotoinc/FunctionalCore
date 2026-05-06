@@ -41,16 +41,12 @@ public static class ResultExtensions
         ArgumentNullException.ThrowIfNull(toException);
 
         if (result.IsSuccess)
-        {
             return result.Value;
-        }
 
         var ex = toException(result.Error);
 
         if (ex == null)
-        {
             throw new InvalidOperationException("Exception factory returned null");
-        }
 
         throw ex;
     }
@@ -162,13 +158,12 @@ public static class ResultExtensions
     public static Result<E, T> ToResult<E, T>(this T value, E errorIfNull)
     {
         if (value is null)
-        {
             return Result<E, T>.Fail(errorIfNull);
-        }
 
         return Result<E, T>.Ok(value);
     }
     #endregion
+
     #region Collections / コレクション
 
     /// <summary>
@@ -179,22 +174,21 @@ public static class ResultExtensions
     /// <typeparam name="T">Type of value / 値の型</typeparam>
     /// <param name="results"></param>
     /// <returns></returns>
-    public static Result<E, IReadOnlyCollection<T>> Sequence<E, T>(this IEnumerable<Result<E, T>> results)
+    public static Result<E, IReadOnlyList<T>> Sequence<E, T>(this IEnumerable<Result<E, T>> results)
     {
-        //ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(results);
 
         var lst = new List<T>();
         foreach (var r in results)
         {
-            if (r.IsSuccess == false)
-            {
-                return Result<E, IReadOnlyCollection<T>>.Fail(r.Error);
-            }
+            r.ThrowIfNotInitialized();
+            if (!r.IsSuccess)
+                return Result<E, IReadOnlyList<T>>.Fail(r.Error);
+           
             lst.Add(r.Value);
         }
 
-        return Result<E, IReadOnlyCollection<T>>.Ok(lst);
+        return Result<E, IReadOnlyList<T>>.Ok(lst);
     }
 
     /// <summary>
@@ -207,7 +201,7 @@ public static class ResultExtensions
     /// <param name="items"></param>
     /// <param name="selector"></param>
     /// <returns></returns>
-    public static Result<E, IReadOnlyCollection<U>> Traverse<E, T, U>(this IEnumerable<T> items, Func<T, Result<E, U>> selector)
+    public static Result<E, IReadOnlyList<U>> Traverse<E, T, U>(this IEnumerable<T> items, Func<T, Result<E, U>> selector)
     {
         ArgumentNullException.ThrowIfNull(items);
         ArgumentNullException.ThrowIfNull(selector);
@@ -216,14 +210,36 @@ public static class ResultExtensions
         foreach (var item in items)
         {
             var r = selector(item);
-            if (r.IsSuccess == false)
-            {
-                return Result<E, IReadOnlyCollection<U>>.Fail(r.Error);
-            }
+            r.ThrowIfNotInitialized();
+            if (!r.IsSuccess)
+                return Result<E, IReadOnlyList<U>>.Fail(r.Error);
+
             lst.Add(r.Value);
         }
 
-        return Result<E, IReadOnlyCollection<U>>.Ok(lst);
+        return Result<E, IReadOnlyList<U>>.Ok(lst);
     }
     #endregion
+
+    /// <summary>
+    /// Combines two results using a selector function.
+    /// 2つの Result を関数で組み合わせる。
+    /// </summary>
+    public static Result<E, U> Combine<E, T, R, U>(this Result<E, T> result, Result<E, R> other, Func<T, R, U> selector)
+    {
+        result.ThrowIfNotInitialized();
+        other.ThrowIfNotInitialized();
+        ArgumentNullException.ThrowIfNull(selector);
+
+        if (!result.IsSuccess)
+            return Result<E, U>.Fail(result.Error);
+        if (!other.IsSuccess)
+            return Result<E, U>.Fail(other.Error);
+
+        var val = selector(result.Value, other.Value);
+        if (val is null)
+            throw new InvalidOperationException("Selector must not return null");
+
+        return Result<E, U>.Ok(val);
+    }
 }

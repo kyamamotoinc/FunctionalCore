@@ -117,7 +117,7 @@ public static class OptionExtensions
     /// <typeparam name="T"></typeparam>
     /// <param name="options"></param>
     /// <returns></returns>
-    public static Option<IReadOnlyCollection<T>> Sequence<T>(this IEnumerable<Option<T>> options)
+    public static Option<IReadOnlyList<T>> Sequence<T>(this IEnumerable<Option<T>> options)
     {
         ArgumentNullException.ThrowIfNull(options);
 
@@ -126,12 +126,12 @@ public static class OptionExtensions
         {
             if (opt.HasValue == false)
             {
-                return Option<IReadOnlyCollection<T>>.None;
+                return Option<IReadOnlyList<T>>.None;
             }
             lst.Add(opt.Value);
         }
 
-        return Option<IReadOnlyCollection<T>>.Some(lst);
+        return Option<IReadOnlyList<T>>.Some(lst);
     }
 
     /// <summary>
@@ -145,6 +145,7 @@ public static class OptionExtensions
     /// <returns></returns>
     public static Option<IReadOnlyList<U>> Traverse<T, U>(this IEnumerable<T> items, Func<T, Option<U>> f)
     {
+        ArgumentNullException.ThrowIfNull(items);
         ArgumentNullException.ThrowIfNull(f);
 
         var lst = new List<U>();
@@ -162,5 +163,17 @@ public static class OptionExtensions
     }
     #endregion
 
+    /// <summary>
+    /// Combines two Option values using a selector function.
+    /// 2つの Option を関数で組み合わせる。
+    /// </summary>
+    public static Option<U> Combine<T, R, U>(this Option<T> option, Option<R> other, Func<T, R, U> selector)
+    {
+        ArgumentNullException.ThrowIfNull(selector);
 
+        if (!option.HasValue || !other.HasValue)
+            return Option<U>.None;
+
+        return Option<U>.Some(selector(option.Value, other.Value));
+    }
 }

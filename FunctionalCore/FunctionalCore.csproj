@@ -11,4 +11,12 @@
     <Compile Remove="ResultExtensions1.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\Public\Documents\CS\FunctionalCore\FunctionalCore\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\Public\Documents\CS\FunctionalCore\FunctionalCore\.editorconfig" />
+  </ItemGroup>
+
 </Project>

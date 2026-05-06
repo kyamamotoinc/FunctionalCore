@@ -1,7 +1,4 @@
-﻿using NUnit.Framework;
-using System;
-
-namespace FunctionalCore.Tests.OptionTests
+﻿namespace FunctionalCore.Tests.OptionTests
 {
     public class DefaultOptionTests
     {

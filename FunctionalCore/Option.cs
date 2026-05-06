@@ -103,50 +103,6 @@ public readonly struct Option<T> : IEquatable<Option<T>>
     public static Option<T> None => _none;
 
     /// <summary>
-    /// Transforms the contained value if present.
-    /// 値が存在する場合のみ変換を行う。
-    ///
-    /// If selector returns null, it is converted to None.
-    /// selector が null を返した場合は None に変換される。
-    ///
-    /// This makes Map null-safe.
-    /// Mapはnullを安全に扱う（null → None）。
-    /// </summary>
-    /// <typeparam name="U">The type of the transformed value. / 変換後の値の型。</typeparam>
-    /// <param name="selector">A function to transform the value. Returning null is converted to None. / 値を変換する関数。nullを返した場合はNoneに変換される。</param>
-    /// <returns>An Option with the transformed value, or None. / 変換後の値を持つOption、またはNone。</returns>
-    /// <exception cref="ArgumentNullException">Thrown if selector is null. / selectorがnullの場合に投げられる。</exception>
-    public Option<U> Map<U>(Func<T, U> selector)
-    {
-        ArgumentNullException.ThrowIfNull(selector);
-
-        if (!HasValue)
-            return Option<U>.None;
-
-        var value = selector(_value);
-
-        return value is null ? Option<U>.None : Option<U>.Some(value);
-    }
-
-    /// <summary>
-    /// Applies a function returning Option and flattens the result.
-    /// Optionを返す関数を適用し、ネストを解消する。
-    ///
-    /// Unlike Map, this does not convert null automatically.
-    /// Mapとは異なり、nullの扱いは呼び出し側の責務。
-    /// </summary>
-    /// <typeparam name="U">The type of the value in the returned Option. / 返されるOptionの値の型。</typeparam>
-    /// <param name="binder">A function that takes the value and returns a new Option. / 値を受け取り新しいOptionを返す関数。</param>
-    /// <returns>The Option returned by binder, or None. / binderが返すOption、またはNone。</returns>
-    /// <exception cref="ArgumentNullException">Thrown if binder is null. / binderがnullの場合に投げられる。</exception>
-    public Option<U> Bind<U>(Func<T, Option<U>> binder)
-    {
-        ArgumentNullException.ThrowIfNull(binder);
-
-        return HasValue ? binder(_value) : Option<U>.None;
-    }
-
-    /// <summary>
     /// Pattern matches Option into a value.
     /// Optionを分岐処理し、値を生成する。
     ///
@@ -191,6 +147,50 @@ public readonly struct Option<T> : IEquatable<Option<T>>
             onSome(_value);
         else
             onNone();
+    }
+
+    /// <summary>
+    /// Applies a function returning Option and flattens the result.
+    /// Optionを返す関数を適用し、ネストを解消する。
+    ///
+    /// Unlike Map, this does not convert null automatically.
+    /// Mapとは異なり、nullの扱いは呼び出し側の責務。
+    /// </summary>
+    /// <typeparam name="U">The type of the value in the returned Option. / 返されるOptionの値の型。</typeparam>
+    /// <param name="binder">A function that takes the value and returns a new Option. / 値を受け取り新しいOptionを返す関数。</param>
+    /// <returns>The Option returned by binder, or None. / binderが返すOption、またはNone。</returns>
+    /// <exception cref="ArgumentNullException">Thrown if binder is null. / binderがnullの場合に投げられる。</exception>
+    public Option<U> Bind<U>(Func<T, Option<U>> binder)
+    {
+        ArgumentNullException.ThrowIfNull(binder);
+
+        return HasValue ? binder(_value) : Option<U>.None;
+    }
+
+    /// <summary>
+    /// Transforms the contained value if present.
+    /// 値が存在する場合のみ変換を行う。
+    ///
+    /// If selector returns null, it is converted to None.
+    /// selector が null を返した場合は None に変換される。
+    ///
+    /// This makes Map null-safe.
+    /// Mapはnullを安全に扱う（null → None）。
+    /// </summary>
+    /// <typeparam name="U">The type of the transformed value. / 変換後の値の型。</typeparam>
+    /// <param name="selector">A function to transform the value. Returning null is converted to None. / 値を変換する関数。nullを返した場合はNoneに変換される。</param>
+    /// <returns>An Option with the transformed value, or None. / 変換後の値を持つOption、またはNone。</returns>
+    /// <exception cref="ArgumentNullException">Thrown if selector is null. / selectorがnullの場合に投げられる。</exception>
+    public Option<U> Map<U>(Func<T, U> selector)
+    {
+        ArgumentNullException.ThrowIfNull(selector);
+
+        if (!HasValue)
+            return Option<U>.None;
+
+        var value = selector(_value);
+
+        return value is null ? Option<U>.None : Option<U>.Some(value);
     }
 
     /// <summary>
@@ -299,11 +299,9 @@ public readonly struct Option<T> : IEquatable<Option<T>>
         return left.Equals(right);
     }
 
-
     public static bool operator !=(Option<T> left, Option<T> right)
     {
         return !(left == right);
     }
-
-    #endregion   
+    #endregion
 }
