@@ -162,5 +162,15 @@ public static class OptionExtensions
     }
     #endregion
 
+    public static Option<U> Combine<T, R, U>(this Option<T> option, Option<R> other, Func<T, R, U> selector)
+    {
+        ArgumentNullException.ThrowIfNull(selector);
 
+        if (!option.HasValue)
+            return Option<U>.None;
+        if (!other.HasValue)
+            return Option<U>.None;
+
+        return Option<U>.Some(selector(option.Value, other.Value));
+    }
 }
