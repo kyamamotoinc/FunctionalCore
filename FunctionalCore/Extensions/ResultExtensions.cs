@@ -226,4 +226,16 @@ public static class ResultExtensions
         return Result<E, IReadOnlyCollection<U>>.Ok(lst);
     }
     #endregion
+
+    public static Result<E, U> Combine<E, T, R, U>(this Result<E, T> result, Result<E, R> other, Func<T, R, U> selector)
+    {
+        ArgumentNullException.ThrowIfNull(selector);
+
+        if (!result.IsSuccess)
+            return Result<E, U>.Fail(result.Error);
+        if (!other.IsSuccess)
+            return Result<E, U>.Fail(other.Error);
+
+        return Result<E, U>.Ok(selector(result.Value, other.Value));
+    }
 }
