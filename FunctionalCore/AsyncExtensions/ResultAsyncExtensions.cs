@@ -1,7 +1,7 @@
 namespace FunctionalCore.AsyncExtensions
 {
     /// <summary>
-    /// <para>Result の非同期パイプラインを構成するための拡張メソッドを提供します。</para>
+    /// <para>Result の非同期パイプラインを構成するための拡張メソッドを提供する。</para>
     /// <para>Provides extension methods for composing asynchronous Result pipelines.</para>
     /// </summary>
     public static class ResultAsyncExtensions
