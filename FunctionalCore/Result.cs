@@ -24,10 +24,16 @@
 public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 {
     /// <summary>
-    /// Indicates whether the result is successful
+    /// Indicates whether the result is successful.
     /// 成功かどうかを示す。
     /// </summary>
     public bool IsSuccess { get; }
+
+    /// <summary>
+    /// Indicates whether the result is a failure.
+    /// 失敗かどうかを示す。
+    /// </summary>
+    public bool IsFailure => !IsSuccess;
 
     /// <summary>
     /// Indicates whether the result is initialized.
