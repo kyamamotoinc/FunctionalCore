@@ -30,6 +30,12 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     public bool IsSuccess { get; }
 
     /// <summary>
+    /// Indicates whether the result is a failure.
+    /// 失敗かどうかを示す。
+    /// </summary>
+    public bool IsFailure => !IsSuccess;
+
+    /// <summary>
     /// Indicates whether the result is initialized.
     /// Uninitialized results do not allow access to Value and Error.
     /// <para>
