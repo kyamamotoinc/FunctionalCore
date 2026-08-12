@@ -1,21 +1,27 @@
-﻿namespace FunctionalCore;
+using System.Reflection;
+
+namespace FunctionalCore;
 
 /// <summary>
 /// Represents an optional value (Some or None).
-/// 値の「存在 / 不在」を明示的に扱うための型。
+/// <para>値の「存在 / 不在」を明示的に扱うための型。</para>
 ///
 /// This type eliminates null by making absence explicit.
-/// null を排除し、「値が無い」という状態を明示的に表現する。
+/// <para>null を排除し、「値が無い」という状態を明示的に表現する。</para>
 ///
+/// <para>
 /// Design rules:
-/// - null is not allowed
-/// - absence must be represented as None
-/// - operations must preserve these invariants
+/// <para>- null is not allowed</para>
+/// <para>- absence must be represented as None</para>
+/// <para>- operations must preserve these invariants</para>
+///</para>
 ///
+/// <para>
 /// 設計ルール:
-/// - nullは禁止
-/// - 値が無い場合は必ず None
-/// - すべての操作はこの不変条件を守る。
+/// <para>- nullは禁止</para>
+/// <para>- 値が無い場合は必ず None</para>
+/// <para>- すべての操作はこの不変条件を守る。</para>
+/// </para>
 /// </summary>
 /// <typeparam name="T">The type of the value. / 値の型。</typeparam>
 public readonly struct Option<T> : IEquatable<Option<T>>
@@ -32,14 +38,14 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Gets the value if present.
-    /// 値を取得する（Someの場合のみ）。
+    /// <para>値を取得する（Someの場合のみ）。</para>
     ///
     /// Throws if no value exists.
-    /// None の場合は例外を投げる。
+    /// <para>None の場合は例外を投げる。</para>
     /// </summary>
     /// <exception cref="InvalidOperationException">
     /// Thrown if no value exists (None).
-    /// 値が存在しない場合（None）に投げられる。
+    /// <para>値が存在しない場合（None）に投げられる。</para>
     /// </exception>
     public T Value
     {
@@ -54,10 +60,10 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Creates a Some(value).
-    /// 値を持つ Option を生成する。
+    /// <para>値を持つ Option を生成する。</para>
     ///
     /// null is not allowed and will throw.
-    /// nullは禁止（例外を投げる）。
+    /// <para>nullは禁止（例外を投げる）。</para>
     /// </summary>
     /// <param name="value">The value to wrap. / ラップする値。</param>
     private Option(T value)
@@ -68,7 +74,7 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Creates a None.
-    /// 値なし(None)の Option を生成する。
+    /// <para>値なし(None)の Option を生成する。</para>
     /// </summary>
     /// <param name="hasValue">Always false for None. / Noneの場合は常にfalse。</param>
     private Option(bool hasValue)
@@ -79,13 +85,16 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Creates a Some(value).
-    /// 値あり(Some)の Option を作成する。
+    /// <para>値あり(Some)の Option を作成する。</para>
     ///
     /// null is not allowed.
-    /// nullは禁止。
+    /// <para>nullは禁止。</para>
     /// </summary>
     /// <param name="value">The value to wrap. Must not be null. / ラップする値。nullは禁止。</param>
-    /// <returns>An Option containing the value. / 値を持つOption。</returns>
+    /// <returns>
+    /// An Option containing the value.
+    /// <para>値を持つOption。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if value is null. / valueがnullの場合に投げられる。</exception>
     public static Option<T> Some(T value)
     {
@@ -95,24 +104,27 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Represents absence of value.
-    /// 値が存在しない状態（None）
+    /// <para>値が存在しない状態（None）</para>
     ///
     /// This is the only way to represent "no value".
-    /// 「値がない」は必ずこれで表現する。
+    /// <para>「値がない」は必ずこれで表現する。</para>
     /// </summary>
     public static Option<T> None => _none;
 
     /// <summary>
     /// Pattern matches Option into a value.
-    /// Optionを分岐処理し、値を生成する。
+    /// <para>Optionを分岐処理し、値を生成する。</para>
     ///
     /// Forces handling of both Some and None.
-    /// Some / None の両方を処理させる。
+    /// <para>Some / None の両方を処理させる。</para>
     /// </summary>
     /// <typeparam name="U">The return type. / 戻り値の型。</typeparam>
     /// <param name="onSome">A function to apply if a value exists. Must not return null. / 値が存在する場合に適用する関数。nullを返してはならない。</param>
     /// <param name="onNone">A function to apply if no value exists. Must not return null. / 値が存在しない場合に適用する関数。nullを返してはならない。</param>
-    /// <returns>The result of the applied function. / 適用した関数の戻り値。</returns>
+    /// <returns>
+    /// The result of the applied function.
+    /// <para>適用した関数の戻り値。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if onSome or onNone is null. / onSomeまたはonNoneがnullの場合に投げられる。</exception>
     /// <exception cref="InvalidOperationException">Thrown if the applied function returns null. / 適用した関数がnullを返した場合に投げられる。</exception>
     public U Match<U>(Func<T, U> onSome, Func<U> onNone)
@@ -130,10 +142,10 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Pattern matches Option and executes an action.
-    /// Optionを分岐処理し、アクションを実行する。
+    /// <para>Optionを分岐処理し、アクションを実行する。</para>
     ///
     /// Forces handling of both Some and None.
-    /// Some / None の両方を処理させる。
+    /// <para>Some / None の両方を処理させる。</para>
     /// </summary>
     /// <param name="onSome">An action to execute if a value exists. / 値が存在する場合に実行するアクション。</param>
     /// <param name="onNone">An action to execute if no value exists. / 値が存在しない場合に実行するアクション。</param>
@@ -151,14 +163,17 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Applies a function returning Option and flattens the result.
-    /// Optionを返す関数を適用し、ネストを解消する。
+    /// <para>Optionを返す関数を適用し、ネストを解消する。</para>
     ///
-    /// Unlike Map, this does not convert null automatically.
-    /// Mapとは異なり、nullの扱いは呼び出し側の責務。
+    /// The binder is responsible for representing absence as None.
+    /// <para>binder は値が存在しない場合を None として表現する。</para>
     /// </summary>
     /// <typeparam name="U">The type of the value in the returned Option. / 返されるOptionの値の型。</typeparam>
     /// <param name="binder">A function that takes the value and returns a new Option. / 値を受け取り新しいOptionを返す関数。</param>
-    /// <returns>The Option returned by binder, or None. / binderが返すOption、またはNone。</returns>
+    /// <returns>
+    /// The Option returned by binder, or None.
+    /// <para>binderが返すOption、またはNone。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if binder is null. / binderがnullの場合に投げられる。</exception>
     public Option<U> Bind<U>(Func<T, Option<U>> binder)
     {
@@ -169,17 +184,20 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Transforms the contained value if present.
-    /// 値が存在する場合のみ変換を行う。
+    /// <para>値が存在する場合のみ変換を行う。</para>
     ///
     /// If selector returns null, it is converted to None.
-    /// selector が null を返した場合は None に変換される。
+    /// <para>selector が null を返した場合は None に変換される。</para>
     ///
     /// This makes Map null-safe.
-    /// Mapはnullを安全に扱う（null → None）。
+    /// <para>Mapはnullを安全に扱う（null → None）。</para>
     /// </summary>
     /// <typeparam name="U">The type of the transformed value. / 変換後の値の型。</typeparam>
     /// <param name="selector">A function to transform the value. Returning null is converted to None. / 値を変換する関数。nullを返した場合はNoneに変換される。</param>
-    /// <returns>An Option with the transformed value, or None. / 変換後の値を持つOption、またはNone。</returns>
+    /// <returns>
+    /// An Option with the transformed value, or None.
+    /// <para>変換後の値を持つOption、またはNone。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if selector is null. / selectorがnullの場合に投げられる。</exception>
     public Option<U> Map<U>(Func<T, U> selector)
     {
@@ -195,13 +213,16 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Filters the value using a predicate.
-    /// 条件を満たさない場合は None に変換する。
+    /// <para>条件を満たさない場合は None に変換する。</para>
     ///
     /// Equivalent to validation.
-    /// バリデーションとして使用する。
+    /// <para>バリデーションとして使用する。</para>
     /// </summary>
     /// <param name="predicate">A function to test the value. / 値を検証する関数。</param>
-    /// <returns>The original Option if the predicate passes; otherwise None. / 条件を満たす場合は元のOption、それ以外はNone。</returns>
+    /// <returns>
+    /// The original Option if the predicate passes; otherwise None.
+    /// <para>条件を満たす場合は元のOption、それ以外はNone。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if predicate is null. / predicateがnullの場合に投げられる。</exception>
     public Option<T> Ensure(Func<T, bool> predicate)
     {
@@ -215,13 +236,16 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Executes side-effect if value exists.
-    /// 値が存在する場合のみ副作用を実行する。
+    /// <para>値が存在する場合のみ副作用を実行する。</para>
     ///
     /// Does not change the Option.
-    /// 状態は変更しない。
+    /// <para>状態は変更しない。</para>
     /// </summary>
     /// <param name="action">An action to execute on the value if present. / 値が存在する場合に実行するアクション。</param>
-    /// <returns>The original Option unchanged. / 変更されていない元のOption。</returns>
+    /// <returns>
+    /// The original Option unchanged.
+    /// <para>変更されていない元のOption。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if action is null. / actionがnullの場合に投げられる。</exception>
     public Option<T> Tap(Action<T> action)
     {
@@ -235,13 +259,16 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Executes side-effect if value does not exist.
-    /// 値が存在しない場合のみ副作用を実行する。
+    /// <para>値が存在しない場合のみ副作用を実行する。</para>
     ///
     /// Does not change the Option.
-    /// 状態は変更しない。
+    /// <para>状態は変更しない。</para>
     /// </summary>
     /// <param name="action">An action to execute if no value exists. / 値が存在しない場合に実行するアクション。</param>
-    /// <returns>The original Option unchanged. / 変更されていない元のOption。</returns>
+    /// <returns>
+    /// The original Option unchanged.
+    /// <para>変更されていない元のOption。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if action is null. / actionがnullの場合に投げられる。</exception>
     public Option<T> TapNone(Action action)
     {
@@ -255,11 +282,11 @@ public readonly struct Option<T> : IEquatable<Option<T>>
 
     /// <summary>
     /// Returns the string representation of Option.
-    /// Option の文字列表現を返す。
+    /// <para>Option の文字列表現を返す。</para>
     /// </summary>
     /// <returns>
     /// "Some(value)" if a value exists; otherwise "None".
-    /// 値が存在する場合は "Some(value)"、存在しない場合は "None"。
+    /// <para>値が存在する場合は "Some(value)"、存在しない場合は "None"。</para>
     /// </returns>
     public override string ToString()
     {

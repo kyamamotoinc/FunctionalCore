@@ -1,4 +1,4 @@
-﻿namespace FunctionalCore;
+namespace FunctionalCore;
 
 /// <summary>
 /// Represents the Unit type, a type that has only one possible value.
@@ -25,7 +25,10 @@ public readonly struct Unit : IEquatable<Unit>
     /// <para>指定された Unit が現在の Unit と等しいかどうかを判定する。</para>
     /// </summary>
     /// <param name="other">The Unit to compare with. 比較対象の Unit。</param>
-    /// <returns>Always true. 常に true を返す。</returns>
+    /// <returns>
+    /// Always true.
+    /// <para>常に true を返す。</para>
+    /// </returns>
     public bool Equals(Unit other) => true;
 
     /// <summary>
@@ -33,7 +36,10 @@ public readonly struct Unit : IEquatable<Unit>
     /// <para>指定されたオブジェクトが現在の Unit と等しいかどうかを判定する。</para>
     /// </summary>
     /// <param name="obj">The object to compare. 比較対象のオブジェクト。</param>
-    /// <returns>True if the object is a Unit; otherwise, false. オブジェクトが Unit の場合は true。</returns>
+    /// <returns>
+    /// True if the object is a Unit; otherwise, false.
+    /// <para>オブジェクトが Unit の場合は true。</para>
+    /// </returns>
     public override bool Equals(object? obj) => obj is Unit;
 
     /// <summary>
@@ -50,14 +56,20 @@ public readonly struct Unit : IEquatable<Unit>
     /// Determines whether two Unit values are equal.
     /// <para>2つの Unit 値が等しいかどうかを判定する。</para>
     /// </summary>
-    /// <returns>Always true. 常に true を返す。</returns>
+    /// <returns>
+    /// Always true.
+    /// <para>常に true を返す。</para>
+    /// </returns>
     public static bool operator ==(Unit left, Unit right) => true;
 
     /// <summary>
     /// Determines whether two Unit values are not equal.
     /// <para>2つの Unit 値が等しくないかどうかを判定する。</para> 
     /// </summary>
-    /// <returns>Always false. 常に false を返す。</returns>
+    /// <returns>
+    /// Always false.
+    /// <para>常に false を返す。</para>
+    /// </returns>
     public static bool operator !=(Unit left, Unit right) => false;
 
     /// <summary>

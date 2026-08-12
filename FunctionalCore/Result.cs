@@ -1,23 +1,27 @@
-﻿namespace FunctionalCore;
+namespace FunctionalCore;
 
 /// <summary>
 /// Represents the result of an operation (Success or Failure).
-/// 処理結果（成功 / 失敗）を表現する型。
+/// <para>処理結果（成功 / 失敗）を表現する型。</para>
 ///
-/// This type replaces exceptions with explicit error values.
-/// 例外の代わりに、失敗を値として扱う。
+/// This type represents expected operation failures as explicit error values.
+/// <para>想定内の処理失敗を、例外ではなく明示的なエラー値として扱う。</para>
 ///
+/// <para>
 /// Design rules:
-/// - Success always contains a value
-/// - Failure always contains an error
-/// - null is not allowed
-/// - operations must preserve these invariants
+/// <para>- Success always contains a value</para>
+/// <para>- Failure always contains an error</para>
+/// <para>- null is not allowed</para>
+/// <para>- operations must preserve these invariants</para>
+/// </para>
 ///
+/// <para>
 /// 設計ルール:
-/// - Success は必ず値を持つ
-/// - Failure は必ずエラーを持つ
-/// - nullは禁止
-/// - すべての操作はこの不変条件を守る
+/// <para>- Success は必ず値を持つ</para>
+/// <para>- Failure は必ずエラーを持つ</para>
+/// <para>- nullは禁止</para>
+/// <para>- すべての操作はこの不変条件を守る</para>
+/// </para>
 /// </summary>
 /// <typeparam name="E">The error type. / エラーの型。</typeparam>
 /// <typeparam name="T">The success value type. / 成功時の値の型。</typeparam>
@@ -31,9 +35,9 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 
     /// <summary>
     /// Indicates whether the result is a failure.
-    /// 失敗かどうかを示す。
+    /// <para>失敗かどうかを示す。</para>
     /// </summary>
-    public bool IsFailure => !IsSuccess;
+    public bool IsFailure => IsInitialized && !IsSuccess;
 
     /// <summary>
     /// Indicates whether the result is initialized.
@@ -55,7 +59,7 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// </summary>
     /// <exception cref="InvalidOperationException">
     /// Thrown if uninitialized or if the result is a failure.
-    /// 未初期化または失敗の場合に投げられる。
+    /// <para>未初期化または失敗の場合に投げられる。</para>
     /// </exception>
     public T Value
     {
@@ -72,14 +76,14 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     private readonly E _error;
     /// <summary>
     /// Gets the error if failed.
-    /// 失敗時のエラーを取得する。
+    /// <para>失敗時のエラーを取得する。</para>
     ///
     /// Throws if the result is uninitialized or success.
-    /// 未初期化または成功時は例外を投げる。
+    /// <para>未初期化または成功時は例外を投げる。</para>
     /// </summary>
     /// <exception cref="InvalidOperationException">
     /// Thrown if uninitialized or if the result is a success.
-    /// 未初期化または成功の場合に投げられる。
+    /// <para>未初期化または成功の場合に投げられる。</para>
     /// </exception>
     public E Error
     {
@@ -111,10 +115,10 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
 
     /// <summary>
     /// Creates a failed result.
-    /// 失敗結果を生成する。
+    /// <para>失敗結果を生成する。</para>
     ///
     /// null is not allowed.
-    /// nullは禁止。
+    /// <para>nullは禁止。</para>
     /// </summary>
     /// <param name="error">The error value. / エラーの値。</param>
     private Result(E error)
@@ -130,7 +134,10 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// <para>成功(Result.Ok)を生成する。</para>
     /// </summary>
     /// <param name="value">The success value. Must not be null. / 成功時の値。nullは禁止。</param>
-    /// <returns>A successful Result containing the value. / 値を持つ成功Result。</returns>
+    /// <returns>
+    /// A successful Result containing the value.
+    /// <para>値を持つ成功Result。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if value is null. / valueがnullの場合に投げられる。</exception>
     public static Result<E, T> Ok(T value)
     {
@@ -144,8 +151,10 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// <para>失敗(Result.Fail)を生成する。</para>
     /// </summary>
     /// <param name="error">The error value. Must not be null. / エラーの値。nullは禁止。</param>
-    /// <returns>A failed Result containing the error. / エラーを持つ失敗Result。</returns>
-    /// <exception cref="ArgumentNullException">Thrown if error is null. / errorがnullの場合に投げられる。</exception>
+    /// <returns>A failed Result containing the error.
+    /// <para>エラーを持つ失敗Result。</para>
+    /// </returns>
+    /// <exception cref="ArgumentNullException">Thrown if error is null.  errorがnullの場合に投げられる。</exception>
     public static Result<E, T> Fail(E error)
     {
         ArgumentNullException.ThrowIfNull(error);
@@ -160,7 +169,9 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// <typeparam name="U">The return type. / 戻り値の型。</typeparam>
     /// <param name="onSuccess">A function to apply if successful. Must not return null. / 成功時に適用する関数。nullを返してはならない。</param>
     /// <param name="onFailure">A function to apply if failed. Must not return null. / 失敗時に適用する関数。nullを返してはならない。</param>
-    /// <returns>The result of the applied function. / 適用した関数の戻り値。</returns>
+    /// <returns>The result of the applied function.
+    /// <para>適用した関数の戻り値。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if onSuccess or onFailure is null. / onSuccessまたはonFailureがnullの場合に投げられる。</exception>
     /// <exception cref="InvalidOperationException">Thrown if the applied function returns null. / 適用した関数がnullを返した場合に投げられる。</exception>
     public U Match<U>(Func<T, U> onSuccess, Func<E, U> onFailure)
@@ -204,14 +215,22 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// </summary>
     /// <typeparam name="U">The type of the value in the returned Result. / 返されるResultの値の型。</typeparam>
     /// <param name="binder">A function that takes the value and returns a new Result. / 値を受け取り新しいResultを返す関数。</param>
-    /// <returns>The Result returned by binder, or the original failure. / binderが返すResult、または元の失敗Result。</returns>
+    /// <returns>The Result returned by binder, or the original failure.
+    /// <para>binderが返すResult、または元の失敗Result。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if binder is null. / binderがnullの場合に投げられる。</exception>
     public Result<E, U> Bind<U>(Func<T, Result<E, U>> binder)
     {
         this.ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(binder);
 
-        return IsSuccess ? binder(_value) : Result<E, U>.Fail(_error);
+        if (!IsSuccess)
+            return Result<E, U>.Fail(_error);
+
+        var next = binder(_value);
+        next.ThrowIfNotInitialized();
+
+        return next;
     }
 
     /// <summary>
@@ -223,7 +242,9 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// </summary>
     /// <typeparam name="U">The type of the transformed value. / 変換後の値の型。</typeparam>
     /// <param name="selector">A function to transform the value. Must not return null. / 値を変換する関数。nullを返してはならない。</param>
-    /// <returns>A Result with the transformed value, or the original failure. / 変換後の値を持つResult、または元の失敗Result。</returns>
+    /// <returns>A Result with the transformed value, or the original failure.
+    /// <para>変換後の値を持つResult、または元の失敗Result。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if selector is null. / selectorがnullの場合に投げられる。</exception>
     /// <exception cref="InvalidOperationException">Thrown if selector returns null. / selectorがnullを返した場合に投げられる。</exception>
     public Result<E, U> Map<U>(Func<T, U> selector)
@@ -251,7 +272,9 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// </summary>
     /// <typeparam name="E1">The target error type. / 変換後のエラー型。</typeparam>
     /// <param name="errorMapper">A function to transform the error. Must not return null. / エラーを変換する関数。nullを返してはならない。</param>
-    /// <returns>A Result with the mapped error, or the original success. / 変換後のエラーを持つResult、または元の成功Result。</returns>
+    /// <returns>A Result with the mapped error, or the original success.
+    /// <para>変換後のエラーを持つResult、または元の成功Result。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if errorMapper is null. / errorMapperがnullの場合に投げられる。</exception>
     /// <exception cref="InvalidOperationException">Thrown if errorMapper returns null. / errorMapperがnullを返した場合に投げられる。</exception>
     public Result<E1, T> MapError<E1>(Func<E, E1> errorMapper)
@@ -277,7 +300,9 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// </summary>
     /// <param name="predicate">A function to test the value. / 値を検証する関数。</param>
     /// <param name="errorFactory">A function to create an error from the value when the predicate fails. / 条件違反時に値からエラーを生成する関数。</param>
-    /// <returns>The original Result if successful and predicate passes; otherwise a failure. / 成功かつ条件を満たす場合は元のResult、それ以外は失敗Result。</returns>
+    /// <returns>The original Result if successful and predicate passes; otherwise a failure.
+    /// <para>成功かつ条件を満たす場合は元のResult、それ以外は失敗Result。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if predicate or errorFactory is null. / predicateまたはerrorFactoryがnullの場合に投げられる。</exception>
     /// <exception cref="InvalidOperationException">Thrown if errorFactory returns null. / errorFactoryがnullを返した場合に投げられる。</exception>
     public Result<E, T> Ensure(Func<T, bool> predicate, Func<T, E> errorFactory)
@@ -304,7 +329,9 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// <para>成功時に副作用を実行し、元のResultを返す。</para>
     /// </summary>
     /// <param name="onSuccess">An action to execute on the value if successful. / 成功時に値に対して実行するアクション。</param>
-    /// <returns>The original Result unchanged. / 変更されていない元のResult。</returns>
+    /// <returns>The original Result unchanged.
+    /// <para>変更されていない元のResult。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if onSuccess is null. / onSuccessがnullの場合に投げられる。</exception>
     public Result<E, T> Tap(Action<T> onSuccess)
     {
@@ -323,7 +350,9 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     /// <para>失敗時に副作用を実行し、元のResultを返す。</para>
     /// </summary>
     /// <param name="onFailure">An action to execute on the error if failed. / 失敗時にエラーに対して実行するアクション。</param>
-    /// <returns>The original Result unchanged. / 変更されていない元のResult。</returns>
+    /// <returns>The original Result unchanged.
+    /// <para>変更されていない元のResult。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if onFailure is null. / onFailureがnullの場合に投げられる。</exception>
     public Result<E, T> TapError(Action<E> onFailure)
     {
