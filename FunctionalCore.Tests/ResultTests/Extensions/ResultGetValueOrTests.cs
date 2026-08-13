@@ -15,110 +15,98 @@ public class ResultGetValueOrTests
     }
 
     /// <summary>
-    /// 1. Ok.GetValueOr は内部の Value を返す
+    /// 1. Ok.GetValueOr は成功値を返す
     /// </summary>
     [Test]
-    public void Result_Ok_GetValueOr_should_return_inner_value()
+    public void Result_Ok_GetValueOr_should_return_value()
     {
-        var value = _ok.GetValueOr(999);
+        var value = _ok.GetValueOr(10);
 
         Assert.That(value, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 2. Fail.GetValueOr は fallback を返す
+    /// 2. Fail.GetValueOr は指定された代替値を返す
     /// </summary>
     [Test]
-    public void Result_Fail_GetValueOr_should_return_fallback()
+    public void Result_Fail_GetValueOr_should_return_default_value()
     {
-        var value = _fail.GetValueOr(999);
+        var value = _fail.GetValueOr(10);
 
-        Assert.That(value, Is.EqualTo(999));
+        Assert.That(value, Is.EqualTo(10));
     }
 
     /// <summary>
-    /// 3. Fail.GetValueOr は default 値を fallback として返せる
+    /// 3. Ok.GetValueOr は参照型でも成功値を返す
     /// </summary>
     [Test]
-    public void Result_Fail_GetValueOr_with_default_should_return_default()
-    {
-        var value = _fail.GetValueOr(default);
-
-        Assert.That(value, Is.EqualTo(default(int)));
-    }
-
-    /// <summary>
-    /// 4. Ok.GetValueOr は Value が default 値でも fallback を使用しない
-    /// </summary>
-    [Test]
-    public void Result_Ok_GetValueOr_with_default_value_should_ignore_fallback()
-    {
-        var ok = Result<string, int>.Ok(0);
-
-        var value = ok.GetValueOr(999);
-
-        Assert.That(value, Is.EqualTo(0));
-    }
-
-    /// <summary>
-    /// 5. 参照型の Fail.GetValueOr は fallback の同一インスタンスを返す
-    /// </summary>
-    [Test]
-    public void Result_Fail_GetValueOr_reference_type_should_return_same_instance()
-    {
-        var fallback = new object();
-        var fail = Result<string, object>.Fail("error");
-
-        var value = fail.GetValueOr(fallback);
-
-        Assert.That(value, Is.SameAs(fallback));
-    }
-
-    /// <summary>
-    /// 6. 参照型の Ok.GetValueOr は fallback を使用しない
-    /// </summary>
-    [Test]
-    public void Result_Ok_GetValueOr_reference_type_should_ignore_fallback()
-    {
-        var original = new object();
-        var fallback = new object();
-        var ok = Result<string, object>.Ok(original);
-
-        var value = ok.GetValueOr(fallback);
-
-        Assert.That(value, Is.SameAs(original));
-    }
-
-    /// <summary>
-    /// 7. 参照型で fallback が null の場合は ArgumentNullException が発生する
-    /// </summary>
-    [Test]
-    public void Result_GetValueOr_null_fallback_should_throw()
-    {
-        var result = Result<string, string>.Fail("error");
-
-        Assert.Throws<ArgumentNullException>(() => result.GetValueOr(null!));
-    }
-
-    /// <summary>
-    /// 8. Ok でも fallback が null の場合は ArgumentNullException が発生する
-    /// </summary>
-    [Test]
-    public void Result_Ok_GetValueOr_null_fallback_should_throw()
+    public void Result_Ok_GetValueOr_reference_type_should_return_value()
     {
         var result = Result<string, string>.Ok("value");
 
-        Assert.Throws<ArgumentNullException>(() => result.GetValueOr(null!));
+        var value = result.GetValueOr("default");
+
+        Assert.That(value, Is.EqualTo("value"));
     }
 
     /// <summary>
-    /// 9. 未初期化 Result で GetValueOr を呼び出すと InvalidOperationException が発生する
+    /// 4. Fail.GetValueOr は参照型の代替値を返す
+    /// </summary>
+    [Test]
+    public void Result_Fail_GetValueOr_reference_type_should_return_default_value()
+    {
+        var result = Result<string, string>.Fail("error");
+
+        var value = result.GetValueOr("default");
+
+        Assert.That(value, Is.EqualTo("default"));
+    }
+
+    /// <summary>
+    /// 5. Ok.GetValueOr では代替値に null を指定しても成功値を返す
+    /// </summary>
+    [Test]
+    public void Result_Ok_GetValueOr_null_default_value_should_return_value()
+    {
+        var result = Result<string, string>.Ok("value");
+
+        var value = result.GetValueOr(null!);
+
+        Assert.That(value, Is.EqualTo("value"));
+    }
+
+    /// <summary>
+    /// 6. Fail.GetValueOr では代替値に null を指定した場合は null を返す
+    /// </summary>
+    [Test]
+    public void Result_Fail_GetValueOr_null_default_value_should_return_null()
+    {
+        var result = Result<string, string>.Fail("error");
+
+        var value = result.GetValueOr(null!);
+
+        Assert.That(value, Is.Null);
+    }
+
+    /// <summary>
+    /// 7. 未初期化 Result.GetValueOr は InvalidOperationException が発生する
     /// </summary>
     [Test]
     public void Result_Default_GetValueOr_should_throw()
     {
         var result = default(Result<string, int>);
 
-        Assert.Throws<InvalidOperationException>(() => result.GetValueOr(999));
+        Assert.Throws<InvalidOperationException>(() => result.GetValueOr(10));
+    }
+
+    /// <summary>
+    /// 8. 未初期化 Result は代替値が null でも InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Default_GetValueOr_null_default_value_should_throw()
+    {
+        var result = default(Result<string, string>);
+
+        Assert.Throws<InvalidOperationException>(() => result.GetValueOr(null!));
     }
 }

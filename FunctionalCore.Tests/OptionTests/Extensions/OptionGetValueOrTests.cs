@@ -15,112 +15,102 @@ public class OptionGetValueOrTests
     }
 
     /// <summary>
-    /// 1. Some.GetValueOr は内部の Value を返す
+    /// 1. Some.GetValueOr は保持している値を返す
     /// </summary>
     [Test]
-    public void Option_Some_GetValueOr_should_return_inner_value()
+    public void Option_Some_GetValueOr_should_return_value()
     {
-        var value = _some.GetValueOr(999);
+        var value = _some.GetValueOr(10);
 
         Assert.That(value, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 2. None.GetValueOr は fallback を返す
+    /// 2. None.GetValueOr は指定された代替値を返す
     /// </summary>
     [Test]
-    public void Option_None_GetValueOr_should_return_fallback()
+    public void Option_None_GetValueOr_should_return_default_value()
     {
-        var value = _none.GetValueOr(999);
+        var value = _none.GetValueOr(10);
 
-        Assert.That(value, Is.EqualTo(999));
+        Assert.That(value, Is.EqualTo(10));
     }
 
     /// <summary>
-    /// 3. None.GetValueOr は default 値を fallback として返せる
+    /// 3. Some.GetValueOr は参照型でも保持している値を返す
     /// </summary>
     [Test]
-    public void Option_None_GetValueOr_with_default_should_return_default()
+    public void Option_Some_GetValueOr_reference_type_should_return_value()
     {
-        var value = _none.GetValueOr(default);
+        var option = Option<string>.Some("value");
 
-        Assert.That(value, Is.EqualTo(default(int)));
+        var value = option.GetValueOr("default");
+
+        Assert.That(value, Is.EqualTo("value"));
     }
 
     /// <summary>
-    /// 4. Some.GetValueOr は Value が default 値でも fallback を使用しない
+    /// 4. None.GetValueOr は参照型の代替値を返す
     /// </summary>
     [Test]
-    public void Option_Some_GetValueOr_with_default_value_should_ignore_fallback()
+    public void Option_None_GetValueOr_reference_type_should_return_default_value()
     {
-        var some = Option<int>.Some(0);
+        var option = Option<string>.None;
 
-        var value = some.GetValueOr(999);
+        var value = option.GetValueOr("default");
 
-        Assert.That(value, Is.EqualTo(0));
+        Assert.That(value, Is.EqualTo("default"));
     }
 
     /// <summary>
-    /// 5. 参照型の None.GetValueOr は fallback の同一インスタンスを返す
+    /// 5. Some.GetValueOr では代替値に null を指定しても保持している値を返す
     /// </summary>
     [Test]
-    public void Option_None_GetValueOr_reference_type_should_return_same_instance()
+    public void Option_Some_GetValueOr_null_default_value_should_return_value()
     {
-        var fallback = new object();
-        var none = Option<object>.None;
+        var option = Option<string>.Some("value");
 
-        var value = none.GetValueOr(fallback);
+        var value = option.GetValueOr(null!);
 
-        Assert.That(value, Is.SameAs(fallback));
+        Assert.That(value, Is.EqualTo("value"));
     }
 
     /// <summary>
-    /// 6. 参照型の Some.GetValueOr は内部のインスタンスを返す
+    /// 6. None.GetValueOr では代替値に null を指定した場合は null を返す
     /// </summary>
     [Test]
-    public void Option_Some_GetValueOr_reference_type_should_return_same_instance()
+    public void Option_None_GetValueOr_null_default_value_should_return_null()
     {
-        var original = new object();
-        var fallback = new object();
-        var some = Option<object>.Some(original);
+        var option = Option<string>.None;
 
-        var value = some.GetValueOr(fallback);
+        var value = option.GetValueOr(null!);
 
-        Assert.That(value, Is.SameAs(original));
+        Assert.That(value, Is.Null);
     }
 
     /// <summary>
-    /// 7. fallback が null の場合は ArgumentNullException が発生する
+    /// 7. Default Option.GetValueOr は None と同様に代替値を返す
     /// </summary>
     [Test]
-    public void Option_None_GetValueOr_null_fallback_should_throw()
-    {
-        var none = Option<string>.None;
-
-        Assert.Throws<ArgumentNullException>(() => none.GetValueOr(null!));
-    }
-
-    /// <summary>
-    /// 8. Some でも fallback が null の場合は ArgumentNullException が発生する
-    /// </summary>
-    [Test]
-    public void Option_Some_GetValueOr_null_fallback_should_throw()
-    {
-        var some = Option<string>.Some("value");
-
-        Assert.Throws<ArgumentNullException>(() => some.GetValueOr(null!));
-    }
-
-    /// <summary>
-    /// 9. Default Option は None と同様に fallback を返す
-    /// </summary>
-    [Test]
-    public void Option_Default_GetValueOr_should_return_fallback()
+    public void Option_Default_GetValueOr_should_return_default_value()
     {
         var option = default(Option<int>);
 
-        var value = option.GetValueOr(999);
+        var value = option.GetValueOr(10);
 
-        Assert.That(value, Is.EqualTo(999));
+        Assert.That(value, Is.EqualTo(10));
+    }
+
+    /// <summary>
+    /// 8. Default Option.GetValueOr では代替値に null を指定した場合は null を返す
+    /// </summary>
+    [Test]
+    public void Option_Default_GetValueOr_null_default_value_should_return_null()
+    {
+        var option = default(Option<string>);
+
+        var value = option.GetValueOr(null!);
+
+        Assert.That(value, Is.Null);
     }
 }

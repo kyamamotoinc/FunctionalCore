@@ -61,23 +61,19 @@ public class ResultToResultFromValueTests
     {
         string? value = null;
 
-        Assert.Throws<ArgumentNullException>(() => value.ToResult<string, string>(null!));
+        Assert.Throws<ArgumentNullException>(() =>
+            value.ToResult<string, string>(null!));
     }
 
     /// <summary>
-    /// 5. 値が null でなければ errorIfNull が null でも使用されない
+    /// 5. 値が null でなくても errorIfNull が null の場合は ArgumentNullException が発生する
     /// </summary>
     [Test]
-    public void Value_ToResult_non_null_should_not_use_null_error()
+    public void Value_ToResult_non_null_value_and_null_error_should_throw()
     {
         var value = "value";
 
-        var result = value.ToResult<string, string>(null!);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value, Is.EqualTo("value"));
-        });
+        Assert.Throws<ArgumentNullException>(() =>
+            value.ToResult<string, string>(null!));
     }
 }

@@ -123,17 +123,17 @@ public static class ResultExtensions
     /// <para>値を取得する Result。</para>
     /// </param>
     /// <param name="defaultValue">
-    /// The fallback value to return when <paramref name="result"/> is failed. Must not be null.
-    /// <para><paramref name="result"/> が失敗している場合に返す代替値。null は許可されない。</para>
+    /// The fallback value to return when <paramref name="result"/> is failed.
+    /// The fallback may be null when the type permits null.
+    /// <para>
+    /// <paramref name="result"/> が失敗している場合に返す代替値。
+    /// 型が null を許容する場合は null を指定できる。
+    /// </para>
     /// </param>
     /// <returns>
     /// The success value when <paramref name="result"/> is successful; otherwise <paramref name="defaultValue"/>.
     /// <para><paramref name="result"/> が成功している場合は成功値、それ以外は <paramref name="defaultValue"/>。</para>
     /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="defaultValue"/> is null.
-    /// <para><paramref name="defaultValue"/> が null の場合にスローされる。</para>
-    /// </exception>
     /// <exception cref="InvalidOperationException">
     /// Thrown when <paramref name="result"/> is uninitialized.
     /// <para><paramref name="result"/> が未初期化の場合にスローされる。</para>
@@ -141,7 +141,6 @@ public static class ResultExtensions
     public static T GetValueOr<E, T>(this Result<E, T> result, T defaultValue)
     {
         result.ThrowIfNotInitialized();
-        ArgumentNullException.ThrowIfNull(defaultValue);
 
         return result.IsSuccess ? result.Value : defaultValue;
     }
@@ -150,34 +149,6 @@ public static class ResultExtensions
     /// Returns this Result when it is successful; otherwise returns the specified alternative Result.
     /// <para>この Result が成功している場合は自身を返し、失敗している場合は指定された代替 Result を返す。</para>
     /// </summary>
-    /// <typeparam name="E">
-    /// The error type.
-    /// <para>エラーの型。</para>
-    /// </typeparam>
-    /// <typeparam name="T">
-    /// The success value type.
-    /// <para>成功値の型。</para>
-    /// </typeparam>
-    /// <param name="result">
-    /// The source Result.
-    /// <para>元の Result。</para>
-    /// </param>
-    /// <param name="other">
-    /// The alternative Result to return when <paramref name="result"/> is failed.
-    /// <para><paramref name="result"/> が失敗している場合に返す代替 Result。</para>
-    /// </param>
-    /// <returns>
-    /// <paramref name="result"/> when it is successful; otherwise <paramref name="other"/>.
-    /// <para><paramref name="result"/> が成功している場合は自身、それ以外は <paramref name="other"/>。</para>
-    /// </returns>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when <paramref name="result"/> is uninitialized,
-    /// or when <paramref name="result"/> is failed and <paramref name="other"/> is uninitialized.
-    /// <para>
-    /// <paramref name="result"/> が未初期化、
-    /// または <paramref name="result"/> が失敗していて <paramref name="other"/> が未初期化の場合にスローされる。
-    /// </para>
-    /// </exception>
     public static Result<E, T> Or<E, T>(this Result<E, T> result, Result<E, T> other)
     {
         result.ThrowIfNotInitialized();
@@ -194,30 +165,6 @@ public static class ResultExtensions
     /// Returns this Result when it is successful; otherwise returns an alternative Result produced by the specified factory.
     /// <para>この Result が成功している場合は自身を返し、失敗している場合は指定されたファクトリで生成した代替 Result を返す。</para>
     /// </summary>
-    /// <typeparam name="E">
-    /// The error type.
-    /// <para>エラーの型。</para>
-    /// </typeparam>
-    /// <typeparam name="T">
-    /// The success value type.
-    /// <para>成功値の型。</para>
-    /// </typeparam>
-    /// <param name="result">
-    /// The source Result.
-    /// <para>元の Result。</para>
-    /// </param>
-    /// <param name="otherFactory">
-    /// A function that produces the alternative Result when <paramref name="result"/> is failed.
-    /// <para><paramref name="result"/> が失敗している場合に代替 Result を生成する関数。</para>
-    /// </param>
-    /// <returns>
-    /// <paramref name="result"/> when it is successful;
-    /// otherwise the Result produced by <paramref name="otherFactory"/>.
-    /// <para>
-    /// <paramref name="result"/> が成功している場合は自身、
-    /// それ以外は <paramref name="otherFactory"/> が生成した Result。
-    /// </para>
-    /// </returns>
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="otherFactory"/> is null.
     /// <para><paramref name="otherFactory"/> が null の場合にスローされる。</para>
@@ -355,8 +302,8 @@ public static class ResultExtensions
     /// <para>変換する値。</para>
     /// </param>
     /// <param name="errorIfNull">
-    /// The error to use when <paramref name="value"/> is null.
-    /// <para><paramref name="value"/> が null の場合に使用するエラー。</para>
+    /// The error to use when <paramref name="value"/> is null. Must not be null.
+    /// <para><paramref name="value"/> が null の場合に使用するエラー。null は許可されない。</para>
     /// </param>
     /// <returns>
     /// A successful Result containing <paramref name="value"/> when it is non-null;
@@ -367,11 +314,13 @@ public static class ResultExtensions
     /// </para>
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="value"/> is null and <paramref name="errorIfNull"/> is null.
-    /// <para><paramref name="value"/> が null で、かつ <paramref name="errorIfNull"/> も null の場合にスローされる。</para>
+    /// Thrown when <paramref name="errorIfNull"/> is null.
+    /// <para><paramref name="errorIfNull"/> が null の場合にスローされる。</para>
     /// </exception>
     public static Result<E, T> ToResult<E, T>(this T value, E errorIfNull)
     {
+        ArgumentNullException.ThrowIfNull(errorIfNull);
+
         if (value is null)
             return Result<E, T>.Fail(errorIfNull);
 
