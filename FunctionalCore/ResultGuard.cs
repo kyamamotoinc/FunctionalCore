@@ -1,21 +1,37 @@
 namespace FunctionalCore;
 
 /// <summary>
-/// Guard class for inspecting the state of Result<E, T>.
-/// <para>Result<E, T> の状態を検査するためのガードクラス。</para>
-/// <para>This class is internal and should not be exposed to public API.</para>
-/// <para>このクラスは内部用であり、公開APIに露出させるべきではない。</para>
+/// Provides internal guard operations for <c>Result&lt;E, T&gt;</c>.
+/// <para><c>Result&lt;E, T&gt;</c> の内部状態を検証するためのガード処理を提供する。</para>
 /// </summary>
+/// <remarks>
+/// This type is for internal use by FunctionalCore and is not part of the public API.
+/// <para>
+/// FunctionalCore 内部で使用するための型であり、公開 API の一部ではない。
+/// </para>
+/// </remarks>
 internal static class ResultGuard
 {
     /// <summary>
-    /// Throws if the result is not initialized.
-    /// <para>Resultが初期化されていない場合は例外を投げる。</para>
+    /// Ensures that the specified Result is initialized.
+    /// <para>指定された Result が初期化済みであることを検証する。</para>
     /// </summary>
-    /// <typeparam name="E">The error type. / エラーの型。</typeparam>
-    /// <typeparam name="T">The success value type. / 成功時の値の型。</typeparam>
-    /// <param name="result">The result to check. / 検査するResult。</param>
-    /// <exception cref="InvalidOperationException">Thrown if the result is not initialized. / 初期化されていない場合に投げられる。</exception>
+    /// <typeparam name="E">
+    /// The error type.
+    /// <para>エラーの型。</para>
+    /// </typeparam>
+    /// <typeparam name="T">
+    /// The success value type.
+    /// <para>成功時の値の型。</para>
+    /// </typeparam>
+    /// <param name="result">
+    /// The Result to validate.
+    /// <para>検証する Result。</para>
+    /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when <paramref name="result"/> is not initialized.
+    /// <para><paramref name="result"/> が未初期化の場合にスローされる。</para>
+    /// </exception>
     internal static void ThrowIfNotInitialized<E, T>(this Result<E, T> result)
     {
         if (!result.IsInitialized)

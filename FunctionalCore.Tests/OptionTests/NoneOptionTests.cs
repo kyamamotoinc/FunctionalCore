@@ -1,6 +1,6 @@
 ﻿namespace FunctionalCore.Tests.OptionTests;
 
-public class OptionNoneTests
+public class NoneOptionTests
 {
     private Option<int> _none;
 
@@ -11,70 +11,61 @@ public class OptionNoneTests
     }
 
     /// <summary>
-    /// 1. None は値を持たない（HasValue = false）
+    /// 1. None は値を保持していない状態である
     /// </summary>
     [Test]
-    public void Option_None_does_not_have_value()
+    public void Option_None_should_not_have_value()
     {
-        Assert.IsFalse(_none.HasValue);
+        Assert.That(_none.HasValue, Is.False);
     }
 
     /// <summary>
-    /// 2. None の Value にアクセスすると例外
+    /// 2. None では Value にアクセスできない
     /// </summary>
     [Test]
-    public void Option_None_accessing_Value_should_throw()
+    public void Option_None_accessing_value_should_throw()
     {
         Assert.Throws<InvalidOperationException>(() => _ = _none.Value);
     }
 
     /// <summary>
-    /// 3. None 同士は常に等しい（==）
+    /// 3. None 同士は等しい
     /// </summary>
     [Test]
-    public void None_should_be_equal_to_None()
+    public void Two_None_options_should_be_equal()
     {
         var other = Option<int>.None;
-        Assert.That(_none, Is.EqualTo(other));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_none == other, Is.True);
+            Assert.That(_none.Equals(other), Is.True);
+            Assert.That(_none.GetHashCode(), Is.EqualTo(other.GetHashCode()));
+        });
     }
 
     /// <summary>
-    /// 4. None 同士は Equals でも等しい
+    /// 4. None と Some は等しくない
     /// </summary>
     [Test]
-    public void None_should_be_equal_via_Equals()
-    {
-        var other = Option<int>.None;
-        Assert.That(_none, Is.EqualTo(other));
-    }
-
-    /// <summary>
-    /// 5. Some と None は等しくない
-    /// </summary>
-    [Test]
-    public void Some_and_None_should_not_be_equal()
+    public void None_and_Some_should_not_be_equal()
     {
         var some = Option<int>.Some(5);
-        Assert.That(_none, Is.Not.EqualTo(some));
-        //Assert.That(some != _none);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_none == some, Is.False);
+            Assert.That(_none != some, Is.True);
+            Assert.That(_none.Equals(some), Is.False);
+        });
     }
 
     /// <summary>
-    /// 6. None の ToString は "None"
+    /// 5. None の ToString は "None" を返す
     /// </summary>
     [Test]
     public void None_ToString_should_return_None()
     {
         Assert.That(_none.ToString(), Is.EqualTo("None"));
-    }
-
-    /// <summary>
-    /// 7. None のハッシュコードは等しい
-    /// </summary>
-    [Test]
-    public void None_hashcode_should_be_equal()
-    {
-        var other = Option<int>.None;
-        Assert.That(_none.GetHashCode(), Is.EqualTo(other.GetHashCode()));
     }
 }

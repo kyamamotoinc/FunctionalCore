@@ -13,27 +13,43 @@ public class OptionMatchTests
     }
 
     /// <summary>
-    /// 1. Some.Match は成功側の関数を実行し、その結果を返す（Some → successFunc）
+    /// 1. Some.Match は Some 側の関数を実行し、その結果を返す
     /// </summary>
     [Test]
-    public void Option_Some_Match_should_invoke_success_func()
+    public void Option_Some_Match_should_return_some_func_result()
     {
-        var opt = _some.Match(
-            x => x + 1,
-            () => -1);
+        var result = _some.Match(value => value + 1, () => -1);
 
-        Assert.That(opt, Is.EqualTo(6));
+        Assert.That(result, Is.EqualTo(6));
     }
 
     /// <summary>
-    /// 2. Some.Match は失敗側の関数を実行しない（排他性の保証）
+    /// 2. Some.Match は Some 側の関数を1回だけ実行する
     /// </summary>
     [Test]
-    public void Option_Some_Match_should_not_invoke_failure_func()
+    public void Option_Some_Match_should_invoke_some_func_once()
     {
         int count = 0;
-        var _ = _some.Match(
-            x => x + 1,
+
+        _some.Match(value =>
+        {
+            count++;
+            return value + 1;
+        }, () => -1);
+
+        Assert.That(count, Is.EqualTo(1));
+    }
+
+    /// <summary>
+    /// 3. Some.Match は None 側の関数を実行しない
+    /// </summary>
+    [Test]
+    public void Option_Some_Match_should_not_invoke_none_func()
+    {
+        int count = 0;
+
+        _some.Match(
+            value => value + 1,
             () =>
             {
                 count++;
@@ -44,76 +60,152 @@ public class OptionMatchTests
     }
 
     /// <summary>
-    /// 3. None.Match は失敗側の関数を実行し、その結果を返す（None → failureFunc）
+    /// 4. None.Match は None 側の関数を実行し、その結果を返す
     /// </summary>
     [Test]
-    public void Option_None_Match_should_invoke_failure_func()
+    public void Option_None_Match_should_return_none_func_result()
     {
-        var opt = _none.Match(
-            x => x + 1,
-            () => -1
-        );
+        var result = _none.Match(value => value + 1, () => -1);
 
-        Assert.That(opt, Is.EqualTo(-1));
+        Assert.That(result, Is.EqualTo(-1));
     }
 
     /// <summary>
-    /// 4. None.Match は成功側の関数を実行しない（排他性の保証）
+    /// 5. None.Match は None 側の関数を1回だけ実行する
     /// </summary>
     [Test]
-    public void Option_None_Match_should_not_invoke_success_func()
+    public void Option_None_Match_should_invoke_none_func_once()
     {
         int count = 0;
-        var _ = _none.Match(
-            x =>
+
+        _none.Match(
+            value => value + 1,
+            () =>
             {
                 count++;
-                return x + 1;
-            },
-            () => -1);
+                return -1;
+            });
+
+        Assert.That(count, Is.EqualTo(1));
+    }
+
+    /// <summary>
+    /// 6. None.Match は Some 側の関数を実行しない
+    /// </summary>
+    [Test]
+    public void Option_None_Match_should_not_invoke_some_func()
+    {
+        int count = 0;
+
+        _none.Match(value =>
+        {
+            count++;
+            return value + 1;
+        }, () => -1);
 
         Assert.That(count, Is.EqualTo(0));
     }
 
     /// <summary>
-    /// 5. 成功側 func が null の場合は ArgumentNullException（null 禁止の世界観）
+    /// 7. Some 側の関数が null の場合は ArgumentNullException が発生する
     /// </summary>
     [Test]
-    public void Option_Some_Match_null_success_func_should_throw()
+    public void Option_Match_null_some_func_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _some.Match<int>(null!, () => -1));
+        Func<int, int>? onSome = null;
+
+        Assert.Throws<ArgumentNullException>(() =>
+            _some.Match(onSome!, () => -1));
     }
 
     /// <summary>
-    /// 6. 失敗側 func が null の場合も ArgumentNullException（対称性の保証）
+    /// 8. None 側の関数が null の場合は ArgumentNullException が発生する
     /// </summary>
     [Test]
-    public void Option_None_Match_null_failure_func_should_throw()
+    public void Option_Match_null_none_func_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _none.Match(x => x + 1, null!));
+        Func<int>? onNone = null;
+
+        Assert.Throws<ArgumentNullException>(() =>
+            _none.Match(value => value + 1, onNone!));
     }
 
     /// <summary>
-    /// 7. 成功側 func が null を返した場合は例外（Match は null を外に出さない）
+    /// 9. Some でも未使用の None 側関数が null の場合は ArgumentNullException が発生する
     /// </summary>
     [Test]
-    public void Option_Some_Match_success_func_returning_null_should_throw()
+    public void Option_Some_Match_null_unused_none_func_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = _some.Match(
-            x => (string)null!,
-            () => "fallback"
-        ));
+        Func<int>? onNone = null;
+
+        Assert.Throws<ArgumentNullException>(() =>
+            _some.Match(value => value + 1, onNone!));
     }
 
     /// <summary>
-    /// 8. 失敗側 func が null を返した場合も例外（出口としての Match の責務）
+    /// 10. None でも未使用の Some 側関数が null の場合は ArgumentNullException が発生する
     /// </summary>
     [Test]
-    public void Option_None_Match_failure_func_returning_null_should_throw()
+    public void Option_None_Match_null_unused_some_func_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = _none.Match(
-            x => "ok",
-            () => (string)null!
-        ));
+        Func<int, int>? onSome = null;
+
+        Assert.Throws<ArgumentNullException>(() =>
+            _none.Match(onSome!, () => -1));
+    }
+
+    /// <summary>
+    /// 11. Some.Match で Some 側の関数が null を返した場合は InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Option_Some_Match_some_func_returning_null_should_throw()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            _some.Match(_ => (string)null!, () => "fallback"));
+    }
+
+    /// <summary>
+    /// 12. None.Match で None 側の関数が null を返した場合は InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Option_None_Match_none_func_returning_null_should_throw()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            _none.Match(_ => "value", () => (string)null!));
+    }
+
+    /// <summary>
+    /// 13. Some.Match では null を返す None 側の関数でも実行されない
+    /// </summary>
+    [Test]
+    public void Option_Some_Match_should_not_evaluate_null_returning_none_func()
+    {
+        var result = _some.Match(value => $"value:{value}", () => (string)null!);
+
+        Assert.That(result, Is.EqualTo("value:5"));
+    }
+
+    /// <summary>
+    /// 14. None.Match では null を返す Some 側の関数でも実行されない
+    /// </summary>
+    [Test]
+    public void Option_None_Match_should_not_evaluate_null_returning_some_func()
+    {
+        var result = _none.Match(_ => (string)null!, () => "none");
+
+        Assert.That(result, Is.EqualTo("none"));
+    }
+
+    /// <summary>
+    /// 15. Default Option は None と同様に None 側の関数を実行する
+    /// </summary>
+    [Test]
+    public void Option_Default_Match_should_behave_as_none()
+    {
+        var option = default(Option<int>);
+
+        var result = option.Match(value => value + 1, () => -1);
+
+        Assert.That(result, Is.EqualTo(-1));
     }
 }

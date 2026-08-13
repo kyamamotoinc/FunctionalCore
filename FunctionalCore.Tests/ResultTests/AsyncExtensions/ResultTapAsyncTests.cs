@@ -1,4 +1,6 @@
-﻿namespace FunctionalCore.Tests.ResultTests;
+﻿using FunctionalCore.AsyncExtensions;
+
+namespace FunctionalCore.Tests.ResultTests.AsyncExtensions;
 
 public class ResultTapAsyncTests
 {
@@ -12,125 +14,146 @@ public class ResultTapAsyncTests
         _fail = Result<string, int>.Fail("error");
     }
 
-    // -----------------------------
-    // Tap (成功レールの副作用)
-    // -----------------------------
-
     /// <summary>
-    /// 1. Tap は成功レールで副作用を実行する
+    /// 1. Ok.TapAsync は onSuccess を1回だけ実行する
     /// </summary>
     [Test]
-    public void Result_Ok_Tap_should_invoke_action()
+    public async Task Result_Ok_TapAsync_should_invoke_action_once()
     {
         int count = 0;
-        _ok.Tap(x => count++);
+
+        await _ok.AsTask().TapAsync(_ =>
+        {
+            count++;
+            return Task.CompletedTask;
+        });
 
         Assert.That(count, Is.EqualTo(1));
     }
 
     /// <summary>
-    /// 2. Tap は失敗レールでは副作用を実行しない
+    /// 2. Ok.TapAsync は成功値を onSuccess に渡す
     /// </summary>
     [Test]
-    public void Result_Fail_Tap_should_not_invoke_action()
+    public async Task Result_Ok_TapAsync_should_pass_value_to_action()
     {
-        int count = 0;
-        _fail.Tap(x => count++);
+        int received = 0;
 
-        Assert.That(count, Is.EqualTo(0));
+        await _ok.AsTask().TapAsync(value =>
+        {
+            received = value;
+            return Task.CompletedTask;
+        });
+
+        Assert.That(received, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 3. Tap は Result を変えずに返す（レールを変えない）
+    /// 3. Fail.TapAsync は onSuccess を実行しない
     /// </summary>
     [Test]
-    public void Result_Tap_should_return_same_result()
+    public async Task Result_Fail_TapAsync_should_not_invoke_action()
     {
         int count = 0;
-        var result =  _ok.Tap(x => count++);
+
+        var result = await _fail.AsTask().TapAsync(_ =>
+        {
+            count++;
+            return Task.CompletedTask;
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(count, Is.EqualTo(0));
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+        });
+    }
+
+    /// <summary>
+    /// 4. Ok.TapAsync は元の Result を変更せずに返す
+    /// </summary>
+    [Test]
+    public async Task Result_Ok_TapAsync_should_return_original_result()
+    {
+        var result = await _ok.AsTask().TapAsync(_ => Task.CompletedTask);
 
         Assert.That(result, Is.EqualTo(_ok));
     }
 
     /// <summary>
-    /// 4. Tap の action が null → ArgumentNullException
+    /// 5. Fail.TapAsync は元の Result を変更せずに返す
     /// </summary>
     [Test]
-    public void Result_Tap_null_action_should_throw()
+    public async Task Result_Fail_TapAsync_should_return_original_result()
     {
-        Assert.Throws<ArgumentNullException>(() => _ok.Tap(null!));
+        var result = await _fail.AsTask().TapAsync(_ => Task.CompletedTask);
+
+        Assert.That(result, Is.EqualTo(_fail));
     }
 
-    //// -----------------------------
-    //// TapError (失敗レールの副作用)
-    //// -----------------------------
+    /// <summary>
+    /// 6. onSuccess が null の場合は ArgumentNullException が発生する
+    /// </summary>
+    [Test]
+    public void Result_TapAsync_null_action_should_throw()
+    {
+        Func<int, Task>? onSuccess = null;
 
-    ///// <summary>
-    ///// 5. TapError は失敗レールで副作用を実行する
-    ///// </summary>
-    //[Test]
-    //public void Result_Fail_TapError_should_invoke_action()
-    //{
-    //    int count = 0;
-    //    _fail.TapError(x => count++);
-
-    //    Assert.That(count, Is.EqualTo(1));
-    //}
-
-    ///// <summary>
-    ///// 6. TapError は成功レールでは副作用を実行しない
-    ///// </summary>
-    //[Test]
-    //public void Result_Ok_TapError_should_not_invoke_action()
-    //{
-    //    int count = 0;
-    //    _ok.TapError(x => count++);
-
-    //    Assert.That(count, Is.EqualTo(0));
-    //}
-
-    ///// <summary>
-    ///// 7. TapError の action が null → ArgumentNullException
-    ///// </summary>
-    //[Test]
-    //public void Result_TapError_null_action_should_throw()
-    //{
-    //    Assert.Throws<ArgumentNullException>(() => _fail.TapError(null!));
-    //}
-
-    // -----------------------------
-    // TapBoth (成功・失敗問わず副作用)
-    // -----------------------------
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await _ok.AsTask().TapAsync(onSuccess!));
+    }
 
     /// <summary>
-    /// 8. TapBoth は成功レールでも副作用を実行する
+    /// 7. resultTask が null の場合は ArgumentNullException が発生する
     /// </summary>
-    //[Test]
-    //public void Result_Ok_TapBoth_should_invoke_action()
-    //{
-    //    int count = 0;
+    [Test]
+    public void Result_TapAsync_null_result_task_should_throw()
+    {
+        Task<Result<string, int>>? resultTask = null;
 
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await resultTask!.TapAsync(_ => Task.CompletedTask));
+    }
 
-    //    //Assert.AreEqual(1, count);
-    //}
+    /// <summary>
+    /// 8. Ok.TapAsync で onSuccess が null Task を返した場合は InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Ok_TapAsync_action_returning_null_task_should_throw()
+    {
+        Func<int, Task> onSuccess = _ => null!;
 
-    ///// <summary>
-    ///// 9. TapBoth は失敗レールでも副作用を実行する
-    ///// </summary>
-    //[Test]
-    //public void Result_Fail_TapBoth_should_invoke_action()
-    //{
-    //    int count = 0;
+        Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await _ok.AsTask().TapAsync(onSuccess));
+    }
 
+    /// <summary>
+    /// 9. Fail.TapAsync では null Task を返す onSuccess でも実行されない
+    /// </summary>
+    [Test]
+    public async Task Result_Fail_TapAsync_should_not_evaluate_null_task_action()
+    {
+        Func<int, Task> onSuccess = _ => null!;
 
-    //}
+        var result = await _fail.AsTask().TapAsync(onSuccess);
 
-    ///// <summary>
-    ///// 10. TapBoth の action が null → ArgumentNullException
-    ///// </summary>
-    //[Test]
-    //public void Result_TapBoth_null_action_should_throw()
-    //{
-    //}
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+        });
+    }
+
+    /// <summary>
+    /// 10. 元の Task が未初期化 Result を返した場合は InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_TapAsync_uninitialized_source_result_should_throw()
+    {
+        var resultTask = Task.FromResult(default(Result<string, int>));
+
+        Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await resultTask.TapAsync(_ => Task.CompletedTask));
+    }
 }
-

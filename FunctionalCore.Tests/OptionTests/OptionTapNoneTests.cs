@@ -13,10 +13,10 @@ public class OptionTapNoneTests
     }
 
     /// <summary>
-    /// 1. TapNone は None のとき副作用を実行する
+    /// 1. None.TapNone は action を1回だけ実行する
     /// </summary>
     [Test]
-    public void Option_None_TapNone_should_invoke_action()
+    public void Option_None_TapNone_should_invoke_action_once()
     {
         int count = 0;
 
@@ -26,7 +26,7 @@ public class OptionTapNoneTests
     }
 
     /// <summary>
-    /// 2. TapNone は Some のとき副作用を実行しない
+    /// 2. Some.TapNone は action を実行しない
     /// </summary>
     [Test]
     public void Option_Some_TapNone_should_not_invoke_action()
@@ -39,52 +39,64 @@ public class OptionTapNoneTests
     }
 
     /// <summary>
-    /// 3. TapNone の action が null → ArgumentNullException
+    /// 3. None.TapNone は元の Option を変更せずに返す
+    /// </summary>
+    [Test]
+    public void Option_None_TapNone_should_return_original_option()
+    {
+        var result = _none.TapNone(() => { });
+
+        Assert.That(result, Is.EqualTo(_none));
+    }
+
+    /// <summary>
+    /// 4. Some.TapNone は元の Option を変更せずに返す
+    /// </summary>
+    [Test]
+    public void Option_Some_TapNone_should_return_original_option()
+    {
+        var result = _some.TapNone(() => { });
+
+        Assert.That(result, Is.EqualTo(_some));
+    }
+
+    /// <summary>
+    /// 5. action が null の場合は ArgumentNullException が発生する
     /// </summary>
     [Test]
     public void Option_TapNone_null_action_should_throw()
     {
-        ;
-        Assert.Throws<ArgumentNullException>(() => _none.TapNone(null!));
+        Action? action = null;
+
+        Assert.Throws<ArgumentNullException>(() => _none.TapNone(action!));
     }
 
-    //// -----------------------------
-    //// TapBoth (Some / None 両方で副作用)
-    //// -----------------------------
+    /// <summary>
+    /// 6. Some でも action が null の場合は ArgumentNullException が発生する
+    /// </summary>
+    [Test]
+    public void Option_Some_TapNone_null_action_should_throw()
+    {
+        Action? action = null;
 
-    ///// <summary>
-    ///// 8. TapBoth は Some のとき副作用を実行する
-    ///// </summary>
-    //[Test]
-    //public void Option_Some_TapBoth_should_invoke_action()
-    //{
-    //    int count = 0;
+        Assert.Throws<ArgumentNullException>(() => _some.TapNone(action!));
+    }
 
-    //    _some.TapBoth(_ => count++);
+    /// <summary>
+    /// 7. Default Option は None と同様に action を実行する
+    /// </summary>
+    [Test]
+    public void Option_Default_TapNone_should_invoke_action()
+    {
+        var option = default(Option<int>);
+        int count = 0;
 
-    //    Assert.That(count, Is.EqualTo(1));
-    //}
+        var result = option.TapNone(() => count++);
 
-    ///// <summary>
-    ///// 9. TapBoth は None のときも副作用を実行する
-    ///// </summary>
-    //[Test]
-    //public void Option_None_TapBoth_should_invoke_action()
-    //{
-    //    int count = 0;
-
-    //    _none.TapBoth(_ => count++);
-
-    //    Assert.That(count, Is.EqualTo(1));
-    //}
-
-    ///// <summary>
-    ///// 10. TapBoth の action が null → ArgumentNullException
-    ///// </summary>
-    //[Test]
-    //public void Option_TapBoth_null_acion_should_throw()
-    //{
-    //    Assert.Throws<ArgumentNullException>(() => _some.TapBoth(null!));
-
-    //}
+        Assert.Multiple(() =>
+        {
+            Assert.That(count, Is.EqualTo(1));
+            Assert.That(result, Is.EqualTo(Option<int>.None));
+        });
+    }
 }

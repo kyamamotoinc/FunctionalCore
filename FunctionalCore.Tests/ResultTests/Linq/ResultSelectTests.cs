@@ -1,6 +1,6 @@
 ﻿using FunctionalCore.Linq;
 
-namespace FunctionalCore.Tests;
+namespace FunctionalCore.Tests.ResultTests.Linq;
 
 public class ResultSelectTests
 {
@@ -15,89 +15,152 @@ public class ResultSelectTests
     }
 
     /// <summary>
-    /// 1. Ok.Map は selector を実行し、変換結果を持つ成功 Result を返す（成功→成功）
+    /// 1. Ok.Select は selector を実行し、変換後の値を持つ Ok を返す
     /// </summary>
     [Test]
     public void Result_Ok_Select_should_return_selector_result()
     {
-        var result = from x in _ok
-                select x + 1;
+        var result = _ok.Select(x => x + 1);
 
-        Assert.That(result.Value, Is.EqualTo(6));
-        Assert.That(result.IsSuccess, Is.True);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.IsFailure, Is.False);
+            Assert.That(result.Value, Is.EqualTo(6));
+        });
     }
 
     /// <summary>
-    /// 2. Fail.Map は selector を実行せず、元のエラーを保持する（失敗→失敗）
+    /// 2. Ok.Select は成功値の型を変更できる
     /// </summary>
     [Test]
-    public void Result_Fail_Select_should_not_invoke_selector_and_keep_error()
+    public void Result_Ok_Select_should_change_value_type()
+    {
+        var result = _ok.Select(x => $"value:{x}");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Value, Is.EqualTo("value:5"));
+        });
+    }
+
+    /// <summary>
+    /// 3. Ok.Select は selector を1回だけ実行する
+    /// </summary>
+    [Test]
+    public void Result_Ok_Select_should_invoke_selector_once()
     {
         int count = 0;
 
-        Func<int, int> selector = x =>
+        _ok.Select(x =>
         {
             count++;
             return x + 1;
-        };
+        });
 
-        var result = from x in _fail
-                     select selector(x);
+        Assert.That(count, Is.EqualTo(1));
+    }
+
+    /// <summary>
+    /// 4. Fail.Select は selector を実行しない
+    /// </summary>
+    [Test]
+    public void Result_Fail_Select_should_not_invoke_selector()
+    {
+        int count = 0;
+
+        _fail.Select(x =>
+        {
+            count++;
+            return x + 1;
+        });
 
         Assert.That(count, Is.EqualTo(0));
-        Assert.That(result.Error, Is.EqualTo("error"));
-        Assert.That(result.IsSuccess, Is.False);
     }
 
     /// <summary>
-    /// 3. Map は常に Result を返す（網羅性）
+    /// 5. Fail.Select は元の Error を保持する
     /// </summary>
     [Test]
-    public void Result_Select_should_always_return_result()
+    public void Result_Fail_Select_should_keep_original_error()
     {
-        var okResult = from x in _ok
-                       select x + 1;
+        var result = _fail.Select(x => x + 1);
 
-        var failResult = from x in _fail
-                         select x + 1;
-
-        Assert.IsInstanceOf<Result<string, int>>(okResult);
-        Assert.IsInstanceOf<Result<string, int>>(failResult);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+        });
     }
 
     /// <summary>
-    /// 4. Map は元の Result を変更しない（不変性）
+    /// 6. selector が null の場合は ArgumentNullException が発生する
     /// </summary>
     [Test]
-    public void Result_Select_should_not_modify_original_result()
+    public void Result_Select_null_selector_should_throw()
     {
-        var _ = from x in _ok
-                select x + 1;
+        Func<int, string>? selector = null;
 
-        var __ = from x in _fail
-                select x + 1;
-
-        Assert.That(_ok, Is.EqualTo(Result<string, int>.Ok(5)));
-        Assert.That(_fail, Is.EqualTo(Result<string, int>.Fail("error")));
+        Assert.Throws<ArgumentNullException>(() => _ok.Select(selector!));
     }
 
     /// <summary>
-    /// 5. selector が null の場合は ArgumentNullException
-    /// `クエリ構文では欠けないためメソッド構文でテスト`
-    /// </summary>
-    [Test]
-    public void Result_Ok_Select_null_selector_should_throw()
-    {
-        Assert.Throws<ArgumentNullException>(() => _ok.Map((Func<int, string>)null!));
-    }
-
-    /// <summary>
-    /// 6. selector が null を返した場合は InvalidOperationException
+    /// 7. Ok.Select で selector が null を返した場合は InvalidOperationException が発生する
     /// </summary>
     [Test]
     public void Result_Ok_Select_selector_returning_null_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = from x in _ok
-                                                           select (string)null!);
+        Assert.Throws<InvalidOperationException>(() => _ok.Select(_ => (string)null!));
+    }
+
+    /// <summary>
+    /// 8. Fail.Select では null を返す selector でも実行されない
+    /// </summary>
+    [Test]
+    public void Result_Fail_Select_should_not_evaluate_null_returning_selector()
+    {
+        var result = _fail.Select(_ => (string)null!);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+        });
+    }
+
+    /// <summary>
+    /// 9. LINQ クエリ構文の select で Select が利用できる
+    /// </summary>
+    [Test]
+    public void Result_Select_should_support_query_syntax()
+    {
+        var result =
+            from x in _ok
+            select x + 1;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Value, Is.EqualTo(6));
+        });
+    }
+
+    /// <summary>
+    /// 10. Fail に対する LINQ クエリ構文の select は元の Error を保持する
+    /// </summary>
+    [Test]
+    public void Result_Fail_Select_query_syntax_should_keep_original_error()
+    {
+        var result =
+            from x in _fail
+            select x + 1;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+        });
     }
 }

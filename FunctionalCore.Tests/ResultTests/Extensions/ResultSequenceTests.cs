@@ -1,103 +1,176 @@
 ﻿using FunctionalCore.Extensions;
-using NUnit.Framework.Legacy;
 
-namespace FunctionalCore.Tests.ResultTests.Extensions
+namespace FunctionalCore.Tests.ResultTests.Extensions;
+
+public class ResultSequenceTests
 {
-    public class ResultSequenceTests
+    private Result<string, int> _ok1;
+    private Result<string, int> _ok2;
+    private Result<string, int> _ok3;
+    private Result<string, int> _fail;
+
+    [SetUp]
+    public void Setup()
     {
-        private Result<int, int> _some1;
-        private Result<int, int> _some2;
-        private Result<int, int> _some3;
-        private Result<int, int> _none;
+        _ok1 = Result<string, int>.Ok(1);
+        _ok2 = Result<string, int>.Ok(2);
+        _ok3 = Result<string, int>.Ok(3);
+        _fail = Result<string, int>.Fail("error");
+    }
 
-        [SetUp]
-        public void Setup()
+    /// <summary>
+    /// 1. すべて Ok の場合は、すべての値を持つ Ok を返す
+    /// </summary>
+    [Test]
+    public void Result_Sequence_all_ok_should_return_ok_collection()
+    {
+        var results = new[]
         {
-            _some1 = Result<int, int>.Ok(1);
-            _some2 = Result<int, int>.Ok(2);
-            _some3 = Result<int, int>.Ok(3);
-            _none = Result<int, int>.Fail(0);
-        }
+            _ok1,
+            _ok2,
+            _ok3
+        };
 
-        /// <summary>
-        /// 1. すべて Ok の場合、値をまとめた Ok(Collection) を返す
-        /// </summary>
-        [Test]
-        public void Sequence_all_Ok_should_return_Ok_collection()
+        var result = results.Sequence();
+
+        Assert.Multiple(() =>
         {
-            var results = new[]
-            {
-                _some1,
-                _some2,
-                _some3
-             };
-
-            var result = results.Sequence();
-
             Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.IsFailure, Is.False);
             Assert.That(result.Value, Is.EqualTo(new[] { 1, 2, 3 }));
-        }
+        });
+    }
 
-        /// <summary>
-        /// 2. None を含む場合、None を返す
-        /// </summary>
-        [Test]
-        public void Sequence_contains_None_should_return_None()
+    /// <summary>
+    /// 2. Fail を含む場合は Fail を返す
+    /// </summary>
+    [Test]
+    public void Result_Sequence_containing_failure_should_return_failure()
+    {
+        var results = new[]
         {
-            var results = new[]
-            {
-                _some1,
-                _none,
-                _some3
-             };
+            _ok1,
+            _fail,
+            _ok3
+        };
 
-            var result = results.Sequence();
+        var result = results.Sequence();
 
+        Assert.Multiple(() =>
+        {
             Assert.That(result.IsSuccess, Is.False);
-        }
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+        });
+    }
 
-        /// <summary>
-        /// 3. 空コレクションの場合、空コレクションを持つ Some を返す
-        /// </summary>
-        [Test]
-        public void Sequence_empty_collection_should_return_Some_empty_collection()
+    /// <summary>
+    /// 3. 複数の Fail がある場合は最初の Error を返す
+    /// </summary>
+    [Test]
+    public void Result_Sequence_multiple_failures_should_return_first_error()
+    {
+        var results = new[]
         {
-            var options = Array.Empty<Option<int>>();
+            _ok1,
+            Result<string, int>.Fail("first error"),
+            Result<string, int>.Fail("second error")
+        };
 
-            var result = options.Sequence();
+        var result = results.Sequence();
 
-            Assert.That(result.HasValue, Is.True);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("first error"));
+        });
+    }
+
+    /// <summary>
+    /// 4. 空のシーケンスの場合は、空のコレクションを持つ Ok を返す
+    /// </summary>
+    [Test]
+    public void Result_Sequence_empty_collection_should_return_ok_empty_collection()
+    {
+        var results = Array.Empty<Result<string, int>>();
+
+        var result = results.Sequence();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value, Is.Empty);
-        }
+        });
+    }
 
-        /// <summary>
-        /// 4. null のコレクションを渡した場合、ArgumentNullException を投げる
-        /// </summary>
-        [Test]
-        public void Sequence_null_options_should_throw_ArgumentNullException()
+    /// <summary>
+    /// 5. null のシーケンスを渡した場合は ArgumentNullException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Sequence_null_results_should_throw()
+    {
+        IEnumerable<Result<string, int>> results = null!;
+
+        Assert.Throws<ArgumentNullException>(() => results.Sequence());
+    }
+
+    /// <summary>
+    /// 6. 成功値の順序は保持される
+    /// </summary>
+    [Test]
+    public void Result_Sequence_should_preserve_order()
+    {
+        var results = new[]
         {
-            IEnumerable<Option<int>> options = null!;
+            _ok3,
+            _ok1,
+            _ok2
+        };
 
-            Assert.Throws<ArgumentNullException>(() => options.Sequence());
-        }
+        var result = results.Sequence();
 
-        /// <summary>
-        /// 5. 値の順序は保持される
-        /// </summary>
-        [Test]
-        public void Sequence_should_preserve_order()
+        Assert.Multiple(() =>
         {
-            var results = new[]
-            {
-                _some3,
-                _some1,
-                _some2
-             };
-
-            var result = results.Sequence();
-
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value, Is.EqualTo(new[] { 3, 1, 2 }));
-        }
+        });
+    }
+
+    /// <summary>
+    /// 7. 未初期化 Result を含む場合は InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Sequence_containing_uninitialized_result_should_throw()
+    {
+        var results = new[]
+        {
+            _ok1,
+            default(Result<string, int>),
+            _ok3
+        };
+
+        Assert.Throws<InvalidOperationException>(() => results.Sequence());
+    }
+
+    /// <summary>
+    /// 8. Fail より後ろに未初期化 Result があっても評価されない
+    /// </summary>
+    [Test]
+    public void Result_Sequence_should_not_evaluate_items_after_failure()
+    {
+        var results = new[]
+        {
+            _ok1,
+            _fail,
+            default(Result<string, int>)
+        };
+
+        var result = results.Sequence();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+        });
     }
 }

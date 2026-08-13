@@ -15,10 +15,10 @@ public class ResultGetValueOrTests
     }
 
     /// <summary>
-    /// 1. Ok の場合は fallback を無視して内部の値を返す（Ok → value）
+    /// 1. Ok.GetValueOr は内部の Value を返す
     /// </summary>
     [Test]
-    public void Ok_GetValueOr_should_return_inner_value()
+    public void Result_Ok_GetValueOr_should_return_inner_value()
     {
         var value = _ok.GetValueOr(999);
 
@@ -26,10 +26,10 @@ public class ResultGetValueOrTests
     }
 
     /// <summary>
-    /// 2. Fail の場合は fallback を返す（Fail → fallback）
+    /// 2. Fail.GetValueOr は fallback を返す
     /// </summary>
     [Test]
-    public void Fail_GetValueOr_should_return_fallback()
+    public void Result_Fail_GetValueOr_should_return_fallback()
     {
         var value = _fail.GetValueOr(999);
 
@@ -37,10 +37,10 @@ public class ResultGetValueOrTests
     }
 
     /// <summary>
-    /// 3. fallback が default 値でも正しく返される（Fail → default）
+    /// 3. Fail.GetValueOr は default 値を fallback として返せる
     /// </summary>
     [Test]
-    public void Fail_GetValueOr_with_default_should_return_default()
+    public void Result_Fail_GetValueOr_with_default_should_return_default()
     {
         var value = _fail.GetValueOr(default);
 
@@ -48,42 +48,77 @@ public class ResultGetValueOrTests
     }
 
     /// <summary>
-    /// 4. Ok の値が default と同じでも fallback は使われない（Ok優先）
+    /// 4. Ok.GetValueOr は Value が default 値でも fallback を使用しない
     /// </summary>
     [Test]
-    public void Ok_with_default_value_should_ignore_fallback()
+    public void Result_Ok_GetValueOr_with_default_value_should_ignore_fallback()
     {
-        var some = Result<string, int>.Ok(0);
+        var ok = Result<string, int>.Ok(0);
 
-        var value = some.GetValueOr(999);
+        var value = ok.GetValueOr(999);
 
         Assert.That(value, Is.EqualTo(0));
     }
 
     /// <summary>
-    /// 5. 参照型: Fail の場合は fallback の参照をそのまま返す
+    /// 5. 参照型の Fail.GetValueOr は fallback の同一インスタンスを返す
     /// </summary>
     [Test]
-    public void Fail_GetValueOr_reference_type_should_return_same_instance()
+    public void Result_Fail_GetValueOr_reference_type_should_return_same_instance()
     {
-        var fallback = "fallback";
-        var none = Result<string, string>.Fail("error");
+        var fallback = new object();
+        var fail = Result<string, object>.Fail("error");
 
-        var value = none.GetValueOr(fallback);
+        var value = fail.GetValueOr(fallback);
 
         Assert.That(value, Is.SameAs(fallback));
     }
 
     /// <summary>
-    /// 6. 参照型: Some の場合は fallback を無視する
+    /// 6. 参照型の Ok.GetValueOr は fallback を使用しない
     /// </summary>
     [Test]
-    public void Ok_GetValueOr_reference_type_should_ignore_fallback()
+    public void Result_Ok_GetValueOr_reference_type_should_ignore_fallback()
     {
-        var some = Result<string, string>.Ok("value");
+        var original = new object();
+        var fallback = new object();
+        var ok = Result<string, object>.Ok(original);
 
-        var value = some.GetValueOr("fallback");
+        var value = ok.GetValueOr(fallback);
 
-        Assert.That(value, Is.EqualTo("value"));
+        Assert.That(value, Is.SameAs(original));
+    }
+
+    /// <summary>
+    /// 7. 参照型で fallback が null の場合は ArgumentNullException が発生する
+    /// </summary>
+    [Test]
+    public void Result_GetValueOr_null_fallback_should_throw()
+    {
+        var result = Result<string, string>.Fail("error");
+
+        Assert.Throws<ArgumentNullException>(() => result.GetValueOr(null!));
+    }
+
+    /// <summary>
+    /// 8. Ok でも fallback が null の場合は ArgumentNullException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Ok_GetValueOr_null_fallback_should_throw()
+    {
+        var result = Result<string, string>.Ok("value");
+
+        Assert.Throws<ArgumentNullException>(() => result.GetValueOr(null!));
+    }
+
+    /// <summary>
+    /// 9. 未初期化 Result で GetValueOr を呼び出すと InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Default_GetValueOr_should_throw()
+    {
+        var result = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => result.GetValueOr(999));
     }
 }

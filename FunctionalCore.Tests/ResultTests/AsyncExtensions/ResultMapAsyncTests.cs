@@ -1,14 +1,12 @@
 ﻿using FunctionalCore.AsyncExtensions;
 
-namespace FunctionalCore.Tests.ResultTests;
+namespace FunctionalCore.Tests.ResultTests.AsyncExtensions;
 
 public class ResultMapAsyncTests
 {
     private Result<string, int> _ok;
     private Result<string, int> _fail;
 
-    private Task<Result<string, int>> _okTask => _ok.AsTask();
-    private Task<Result<string, int>> _failTask => _fail.AsTask();
     [SetUp]
     public void Setup()
     {
@@ -17,75 +15,178 @@ public class ResultMapAsyncTests
     }
 
     /// <summary>
-    /// 1. Ok.Map は selector を実行し、変換結果を持つ成功 Result を返す（成功→成功）
+    /// 1. Ok.MapAsync は selector を実行し、変換後の値を持つ Ok を返す
     /// </summary>
     [Test]
-    public async Task Result_Ok_Map_should_return_selector_result()
+    public async Task Result_Ok_MapAsync_should_return_selector_result()
     {
-        var resOk2 = await _okTask.MapAsync(x => Task.FromResult(x + 1));
-        Assert.That(resOk2.Value, Is.EqualTo(6));
-        Assert.That(resOk2.IsSuccess, Is.True);
+        var result = await _ok.AsTask().MapAsync(x => Task.FromResult(x + 1));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.IsFailure, Is.False);
+            Assert.That(result.Value, Is.EqualTo(6));
+        });
     }
 
     /// <summary>
-    /// 2. Fail.Map は selector を実行せず、元のエラーを保持する（失敗→失敗）
+    /// 2. Ok.MapAsync は成功値の型を変更できる
     /// </summary>
     [Test]
-    public async Task Result_Fail_Map_should_not_invoke_selector_and_keep_error()
+    public async Task Result_Ok_MapAsync_should_change_value_type()
+    {
+        var result = await _ok.AsTask().MapAsync(x => Task.FromResult($"value:{x}"));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Value, Is.EqualTo("value:5"));
+        });
+    }
+
+    /// <summary>
+    /// 3. Ok.MapAsync は selector を1回だけ実行する
+    /// </summary>
+    [Test]
+    public async Task Result_Ok_MapAsync_should_invoke_selector_once()
     {
         int count = 0;
-        var resFail2 = await _failTask.MapAsync(x =>
+
+        await _ok.AsTask().MapAsync(x =>
         {
             count++;
             return Task.FromResult(x + 1);
         });
 
-        Assert.That(count, Is.EqualTo(0));
-        Assert.That(resFail2.Error, Is.EqualTo("error"));
-        Assert.That(resFail2.IsSuccess, Is.False);
+        Assert.That(count, Is.EqualTo(1));
     }
 
     /// <summary>
-    /// 3. Map は常に Result を返す（網羅性）
+    /// 4. Fail.MapAsync は selector を実行しない
     /// </summary>
     [Test]
-    public async Task Result_Map_should_always_return_result()
+    public async Task Result_Fail_MapAsync_should_not_invoke_selector()
     {
-        var okResult = await _okTask.MapAsync(x => Task.FromResult(x + 1));
-        var failResult = await _failTask.MapAsync(x => Task.FromResult(x + 1));
+        int count = 0;
 
-        Assert.IsInstanceOf<Result<string, int>>(okResult);
-        Assert.IsInstanceOf<Result<string, int>>(failResult);
+        var result = await _fail.AsTask().MapAsync(x =>
+        {
+            count++;
+            return Task.FromResult(x + 1);
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(count, Is.EqualTo(0));
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+        });
     }
 
     /// <summary>
-    /// 4. Map は元の Result を変更しない（不変性）
+    /// 5. Fail.MapAsync は元の Error を保持する
     /// </summary>
     [Test]
-    public async Task Result_Map_should_not_modify_original_result()
+    public async Task Result_Fail_MapAsync_should_keep_original_error()
     {
-        await _okTask.MapAsync(x => Task.FromResult(x + 1));
-        await _failTask.MapAsync(x => Task.FromResult(x + 1));
+        var result = await _fail.AsTask().MapAsync(x => Task.FromResult(x + 1));
 
-        Assert.That(_ok, Is.EqualTo(Result<string, int>.Ok(5)));
-        Assert.That(_fail, Is.EqualTo(Result<string, int>.Fail("error")));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+        });
     }
 
     /// <summary>
-    /// 5. selector が null の場合は ArgumentNullException
+    /// 6. selector が null の場合は ArgumentNullException が発生する
     /// </summary>
     [Test]
-    public async Task Result_Ok_Map_null_selector_should_throw()
+    public void Result_MapAsync_null_selector_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ = _okTask.MapAsync<string>(null!));
+        Func<int, Task<string>>? selector = null;
+
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await _ok.AsTask().MapAsync(selector!));
     }
 
     /// <summary>
-    /// 6. selector が null を返した場合は InvalidOperationException
+    /// 7. resultTask が null の場合は ArgumentNullException が発生する
     /// </summary>
     [Test]
-    public async Task Result_Ok_Map_selector_returning_null_should_throw()
+    public void Result_MapAsync_null_result_task_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = _okTask.MapAsync(x => Task.FromResult((string)null!)));
+        Task<Result<string, int>>? resultTask = null;
+
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await resultTask!.MapAsync(x => Task.FromResult(x + 1)));
+    }
+
+    /// <summary>
+    /// 8. selector が null Task を返した場合は InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Ok_MapAsync_selector_returning_null_task_should_throw()
+    {
+        Func<int, Task<string>> selector = _ => null!;
+
+        Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await _ok.AsTask().MapAsync(selector));
+    }
+
+    /// <summary>
+    /// 9. selector の Task が null の値を返した場合は InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Ok_MapAsync_selector_returning_null_value_should_throw()
+    {
+        Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await _ok.AsTask().MapAsync(_ => Task.FromResult((string)null!)));
+    }
+
+    /// <summary>
+    /// 10. 元の Task が未初期化 Result を返した場合は InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_MapAsync_uninitialized_source_result_should_throw()
+    {
+        var resultTask = Task.FromResult(default(Result<string, int>));
+
+        Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await resultTask.MapAsync(x => Task.FromResult(x + 1)));
+    }
+
+    /// <summary>
+    /// 11. Fail.MapAsync では null Task を返す selector でも実行されない
+    /// </summary>
+    [Test]
+    public async Task Result_Fail_MapAsync_should_not_evaluate_null_task_selector()
+    {
+        Func<int, Task<string>> selector = _ => null!;
+
+        var result = await _fail.AsTask().MapAsync(selector);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+        });
+    }
+
+    /// <summary>
+    /// 12. Fail.MapAsync では null の値を返す selector でも実行されない
+    /// </summary>
+    [Test]
+    public async Task Result_Fail_MapAsync_should_not_evaluate_null_value_selector()
+    {
+        var result = await _fail.AsTask().MapAsync(_ => Task.FromResult((string)null!));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+        });
     }
 }

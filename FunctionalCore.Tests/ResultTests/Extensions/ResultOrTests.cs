@@ -15,23 +15,23 @@ public class ResultOrTests
     }
 
     /// <summary>
-    /// 1. Some.Or は常に自身を返す（Some優先）
+    /// 1. Ok.Or は自身を返す
     /// </summary>
     [Test]
-    public void Ok_Or_should_return_self()
+    public void Result_Ok_Or_should_return_original_result()
     {
         var other = Result<string, int>.Ok(10);
 
         var result = _ok.Or(other);
 
-        Assert.That(_ok, Is.EqualTo(result));
+        Assert.That(result, Is.EqualTo(_ok));
     }
 
     /// <summary>
-    /// 2. None.Or は代替Optionを返す（None → other）
+    /// 2. Fail.Or は代替 Result を返す
     /// </summary>
     [Test]
-    public void Fail_Or_should_return_other()
+    public void Result_Fail_Or_should_return_other_result()
     {
         var other = Result<string, int>.Ok(10);
 
@@ -41,36 +41,72 @@ public class ResultOrTests
     }
 
     /// <summary>
-    /// 3. None.Or(None) は None のまま
+    /// 3. Fail.Or に Fail を渡した場合は代替側の Error を持つ Fail を返す
     /// </summary>
     [Test]
-    public void Fail_Or_none_should_return_none()
+    public void Result_Fail_Or_failure_should_return_other_failure()
     {
-        var other = Result<string, int>.Fail("error");
+        var other = Result<string, int>.Fail("other error");
 
         var result = _fail.Or(other);
 
-        Assert.That(result.IsSuccess, Is.False);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("other error"));
+        });
     }
 
     /// <summary>
-    /// 4. Some.Or は other を評価しない（即時版）
+    /// 4. Ok.Or は代替 Result を採用しない
     /// </summary>
     [Test]
-    public void Ok_Or_should_not_use_other()
+    public void Result_Ok_Or_should_ignore_other_result()
     {
         var other = Result<string, int>.Ok(10);
 
         var result = _ok.Or(other);
 
-        Assert.That(result.Value, Is.EqualTo(5));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Value, Is.EqualTo(5));
+        });
     }
 
     /// <summary>
-    /// 5. Some.Or(Func) は factory を実行しない（遅延評価）
+    /// 5. Ok.Or では代替 Result が未初期化でも使用されない
     /// </summary>
     [Test]
-    public void Ok_Or_factory_should_not_be_invoked()
+    public void Result_Ok_Or_should_not_validate_unused_uninitialized_other()
+    {
+        var other = default(Result<string, int>);
+
+        var result = _ok.Or(other);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Value, Is.EqualTo(5));
+        });
+    }
+
+    /// <summary>
+    /// 6. Fail.Or で代替 Result が未初期化の場合は InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Fail_Or_uninitialized_other_should_throw()
+    {
+        var other = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => _fail.Or(other));
+    }
+
+    /// <summary>
+    /// 7. Ok.Or(Func) は factory を実行しない
+    /// </summary>
+    [Test]
+    public void Result_Ok_Or_factory_should_not_be_invoked()
     {
         int count = 0;
 
@@ -80,15 +116,19 @@ public class ResultOrTests
             return Result<string, int>.Ok(10);
         });
 
-        Assert.That(count, Is.EqualTo(0));
-        Assert.That(result.Value, Is.EqualTo(5));
+        Assert.Multiple(() =>
+        {
+            Assert.That(count, Is.EqualTo(0));
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Value, Is.EqualTo(5));
+        });
     }
 
     /// <summary>
-    /// 6. None.Or(Func) は factory を実行する（None → factory）
+    /// 8. Fail.Or(Func) は factory を1回だけ実行し、その Result を返す
     /// </summary>
     [Test]
-    public void Fail_Or_factory_should_be_invoked()
+    public void Result_Fail_Or_factory_should_be_invoked_once()
     {
         int count = 0;
 
@@ -98,16 +138,83 @@ public class ResultOrTests
             return Result<string, int>.Ok(10);
         });
 
-        Assert.That(count, Is.EqualTo(1));
-        Assert.That(result.Value, Is.EqualTo(10));
+        Assert.Multiple(() =>
+        {
+            Assert.That(count, Is.EqualTo(1));
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Value, Is.EqualTo(10));
+        });
     }
 
     /// <summary>
-    /// 7. factory が null の場合は ArgumentNullException
+    /// 9. Fail.Or(Func) の factory が Fail を返した場合はその Fail を返す
     /// </summary>
     [Test]
-    public void Or_null_factory_should_throw()
+    public void Result_Fail_Or_factory_returning_failure_should_return_failure()
+    {
+        var result = _fail.Or(() => Result<string, int>.Fail("other error"));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("other error"));
+        });
+    }
+
+    /// <summary>
+    /// 10. factory が null の場合は ArgumentNullException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Or_null_factory_should_throw()
     {
         Assert.Throws<ArgumentNullException>(() => _fail.Or((Func<Result<string, int>>)null!));
+    }
+
+    /// <summary>
+    /// 11. Fail.Or(Func) の factory が未初期化 Result を返した場合は InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Fail_Or_factory_returning_uninitialized_result_should_throw()
+    {
+        Assert.Throws<InvalidOperationException>(() => _fail.Or(() => default(Result<string, int>)));
+    }
+
+    /// <summary>
+    /// 12. Ok.Or(Func) では未初期化 Result を返す factory でも実行されない
+    /// </summary>
+    [Test]
+    public void Result_Ok_Or_should_not_evaluate_uninitialized_factory_result()
+    {
+        var result = _ok.Or(() => default(Result<string, int>));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Value, Is.EqualTo(5));
+        });
+    }
+
+    /// <summary>
+    /// 13. 未初期化 Result で Or を呼び出すと InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Default_Or_should_throw()
+    {
+        var result = default(Result<string, int>);
+        var other = Result<string, int>.Ok(10);
+
+        Assert.Throws<InvalidOperationException>(() => result.Or(other));
+    }
+
+    /// <summary>
+    /// 14. 未初期化 Result で Or(Func) を呼び出すと InvalidOperationException が発生する
+    /// </summary>
+    [Test]
+    public void Result_Default_Or_factory_should_throw()
+    {
+        var result = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            result.Or(() => Result<string, int>.Ok(10)));
     }
 }
