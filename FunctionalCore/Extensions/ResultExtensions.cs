@@ -523,4 +523,133 @@ public static class ResultExtensions
 
         return Result<E, U>.Ok(val);
     }
+
+    /// <summary>
+    /// Recovers from a failed Result by converting the error into a success value.
+    /// <para>失敗した Result のエラーを成功値へ変換して回復する。</para>
+    /// </summary>
+    /// <typeparam name="E">
+    /// The error type.
+    /// <para>エラーの型。</para>
+    /// </typeparam>
+    /// <typeparam name="T">
+    /// The success value type.
+    /// <para>成功値の型。</para>
+    /// </typeparam>
+    /// <param name="result">
+    /// The source Result.
+    /// <para>元の Result。</para>
+    /// </param>
+    /// <param name="recovery">
+    /// A function that converts the error into a success value.
+    /// Must not be null or return null.
+    /// <para>
+    /// エラーを成功値へ変換する関数。
+    /// null、または null の戻り値は許可されない。
+    /// </para>
+    /// </param>
+    /// <returns>
+    /// The original Result when successful;
+    /// otherwise a successful Result containing the value produced by <paramref name="recovery"/>.
+    /// <para>
+    /// 元の Result が成功している場合はその Result。
+    /// 失敗している場合は <paramref name="recovery"/> が生成した値を保持する成功 Result。
+    /// </para>
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="recovery"/> is null.
+    /// <para><paramref name="recovery"/> が null の場合にスローされる。</para>
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when <paramref name="result"/> is uninitialized,
+    /// or when <paramref name="recovery"/> returns null.
+    /// <para>
+    /// <paramref name="result"/> が未初期化、
+    /// または <paramref name="recovery"/> が null を返した場合にスローされる。
+    /// </para>
+    /// </exception>
+    public static Result<E, T> Recover<E, T>(this Result<E, T> result, Func<E, T> recovery)
+    {
+        result.ThrowIfNotInitialized();
+        ArgumentNullException.ThrowIfNull(recovery);
+
+        if (result.IsSuccess)
+            return result;
+
+        var recoveredValue = recovery(result.Error);
+
+        if (recoveredValue is null)
+            throw new InvalidOperationException("Recovery function must not return null.");
+
+        return Result<E, T>.Ok(recoveredValue);
+    }
+
+    /// <summary>
+    /// Recovers from a failed Result by applying the specified recovery function.
+    /// <para>失敗した Result に指定された回復関数を適用して回復を試みる。</para>
+    ///
+    /// If this Result is successful, the original Result is returned unchanged.
+    /// If this Result is failed, <paramref name="recovery"/> is invoked with the error,
+    /// and the Result returned by the recovery function is returned as-is.
+    /// <para>
+    /// この Result が成功している場合は、元の Result をそのまま返す。
+    /// この Result が失敗している場合は、エラーを <paramref name="recovery"/> に渡して実行し、
+    /// recovery 関数が返した Result をそのまま返す。
+    /// </para>
+    /// </summary>
+    /// <typeparam name="E">
+    /// The error type.
+    /// <para>エラーの型。</para>
+    /// </typeparam>
+    /// <typeparam name="T">
+    /// The success value type.
+    /// <para>成功値の型。</para>
+    /// </typeparam>
+    /// <param name="result">
+    /// The source Result.
+    /// <para>元の Result。</para>
+    /// </param>
+    /// <param name="recovery">
+    /// A function that receives the error and returns a Result used for recovery.
+    /// Must not be null and must not return an uninitialized Result.
+    /// <para>
+    /// エラーを受け取り、回復に使用する Result を返す関数。
+    /// null は許可されず、未初期化の Result を返してはならない。
+    /// </para>
+    /// </param>
+    /// <returns>
+    /// The original Result when <paramref name="result"/> is successful;
+    /// otherwise the Result returned by <paramref name="recovery"/>.
+    /// The recovery Result may be either successful or failed.
+    /// <para>
+    /// <paramref name="result"/> が成功している場合は元の Result。
+    /// 失敗している場合は <paramref name="recovery"/> が返した Result。
+    /// recovery が返す Result は成功でも失敗でもよい。
+    /// </para>
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="recovery"/> is null.
+    /// <para><paramref name="recovery"/> が null の場合にスローされる。</para>
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when <paramref name="result"/> is uninitialized,
+    /// or when <paramref name="recovery"/> returns an uninitialized Result.
+    /// <para>
+    /// <paramref name="result"/> が未初期化、
+    /// または <paramref name="recovery"/> が未初期化の Result を返した場合にスローされる。
+    /// </para>
+    /// </exception>
+    public static Result<E, T> RecoverWith<E, T>(this Result<E, T> result, Func<E, Result<E, T>> recovery)
+    {
+        result.ThrowIfNotInitialized();
+        ArgumentNullException.ThrowIfNull(recovery);
+
+        if (result.IsSuccess)
+            return result;
+
+        var recoveredResult = recovery(result.Error);
+        recoveredResult.ThrowIfNotInitialized();
+
+        return recoveredResult;
+    }
 }
