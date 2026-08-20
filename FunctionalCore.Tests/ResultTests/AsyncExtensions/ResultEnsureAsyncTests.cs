@@ -5,36 +5,43 @@ namespace FunctionalCore.Tests.ResultTests.AsyncExtensions;
 public class ResultEnsureAsyncTests
 {
     /// <summary>
-    /// 1. ResultがFailの場合は元のFailをそのまま返し、predicateを実行しない。
+    /// 1. ResultがFailの場合は元のFailをそのまま返す。
+    /// predicateとerrorFactoryは実行しない。
     /// </summary>
     [Test]
-    public async Task Fail_EnsureAsync_should_return_original_fail_without_invoking_predicate_when_result_is_fail()
+    public async Task Fail_EnsureAsync_should_return_original_fail_without_invoking_predicate_or_errorFactory()
     {
         var fail = Result<string, int>.Fail("error");
-        var count = 0;
+        var predicateCount = 0;
+        var errorFactoryCount = 0;
 
-        var result = await fail.AsTask().EnsureAsync(x => { count++; return Task.FromResult(x > 0); }, x => "Value must be positive");
+        var result = await fail.AsTask().EnsureAsync(
+            x => { predicateCount++; return Task.FromResult(x > 0); },
+            x => { errorFactoryCount++; return "Value must be positive"; });
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
-            Assert.That(count, Is.EqualTo(0));
+            Assert.That(predicateCount, Is.EqualTo(0));
+            Assert.That(errorFactoryCount, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 2. ResultがOkでpredicateがtrueを返す場合は元のOkを返し、
-    /// predicateを1回実行し、errorFactoryは実行しない。
+    /// 2. ResultがOkでpredicateがtrueを返す場合は元のOkをそのまま返す。
+    /// predicateは1回実行し、errorFactoryは実行しない。
     /// </summary>
     [Test]
-    public async Task EnsureAsync_should_return_ok_when_predicate_returns_true()
+    public async Task Ok_EnsureAsync_should_return_original_ok_when_predicate_returns_true()
     {
         var ok = Result<string, int>.Ok(5);
         var predicateCount = 0;
         var errorFactoryCount = 0;
 
-        var result = await ok.AsTask().EnsureAsync(x => { predicateCount++; return Task.FromResult(x > 0); }, x => { errorFactoryCount++; return "Value must be positive"; });
+        var result = await ok.AsTask().EnsureAsync(
+            x => { predicateCount++; return Task.FromResult(x > 0); },
+            x => { errorFactoryCount++; return "Value must be positive"; });
 
         Assert.Multiple(() =>
         {
@@ -46,17 +53,20 @@ public class ResultEnsureAsyncTests
     }
 
     /// <summary>
-    /// 3. ResultがOkでpredicateがfalseを返す場合はerrorFactoryを1回実行し、
-    /// 生成されたエラーを保持するFailを返す。
+    /// 3. ResultがOkでpredicateがfalseを返す場合は、
+    /// errorFactoryが生成したエラーを保持するFailを返す。
+    /// predicateとerrorFactoryはそれぞれ1回実行する。
     /// </summary>
     [Test]
-    public async Task EnsureAsync_should_return_Fail_when_predicate_returns_false()
+    public async Task Ok_EnsureAsync_should_return_fail_when_predicate_returns_false()
     {
         var ok = Result<string, int>.Ok(5);
         var predicateCount = 0;
         var errorFactoryCount = 0;
 
-        var result = await ok.AsTask().EnsureAsync(x => { predicateCount++; return Task.FromResult(x > 10); }, x => { errorFactoryCount++; return "Value must be larger than 10"; });
+        var result = await ok.AsTask().EnsureAsync(
+            x => { predicateCount++; return Task.FromResult(x > 10); },
+            x => { errorFactoryCount++; return "Value must be larger than 10"; });
 
         Assert.Multiple(() =>
         {
@@ -71,7 +81,7 @@ public class ResultEnsureAsyncTests
     /// 4. resultTaskがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void EnsureAsync_should_throw_exception_when_resultTask_is_null()
+    public void EnsureAsync_should_throw_argument_null_exception_when_resultTask_is_null()
     {
         Task<Result<string, int>>? resultTask = null;
 
@@ -85,7 +95,7 @@ public class ResultEnsureAsyncTests
     /// 5. ResultがOkの場合でもpredicateがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Ok_EnsureAsync_should_throw_exception_when_predicate_is_null()
+    public void Ok_EnsureAsync_should_throw_argument_null_exception_when_predicate_is_null()
     {
         var ok = Result<string, int>.Ok(5);
 
@@ -99,7 +109,7 @@ public class ResultEnsureAsyncTests
     /// 6. ResultがFailの場合でもpredicateがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Fail_EnsureAsync_should_throw_exception_when_predicate_is_null()
+    public void Fail_EnsureAsync_should_throw_argument_null_exception_when_predicate_is_null()
     {
         var fail = Result<string, int>.Fail("error");
 
@@ -113,7 +123,7 @@ public class ResultEnsureAsyncTests
     /// 7. ResultがOkの場合でもerrorFactoryがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Ok_EnsureAsync_should_throw_exception_when_errorFactory_is_null()
+    public void Ok_EnsureAsync_should_throw_argument_null_exception_when_errorFactory_is_null()
     {
         var ok = Result<string, int>.Ok(10);
 
@@ -127,7 +137,7 @@ public class ResultEnsureAsyncTests
     /// 8. ResultがFailの場合でもerrorFactoryがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Fail_EnsureAsync_should_throw_exception_when_errorFactory_is_null()
+    public void Fail_EnsureAsync_should_throw_argument_null_exception_when_errorFactory_is_null()
     {
         var fail = Result<string, int>.Fail("error");
 
@@ -141,7 +151,7 @@ public class ResultEnsureAsyncTests
     /// 9. predicateがnullのTaskを返す場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Ok_EnsureAsync_should_throw_exception_when_predicate_returns_null()
+    public void Ok_EnsureAsync_should_throw_invalid_operation_exception_when_predicate_returns_null_task()
     {
         var ok = Result<string, int>.Ok(10);
 
@@ -155,7 +165,7 @@ public class ResultEnsureAsyncTests
     /// 10. predicateが同期的に例外を発生させた場合は、その例外をそのまま伝播させる。
     /// </summary>
     [Test]
-    public void Ok_EnsureAsync_should_propagate_exception_when_predicate_throws_exception()
+    public void Ok_EnsureAsync_should_propagate_exception_when_predicate_throws()
     {
         var ok = Result<string, int>.Ok(10);
         var exception = new NotSupportedException("predicate error");
@@ -172,25 +182,25 @@ public class ResultEnsureAsyncTests
     /// 11. predicateが返したTaskが例外で完了した場合は、その例外をそのまま伝播させる。
     /// </summary>
     [Test]
-    public void Ok_EnsureAsync_should_propagate_exception_when_predicateTask_throws_exception()
+    public void Ok_EnsureAsync_should_propagate_exception_when_predicate_task_faults()
     {
         var ok = Result<string, int>.Ok(10);
         var exception = new NotSupportedException("predicate error");
 
         var actual = Assert.ThrowsAsync<NotSupportedException>(async () =>
         {
-            await ok.AsTask().EnsureAsync(x => Task.FromException<bool>(exception), x => "PredicateTask throws exception");
+            await ok.AsTask().EnsureAsync(x => Task.FromException<bool>(exception), x => "Predicate task throws exception");
         });
 
         Assert.That(actual, Is.SameAs(exception));
     }
 
     /// <summary>
-    /// 12. predicateがfalseを返した後、errorFactoryが例外を発生させた場合は、
+    /// 12. predicateがfalseを返した後にerrorFactoryが例外を発生させた場合は、
     /// その例外をそのまま伝播させる。
     /// </summary>
     [Test]
-    public void Ok_EnsureAsync_should_propagate_exception_when_errorFactory_throws_exception()
+    public void Ok_EnsureAsync_should_propagate_exception_when_errorFactory_throws()
     {
         var ok = Result<string, int>.Ok(10);
         var exception = new NotSupportedException("error factory error");
@@ -204,17 +214,42 @@ public class ResultEnsureAsyncTests
     }
 
     /// <summary>
-    /// 13. predicateがfalseを返した後、errorFactoryがnullを返す場合は
+    /// 13. predicateがfalseを返した後にerrorFactoryがnullを返す場合は、
     /// InvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Ok_EnsureAsync_should_throw_exception_when_errorFactory_returns_null()
+    public void Ok_EnsureAsync_should_throw_invalid_operation_exception_when_errorFactory_returns_null()
     {
         var ok = Result<string, int>.Ok(10);
 
         Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
             await ok.AsTask().EnsureAsync(x => Task.FromResult(false), x => null!);
+        });
+    }
+
+    /// <summary>
+    /// 14. resultTaskがdefaultのResultを返す場合はInvalidOperationExceptionを発生させる。
+    /// predicateとerrorFactoryは実行しない。
+    /// </summary>
+    [Test]
+    public void EnsureAsync_should_throw_invalid_operation_exception_when_resultTask_returns_default_result()
+    {
+        var resultTask = Task.FromResult(default(Result<string, int>));
+        var predicateCount = 0;
+        var errorFactoryCount = 0;
+
+        Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await resultTask.EnsureAsync(
+                x => { predicateCount++; return Task.FromResult(x > 0); },
+                x => { errorFactoryCount++; return "Value must be positive"; });
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(predicateCount, Is.EqualTo(0));
+            Assert.That(errorFactoryCount, Is.EqualTo(0));
         });
     }
 }
