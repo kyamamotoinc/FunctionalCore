@@ -2,23 +2,14 @@
 
 public class ResultMapErrorTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Fail.MapError は errorMapper を実行し、変換後の Error を持つ Fail を返す
     /// </summary>
     [Test]
     public void Result_Fail_MapError_should_return_mapped_error()
     {
-        var result = _fail.MapError(error => $"mapped:{error}");
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.MapError(error => $"mapped:{error}");
 
         Assert.Multiple(() =>
         {
@@ -34,7 +25,8 @@ public class ResultMapErrorTests
     [Test]
     public void Result_Fail_MapError_should_change_error_type()
     {
-        var result = _fail.MapError(error => error.Length);
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.MapError(error => error.Length);
 
         Assert.Multiple(() =>
         {
@@ -49,9 +41,10 @@ public class ResultMapErrorTests
     [Test]
     public void Result_Fail_MapError_should_invoke_error_mapper_once()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.MapError(error =>
+        fail.MapError(error =>
         {
             count++;
             return $"mapped:{error}";
@@ -66,9 +59,10 @@ public class ResultMapErrorTests
     [Test]
     public void Result_Ok_MapError_should_not_invoke_error_mapper()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.MapError(error =>
+        ok.MapError(error =>
         {
             count++;
             return $"mapped:{error}";
@@ -83,7 +77,8 @@ public class ResultMapErrorTests
     [Test]
     public void Result_Ok_MapError_should_keep_original_value()
     {
-        var result = _ok.MapError(error => $"mapped:{error}");
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.MapError(error => $"mapped:{error}");
 
         Assert.Multiple(() =>
         {
@@ -99,13 +94,16 @@ public class ResultMapErrorTests
     [Test]
     public void Result_MapError_should_not_modify_original_result()
     {
-        _ok.MapError(error => $"mapped:{error}");
-        _fail.MapError(error => $"mapped:{error}");
+        var ok = Result<string, int>.Ok(5);
+        var fail = Result<string, int>.Fail("error");
+
+        ok.MapError(error => $"mapped:{error}");
+        fail.MapError(error => $"mapped:{error}");
 
         Assert.Multiple(() =>
         {
-            Assert.That(_ok, Is.EqualTo(Result<string, int>.Ok(5)));
-            Assert.That(_fail, Is.EqualTo(Result<string, int>.Fail("error")));
+            Assert.That(ok, Is.EqualTo(Result<string, int>.Ok(5)));
+            Assert.That(fail, Is.EqualTo(Result<string, int>.Fail("error")));
         });
     }
 
@@ -115,7 +113,8 @@ public class ResultMapErrorTests
     [Test]
     public void Result_MapError_null_error_mapper_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _fail.MapError<int>(null!));
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<ArgumentNullException>(() => fail.MapError<int>(null!));
     }
 
     /// <summary>
@@ -124,7 +123,8 @@ public class ResultMapErrorTests
     [Test]
     public void Result_Fail_MapError_error_mapper_returning_null_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _fail.MapError(_ => (string)null!));
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<InvalidOperationException>(() => fail.MapError(_ => (string)null!));
     }
 
     /// <summary>
@@ -133,7 +133,8 @@ public class ResultMapErrorTests
     [Test]
     public void Result_Ok_MapError_should_not_evaluate_null_returning_error_mapper()
     {
-        var result = _ok.MapError(_ => (string)null!);
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.MapError(_ => (string)null!);
 
         Assert.Multiple(() =>
         {

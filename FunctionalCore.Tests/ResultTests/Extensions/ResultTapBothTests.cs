@@ -4,26 +4,17 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 
 public class ResultTapBothTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.TapBoth は成功側の action だけを実行する
     /// </summary>
     [Test]
     public void Result_Ok_TapBoth_should_invoke_only_success_action()
     {
+        var ok = Result<string, int>.Ok(5);
         int successCount = 0;
         int failureCount = 0;
 
-        _ok.TapBoth(_ => successCount++, _ => failureCount++);
+        ok.TapBoth(_ => successCount++, _ => failureCount++);
 
         Assert.Multiple(() =>
         {
@@ -38,10 +29,11 @@ public class ResultTapBothTests
     [Test]
     public void Result_Fail_TapBoth_should_invoke_only_failure_action()
     {
+        var fail = Result<string, int>.Fail("error");
         int successCount = 0;
         int failureCount = 0;
 
-        _fail.TapBoth(_ => successCount++, _ => failureCount++);
+        fail.TapBoth(_ => successCount++, _ => failureCount++);
 
         Assert.Multiple(() =>
         {
@@ -56,9 +48,10 @@ public class ResultTapBothTests
     [Test]
     public void Result_Ok_TapBoth_should_pass_value_to_success_action()
     {
+        var ok = Result<string, int>.Ok(5);
         int received = 0;
 
-        _ok.TapBoth(value => received = value, _ => { });
+        ok.TapBoth(value => received = value, _ => { });
 
         Assert.That(received, Is.EqualTo(5));
     }
@@ -69,9 +62,10 @@ public class ResultTapBothTests
     [Test]
     public void Result_Fail_TapBoth_should_pass_error_to_failure_action()
     {
+        var fail = Result<string, int>.Fail("error");
         string? received = null;
 
-        _fail.TapBoth(_ => { }, error => received = error);
+        fail.TapBoth(_ => { }, error => received = error);
 
         Assert.That(received, Is.EqualTo("error"));
     }
@@ -82,13 +76,15 @@ public class ResultTapBothTests
     [Test]
     public void Result_TapBoth_should_return_original_result()
     {
-        var okResult = _ok.TapBoth(_ => { }, _ => { });
-        var failResult = _fail.TapBoth(_ => { }, _ => { });
+        var ok = Result<string, int>.Ok(5);
+        var fail = Result<string, int>.Fail("error");
+        var okResult = ok.TapBoth(_ => { }, _ => { });
+        var failResult = fail.TapBoth(_ => { }, _ => { });
 
         Assert.Multiple(() =>
         {
-            Assert.That(okResult, Is.EqualTo(_ok));
-            Assert.That(failResult, Is.EqualTo(_fail));
+            Assert.That(okResult, Is.EqualTo(ok));
+            Assert.That(failResult, Is.EqualTo(fail));
         });
     }
 
@@ -98,7 +94,8 @@ public class ResultTapBothTests
     [Test]
     public void Result_TapBoth_null_success_action_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ok.TapBoth(null!, _ => { }));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<ArgumentNullException>(() => ok.TapBoth(null!, _ => { }));
     }
 
     /// <summary>
@@ -107,7 +104,8 @@ public class ResultTapBothTests
     [Test]
     public void Result_TapBoth_null_failure_action_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _fail.TapBoth(_ => { }, null!));
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<ArgumentNullException>(() => fail.TapBoth(_ => { }, null!));
     }
 
     /// <summary>

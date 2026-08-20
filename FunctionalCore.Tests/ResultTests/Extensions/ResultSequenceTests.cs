@@ -4,31 +4,21 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 
 public class ResultSequenceTests
 {
-    private Result<string, int> _ok1;
-    private Result<string, int> _ok2;
-    private Result<string, int> _ok3;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok1 = Result<string, int>.Ok(1);
-        _ok2 = Result<string, int>.Ok(2);
-        _ok3 = Result<string, int>.Ok(3);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. すべて Ok の場合は、すべての値を持つ Ok を返す
     /// </summary>
     [Test]
     public void Result_Sequence_all_ok_should_return_ok_collection()
     {
+        var ok1 = Result<string, int>.Ok(1);
+        var ok2 = Result<string, int>.Ok(2);
+        var ok3 = Result<string, int>.Ok(3);
+
         var results = new[]
         {
-            _ok1,
-            _ok2,
-            _ok3
+            ok1,
+            ok2,
+            ok3
         };
 
         var result = results.Sequence();
@@ -47,11 +37,15 @@ public class ResultSequenceTests
     [Test]
     public void Result_Sequence_containing_failure_should_return_failure()
     {
+        var ok1 = Result<string, int>.Ok(1);
+        var ok3 = Result<string, int>.Ok(3);
+        var fail = Result<string, int>.Fail("error");
+
         var results = new[]
         {
-            _ok1,
-            _fail,
-            _ok3
+            ok1,
+            fail,
+            ok3
         };
 
         var result = results.Sequence();
@@ -70,9 +64,11 @@ public class ResultSequenceTests
     [Test]
     public void Result_Sequence_multiple_failures_should_return_first_error()
     {
+        var ok1 = Result<string, int>.Ok(1);
+
         var results = new[]
         {
-            _ok1,
+            ok1,
             Result<string, int>.Fail("first error"),
             Result<string, int>.Fail("second error")
         };
@@ -120,11 +116,15 @@ public class ResultSequenceTests
     [Test]
     public void Result_Sequence_should_preserve_order()
     {
+        var ok1 = Result<string, int>.Ok(1);
+        var ok2 = Result<string, int>.Ok(2);
+        var ok3 = Result<string, int>.Ok(3);
+
         var results = new[]
         {
-            _ok3,
-            _ok1,
-            _ok2
+            ok3,
+            ok1,
+            ok2
         };
 
         var result = results.Sequence();
@@ -142,11 +142,14 @@ public class ResultSequenceTests
     [Test]
     public void Result_Sequence_containing_uninitialized_result_should_throw()
     {
+        var ok1 = Result<string, int>.Ok(1);
+        var ok3 = Result<string, int>.Ok(3);
+
         var results = new[]
         {
-            _ok1,
+            ok1,
             default(Result<string, int>),
-            _ok3
+            ok3
         };
 
         Assert.Throws<InvalidOperationException>(() => results.Sequence());
@@ -158,10 +161,13 @@ public class ResultSequenceTests
     [Test]
     public void Result_Sequence_should_not_evaluate_items_after_failure()
     {
+        var ok1 = Result<string, int>.Ok(1);
+        var fail = Result<string, int>.Fail("error");
+
         var results = new[]
         {
-            _ok1,
-            _fail,
+            ok1,
+            fail,
             default(Result<string, int>)
         };
 

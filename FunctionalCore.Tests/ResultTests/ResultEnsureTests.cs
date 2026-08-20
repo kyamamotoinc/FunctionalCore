@@ -2,30 +2,21 @@
 
 public class ResultEnsureTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.Ensure で predicate が true の場合は元の Ok を保持する
     /// </summary>
     [Test]
     public void Result_Ok_Ensure_true_should_keep_original_ok()
     {
-        var result = _ok.Ensure(x => x > 0, _ => "invalid");
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Ensure(x => x > 0, _ => "invalid");
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.IsFailure, Is.False);
             Assert.That(result.Value, Is.EqualTo(5));
-            Assert.That(result, Is.EqualTo(_ok));
+            Assert.That(result, Is.EqualTo(ok));
         });
     }
 
@@ -35,7 +26,8 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ok_Ensure_false_should_return_failure()
     {
-        var result = _ok.Ensure(x => x < 0, _ => "invalid");
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Ensure(x => x < 0, _ => "invalid");
 
         Assert.Multiple(() =>
         {
@@ -51,9 +43,10 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ok_Ensure_should_invoke_predicate_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.Ensure(x =>
+        ok.Ensure(x =>
         {
             count++;
             return x > 0;
@@ -68,9 +61,10 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ok_Ensure_true_should_not_invoke_error_factory()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.Ensure(x => x > 0, _ =>
+        ok.Ensure(x => x > 0, _ =>
         {
             count++;
             return "invalid";
@@ -85,9 +79,10 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ok_Ensure_false_should_invoke_error_factory_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        var result = _ok.Ensure(x => x < 0, _ =>
+        var result = ok.Ensure(x => x < 0, _ =>
         {
             count++;
             return "invalid";
@@ -107,9 +102,10 @@ public class ResultEnsureTests
     [Test]
     public void Result_Fail_Ensure_should_not_invoke_predicate()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.Ensure(x =>
+        fail.Ensure(x =>
         {
             count++;
             return true;
@@ -124,9 +120,10 @@ public class ResultEnsureTests
     [Test]
     public void Result_Fail_Ensure_should_not_invoke_error_factory()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.Ensure(_ => false, _ =>
+        fail.Ensure(_ => false, _ =>
         {
             count++;
             return "invalid";
@@ -141,14 +138,15 @@ public class ResultEnsureTests
     [Test]
     public void Result_Fail_Ensure_should_keep_original_error()
     {
-        var result = _fail.Ensure(_ => false, _ => "invalid");
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Ensure(_ => false, _ => "invalid");
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
-            Assert.That(result, Is.EqualTo(_fail));
+            Assert.That(result, Is.EqualTo(fail));
         });
     }
 
@@ -158,7 +156,8 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ensure_null_predicate_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ok.Ensure(null!, _ => "invalid"));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<ArgumentNullException>(() => ok.Ensure(null!, _ => "invalid"));
     }
 
     /// <summary>
@@ -167,7 +166,8 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ensure_null_error_factory_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ok.Ensure(_ => false, null!));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<ArgumentNullException>(() => ok.Ensure(_ => false, null!));
     }
 
     /// <summary>
@@ -176,7 +176,8 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ok_Ensure_error_factory_returning_null_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ok.Ensure(_ => false, _ => null!));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<InvalidOperationException>(() => ok.Ensure(_ => false, _ => null!));
     }
 
     /// <summary>
@@ -185,7 +186,8 @@ public class ResultEnsureTests
     [Test]
     public void Result_Ok_Ensure_true_should_not_evaluate_null_returning_error_factory()
     {
-        var result = _ok.Ensure(_ => true, _ => null!);
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Ensure(_ => true, _ => null!);
 
         Assert.Multiple(() =>
         {
@@ -200,7 +202,8 @@ public class ResultEnsureTests
     [Test]
     public void Result_Fail_Ensure_should_not_evaluate_null_returning_error_factory()
     {
-        var result = _fail.Ensure(_ => false, _ => null!);
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Ensure(_ => false, _ => null!);
 
         Assert.Multiple(() =>
         {

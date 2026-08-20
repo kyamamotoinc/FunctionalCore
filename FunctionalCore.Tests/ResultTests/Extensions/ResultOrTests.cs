@@ -4,27 +4,18 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 
 public class ResultOrTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.Or は自身を返す
     /// </summary>
     [Test]
     public void Result_Ok_Or_should_return_original_result()
     {
+        var ok = Result<string, int>.Ok(5);
         var other = Result<string, int>.Ok(10);
 
-        var result = _ok.Or(other);
+        var result = ok.Or(other);
 
-        Assert.That(result, Is.EqualTo(_ok));
+        Assert.That(result, Is.EqualTo(ok));
     }
 
     /// <summary>
@@ -33,9 +24,10 @@ public class ResultOrTests
     [Test]
     public void Result_Fail_Or_should_return_other_result()
     {
+        var fail = Result<string, int>.Fail("error");
         var other = Result<string, int>.Ok(10);
 
-        var result = _fail.Or(other);
+        var result = fail.Or(other);
 
         Assert.That(result, Is.EqualTo(other));
     }
@@ -46,9 +38,10 @@ public class ResultOrTests
     [Test]
     public void Result_Fail_Or_failure_should_return_other_failure()
     {
+        var fail = Result<string, int>.Fail("error");
         var other = Result<string, int>.Fail("other error");
 
-        var result = _fail.Or(other);
+        var result = fail.Or(other);
 
         Assert.Multiple(() =>
         {
@@ -63,9 +56,10 @@ public class ResultOrTests
     [Test]
     public void Result_Ok_Or_should_ignore_other_result()
     {
+        var ok = Result<string, int>.Ok(5);
         var other = Result<string, int>.Ok(10);
 
-        var result = _ok.Or(other);
+        var result = ok.Or(other);
 
         Assert.Multiple(() =>
         {
@@ -80,9 +74,10 @@ public class ResultOrTests
     [Test]
     public void Result_Ok_Or_should_not_validate_unused_uninitialized_other()
     {
+        var ok = Result<string, int>.Ok(5);
         var other = default(Result<string, int>);
 
-        var result = _ok.Or(other);
+        var result = ok.Or(other);
 
         Assert.Multiple(() =>
         {
@@ -97,9 +92,10 @@ public class ResultOrTests
     [Test]
     public void Result_Fail_Or_uninitialized_other_should_throw()
     {
+        var fail = Result<string, int>.Fail("error");
         var other = default(Result<string, int>);
 
-        Assert.Throws<InvalidOperationException>(() => _fail.Or(other));
+        Assert.Throws<InvalidOperationException>(() => fail.Or(other));
     }
 
     /// <summary>
@@ -108,9 +104,10 @@ public class ResultOrTests
     [Test]
     public void Result_Ok_Or_factory_should_not_be_invoked()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        var result = _ok.Or(() =>
+        var result = ok.Or(() =>
         {
             count++;
             return Result<string, int>.Ok(10);
@@ -130,9 +127,10 @@ public class ResultOrTests
     [Test]
     public void Result_Fail_Or_factory_should_be_invoked_once()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        var result = _fail.Or(() =>
+        var result = fail.Or(() =>
         {
             count++;
             return Result<string, int>.Ok(10);
@@ -152,7 +150,8 @@ public class ResultOrTests
     [Test]
     public void Result_Fail_Or_factory_returning_failure_should_return_failure()
     {
-        var result = _fail.Or(() => Result<string, int>.Fail("other error"));
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Or(() => Result<string, int>.Fail("other error"));
 
         Assert.Multiple(() =>
         {
@@ -167,7 +166,8 @@ public class ResultOrTests
     [Test]
     public void Result_Or_null_factory_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _fail.Or((Func<Result<string, int>>)null!));
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<ArgumentNullException>(() => fail.Or((Func<Result<string, int>>)null!));
     }
 
     /// <summary>
@@ -176,7 +176,8 @@ public class ResultOrTests
     [Test]
     public void Result_Fail_Or_factory_returning_uninitialized_result_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _fail.Or(() => default(Result<string, int>)));
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<InvalidOperationException>(() => fail.Or(() => default(Result<string, int>)));
     }
 
     /// <summary>
@@ -185,7 +186,8 @@ public class ResultOrTests
     [Test]
     public void Result_Ok_Or_should_not_evaluate_uninitialized_factory_result()
     {
-        var result = _ok.Or(() => default(Result<string, int>));
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Or(() => default(Result<string, int>));
 
         Assert.Multiple(() =>
         {

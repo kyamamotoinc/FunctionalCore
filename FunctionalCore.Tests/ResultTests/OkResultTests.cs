@@ -2,13 +2,13 @@
 
 public class OkResultTests
 {
-    private Result<string, int> _ok;
+    //private Result<string, int> _ok;
 
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-    }
+    //[SetUp]
+    //public void Setup()
+    //{
+    //    _ok = Result<string, int>.Ok(5);
+    //}
 
     /// <summary>
     /// 1. Ok は内部の Value をそのまま返す
@@ -16,7 +16,8 @@ public class OkResultTests
     [Test]
     public void Result_Ok_should_return_inner_Value()
     {
-        Assert.That(_ok.Value, Is.EqualTo(5));
+        var ok = Result<string, int>.Ok(5);
+        Assert.That(ok.Value, Is.EqualTo(5));
     }
 
     /// <summary>
@@ -25,10 +26,11 @@ public class OkResultTests
     [Test]
     public void Result_Ok_should_be_success()
     {
+        var ok = Result<string, int>.Ok(5);
         Assert.Multiple(() =>
         {
-            Assert.That(_ok.IsSuccess, Is.True);
-            Assert.That(_ok.IsFailure, Is.False);
+            Assert.That(ok.IsSuccess, Is.True);
+            Assert.That(ok.IsFailure, Is.False);
         });
     }
 
@@ -38,7 +40,8 @@ public class OkResultTests
     [Test]
     public void Result_Ok_accessing_Error_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = _ok.Error);
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<InvalidOperationException>(() => _ = ok.Error);
     }
 
     /// <summary>
@@ -56,13 +59,14 @@ public class OkResultTests
     [Test]
     public void Ok_with_same_value_should_be_equal()
     {
+        var ok = Result<string, int>.Ok(5);
         var other = Result<string, int>.Ok(5);
 
         Assert.Multiple(() =>
         {
-            Assert.That(_ok == other, Is.True);
-            Assert.That(_ok.Equals(other), Is.True);
-            Assert.That(_ok.GetHashCode(), Is.EqualTo(other.GetHashCode()));
+            Assert.That(ok == other, Is.True);
+            Assert.That(ok.Equals(other), Is.True);
+            Assert.That(ok.GetHashCode(), Is.EqualTo(other.GetHashCode()));
         });
     }
 
@@ -72,12 +76,13 @@ public class OkResultTests
     [Test]
     public void Ok_with_different_value_should_not_be_equal()
     {
+        var ok = Result<string, int>.Ok(5);
         var other = Result<string, int>.Ok(10);
 
         Assert.Multiple(() =>
         {
-            Assert.That(_ok != other, Is.True);
-            Assert.That(_ok.Equals(other), Is.False);
+            Assert.That(ok != other, Is.True);
+            Assert.That(ok.Equals(other), Is.False);
         });
     }
 
@@ -87,13 +92,14 @@ public class OkResultTests
     [Test]
     public void Ok_and_Fail_should_not_be_equal()
     {
+        var ok = Result<string, int>.Ok(5);
         var fail = Result<string, int>.Fail("error");
 
         Assert.Multiple(() =>
         {
-            Assert.That(_ok == fail, Is.False);
-            Assert.That(_ok != fail, Is.True);
-            Assert.That(_ok.Equals(fail), Is.False);
+            Assert.That(ok == fail, Is.False);
+            Assert.That(ok != fail, Is.True);
+            Assert.That(ok.Equals(fail), Is.False);
         });
     }
 
@@ -103,6 +109,7 @@ public class OkResultTests
     [Test]
     public void Ok_ToString_should_return_formatted_value()
     {
-        Assert.That(_ok.ToString(), Is.EqualTo("Ok(5)"));
+        var ok = Result<string, int>.Ok(5);
+        Assert.That(ok.ToString(), Is.EqualTo("Ok(5)"));
     }
 }

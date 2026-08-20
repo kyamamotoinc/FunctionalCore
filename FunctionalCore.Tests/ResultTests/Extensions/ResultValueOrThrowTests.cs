@@ -4,23 +4,14 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 
 public class ResultValueOrThrowTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.ValueOrThrow は内部の Value を返す
     /// </summary>
     [Test]
     public void Result_Ok_ValueOrThrow_should_return_inner_value()
     {
-        var value = _ok.ValueOrThrow(error => new InvalidOperationException(error));
+        var ok = Result<string, int>.Ok(5);
+        var value = ok.ValueOrThrow(error => new InvalidOperationException(error));
 
         Assert.That(value, Is.EqualTo(5));
     }
@@ -31,9 +22,10 @@ public class ResultValueOrThrowTests
     [Test]
     public void Result_Ok_ValueOrThrow_should_not_invoke_exception_factory()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        var value = _ok.ValueOrThrow(error =>
+        var value = ok.ValueOrThrow(error =>
         {
             count++;
             return new InvalidOperationException(error);
@@ -52,7 +44,8 @@ public class ResultValueOrThrowTests
     [Test]
     public void Result_Fail_ValueOrThrow_should_throw_factory_exception()
     {
-        Assert.Throws<InvalidOperationException>(() => _fail.ValueOrThrow(error => new InvalidOperationException(error)));
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<InvalidOperationException>(() => fail.ValueOrThrow(error => new InvalidOperationException(error)));
     }
 
     /// <summary>
@@ -61,9 +54,10 @@ public class ResultValueOrThrowTests
     [Test]
     public void Result_Fail_ValueOrThrow_should_pass_error_to_exception_factory()
     {
+        var fail = Result<string, int>.Fail("error");
         string? received = null;
 
-        Assert.Throws<InvalidOperationException>(() => _fail.ValueOrThrow(error =>
+        Assert.Throws<InvalidOperationException>(() => fail.ValueOrThrow(error =>
         {
             received = error;
             return new InvalidOperationException(error);
@@ -78,9 +72,10 @@ public class ResultValueOrThrowTests
     [Test]
     public void Result_Fail_ValueOrThrow_should_invoke_exception_factory_once()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        Assert.Throws<InvalidOperationException>(() => _fail.ValueOrThrow(error =>
+        Assert.Throws<InvalidOperationException>(() => fail.ValueOrThrow(error =>
         {
             count++;
             return new InvalidOperationException(error);
@@ -95,9 +90,10 @@ public class ResultValueOrThrowTests
     [Test]
     public void Result_Fail_ValueOrThrow_should_throw_same_exception_instance()
     {
+        var fail = Result<string, int>.Fail("error");
         var expected = new InvalidOperationException("expected");
 
-        var actual = Assert.Throws<InvalidOperationException>(() => _fail.ValueOrThrow(_ => expected));
+        var actual = Assert.Throws<InvalidOperationException>(() => fail.ValueOrThrow(_ => expected));
 
         Assert.That(actual, Is.SameAs(expected));
     }
@@ -108,7 +104,8 @@ public class ResultValueOrThrowTests
     [Test]
     public void Result_ValueOrThrow_null_exception_factory_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _fail.ValueOrThrow(null!));
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<ArgumentNullException>(() => fail.ValueOrThrow(null!));
     }
 
     /// <summary>
@@ -117,7 +114,8 @@ public class ResultValueOrThrowTests
     [Test]
     public void Result_Fail_ValueOrThrow_exception_factory_returning_null_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _fail.ValueOrThrow(_ => null!));
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<InvalidOperationException>(() => fail.ValueOrThrow(_ => null!));
     }
 
     /// <summary>
@@ -126,7 +124,8 @@ public class ResultValueOrThrowTests
     [Test]
     public void Result_Ok_ValueOrThrow_should_not_evaluate_null_returning_exception_factory()
     {
-        var value = _ok.ValueOrThrow(_ => null!);
+        var ok = Result<string, int>.Ok(5);
+        var value = ok.ValueOrThrow(_ => null!);
 
         Assert.That(value, Is.EqualTo(5));
     }

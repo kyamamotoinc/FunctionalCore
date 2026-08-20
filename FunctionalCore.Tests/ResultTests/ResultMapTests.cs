@@ -2,23 +2,14 @@
 
 public class ResultMapTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.Map は selector を実行し、変換後の値を持つ成功 Result を返す
     /// </summary>
     [Test]
     public void Result_Ok_Map_should_return_selector_result()
     {
-        var result = _ok.Map(x => x + 1);
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Map(x => x + 1);
 
         Assert.Multiple(() =>
         {
@@ -34,7 +25,8 @@ public class ResultMapTests
     [Test]
     public void Result_Ok_Map_should_change_value_type()
     {
-        var result = _ok.Map(x => $"value:{x}");
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Map(x => $"value:{x}");
 
         Assert.Multiple(() =>
         {
@@ -49,9 +41,10 @@ public class ResultMapTests
     [Test]
     public void Result_Ok_Map_should_invoke_selector_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.Map(x =>
+        ok.Map(x =>
         {
             count++;
             return x + 1;
@@ -66,9 +59,10 @@ public class ResultMapTests
     [Test]
     public void Result_Fail_Map_should_not_invoke_selector()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.Map(x =>
+        fail.Map(x =>
         {
             count++;
             return x + 1;
@@ -83,7 +77,8 @@ public class ResultMapTests
     [Test]
     public void Result_Fail_Map_should_keep_original_error()
     {
-        var result = _fail.Map(x => x + 1);
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Map(x => x + 1);
 
         Assert.Multiple(() =>
         {
@@ -99,13 +94,16 @@ public class ResultMapTests
     [Test]
     public void Result_Map_should_not_modify_original_result()
     {
-        _ok.Map(x => x + 1);
-        _fail.Map(x => x + 1);
+        var ok = Result<string, int>.Ok(5);
+        var fail = Result<string, int>.Fail("error");
+
+        ok.Map(x => x + 1);
+        fail.Map(x => x + 1);
 
         Assert.Multiple(() =>
         {
-            Assert.That(_ok, Is.EqualTo(Result<string, int>.Ok(5)));
-            Assert.That(_fail, Is.EqualTo(Result<string, int>.Fail("error")));
+            Assert.That(ok, Is.EqualTo(Result<string, int>.Ok(5)));
+            Assert.That(fail, Is.EqualTo(Result<string, int>.Fail("error")));
         });
     }
 
@@ -115,7 +113,8 @@ public class ResultMapTests
     [Test]
     public void Result_Ok_Map_null_selector_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ok.Map<string>(null!));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<ArgumentNullException>(() => ok.Map<string>(null!));
     }
 
     /// <summary>
@@ -124,7 +123,8 @@ public class ResultMapTests
     [Test]
     public void Result_Ok_Map_selector_returning_null_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ok.Map(_ => (string)null!));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<InvalidOperationException>(() => ok.Map(_ => (string)null!));
     }
 
     /// <summary>
@@ -133,7 +133,8 @@ public class ResultMapTests
     [Test]
     public void Result_Fail_Map_should_not_evaluate_null_returning_selector()
     {
-        var result = _fail.Map(_ => (string)null!);
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Map(_ => (string)null!);
 
         Assert.Multiple(() =>
         {

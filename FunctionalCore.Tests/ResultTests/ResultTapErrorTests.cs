@@ -2,25 +2,16 @@
 
 public class ResultTapErrorTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Fail.TapError は action を1回だけ実行する
     /// </summary>
     [Test]
     public void Result_Fail_TapError_should_invoke_action_once()
     {
+        var fail = Result<string, int>.Fail("error"); ;
         int count = 0;
 
-        _fail.TapError(_ => count++);
+        fail.TapError(_ => count++);
 
         Assert.That(count, Is.EqualTo(1));
     }
@@ -31,9 +22,10 @@ public class ResultTapErrorTests
     [Test]
     public void Result_Fail_TapError_should_pass_error_to_action()
     {
+        var fail = Result<string, int>.Fail("error");
         string? received = null;
 
-        _fail.TapError(error => received = error);
+        fail.TapError(error => received = error);
 
         Assert.That(received, Is.EqualTo("error"));
     }
@@ -44,9 +36,10 @@ public class ResultTapErrorTests
     [Test]
     public void Result_Ok_TapError_should_not_invoke_action()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.TapError(_ => count++);
+        ok.TapError(_ => count++);
 
         Assert.That(count, Is.EqualTo(0));
     }
@@ -57,9 +50,10 @@ public class ResultTapErrorTests
     [Test]
     public void Result_Fail_TapError_should_return_original_result()
     {
-        var result = _fail.TapError(_ => { });
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.TapError(_ => { });
 
-        Assert.That(result, Is.EqualTo(_fail));
+        Assert.That(result, Is.EqualTo(fail));
     }
 
     /// <summary>
@@ -68,9 +62,10 @@ public class ResultTapErrorTests
     [Test]
     public void Result_Ok_TapError_should_return_original_result()
     {
-        var result = _ok.TapError(_ => { });
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.TapError(_ => { });
 
-        Assert.That(result, Is.EqualTo(_ok));
+        Assert.That(result, Is.EqualTo(ok));
     }
 
     /// <summary>
@@ -79,6 +74,7 @@ public class ResultTapErrorTests
     [Test]
     public void Result_TapError_null_action_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _fail.TapError(null!));
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<ArgumentNullException>(() => fail.TapError(null!));
     }
 }

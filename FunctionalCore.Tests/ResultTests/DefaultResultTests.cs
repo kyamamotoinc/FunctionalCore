@@ -2,14 +2,6 @@
 
 public class DefaultResultTests
 {
-    private Result<string, string> _default;
-
-    [SetUp]
-    public void Setup()
-    {
-        _default = default;
-    }
-
     /// <summary>
     /// 1. Default Result は成功でも失敗でもない
     /// </summary>
@@ -18,8 +10,8 @@ public class DefaultResultTests
     {
         Assert.Multiple(() =>
         {
-            Assert.That(_default.IsSuccess, Is.False);
-            Assert.That(_default.IsFailure, Is.False);
+            Assert.That(default(Result<string, string>).IsSuccess, Is.False);
+            Assert.That(default(Result<string, string>).IsFailure, Is.False);
         });
     }
 
@@ -29,7 +21,7 @@ public class DefaultResultTests
     [Test]
     public void Default_Result_accessing_Value_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = _default.Value);
+        Assert.Throws<InvalidOperationException>(() => _ = default(Result<string, string>).Value);
     }
 
     /// <summary>
@@ -38,7 +30,7 @@ public class DefaultResultTests
     [Test]
     public void Default_Result_accessing_Error_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = _default.Error);
+        Assert.Throws<InvalidOperationException>(() => _ = default(Result<string, string>).Error);
     }
 
     /// <summary>
@@ -47,7 +39,7 @@ public class DefaultResultTests
     [Test]
     public void Default_Result_ToString_should_indicate_uninitialized()
     {
-        Assert.That(_default.ToString(), Does.Contain("uninitialized"));
+        Assert.That(default(Result<string, string>).ToString(), Does.Contain("uninitialized"));
     }
 
     /// <summary>
@@ -60,9 +52,9 @@ public class DefaultResultTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(_default == other, Is.True);
-            Assert.That(_default.Equals(other), Is.True);
-            Assert.That(_default.GetHashCode(), Is.EqualTo(other.GetHashCode()));
+            Assert.That(default(Result<string, string>) == other, Is.True);
+            Assert.That(default(Result<string, string>).Equals(other), Is.True);
+            Assert.That(default(Result<string, string>).GetHashCode(), Is.EqualTo(other.GetHashCode()));
         });
     }
 
@@ -94,7 +86,7 @@ public class DefaultResultTests
     [Test]
     public void Default_Result_Map_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _default.Map(x => x));
+        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).Map(x => x));
     }
 
     /// <summary>
@@ -103,7 +95,7 @@ public class DefaultResultTests
     [Test]
     public void Default_Result_MapError_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _default.MapError(e => e));
+        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).MapError(e => e));
     }
 
     /// <summary>
@@ -112,7 +104,7 @@ public class DefaultResultTests
     [Test]
     public void Default_Result_Bind_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _default.Bind(x => Result<string, string>.Ok(x)));
+        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).Bind(x => Result<string, string>.Ok(x)));
     }
 
     /// <summary>
@@ -121,7 +113,7 @@ public class DefaultResultTests
     [Test]
     public void Default_Result_Match_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _default.Match(x => x, e => e));
+        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).Match(x => x, e => e));
     }
 
     /// <summary>
@@ -130,7 +122,7 @@ public class DefaultResultTests
     [Test]
     public void Default_Result_Ensure_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _default.Ensure(x => true, x => x));
+        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).Ensure(x => true, x => x));
     }
 
     /// <summary>
@@ -139,7 +131,7 @@ public class DefaultResultTests
     [Test]
     public void Default_Result_Tap_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _default.Tap(_ => { }));
+        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).Tap(_ => { }));
     }
 
     /// <summary>
@@ -148,6 +140,6 @@ public class DefaultResultTests
     [Test]
     public void Default_Result_TapError_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _default.TapError(_ => { }));
+        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).TapError(_ => { }));
     }
 }

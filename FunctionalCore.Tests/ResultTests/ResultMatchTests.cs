@@ -2,23 +2,14 @@
 
 public class ResultMatchTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.Match は成功側の関数を実行し、その結果を返す
     /// </summary>
     [Test]
     public void Result_Ok_Match_should_return_success_func_result()
     {
-        var result = _ok.Match(value => value + 1, _ => -1);
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Match(value => value + 1, _ => -1);
 
         Assert.That(result, Is.EqualTo(6));
     }
@@ -29,9 +20,10 @@ public class ResultMatchTests
     [Test]
     public void Result_Ok_Match_should_invoke_success_func_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.Match(value =>
+        ok.Match(value =>
         {
             count++;
             return value + 1;
@@ -46,9 +38,10 @@ public class ResultMatchTests
     [Test]
     public void Result_Ok_Match_should_not_invoke_failure_func()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.Match(value => value + 1, _ =>
+        ok.Match(value => value + 1, _ =>
         {
             count++;
             return -1;
@@ -63,7 +56,8 @@ public class ResultMatchTests
     [Test]
     public void Result_Fail_Match_should_return_failure_func_result()
     {
-        var result = _fail.Match(value => value + 1, _ => -1);
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Match(value => value + 1, _ => -1);
 
         Assert.That(result, Is.EqualTo(-1));
     }
@@ -74,9 +68,10 @@ public class ResultMatchTests
     [Test]
     public void Result_Fail_Match_should_invoke_failure_func_once()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.Match(value => value + 1, _ =>
+        fail.Match(value => value + 1, _ =>
         {
             count++;
             return -1;
@@ -91,9 +86,10 @@ public class ResultMatchTests
     [Test]
     public void Result_Fail_Match_should_not_invoke_success_func()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.Match(value =>
+        fail.Match(value =>
         {
             count++;
             return value + 1;
@@ -108,7 +104,8 @@ public class ResultMatchTests
     [Test]
     public void Result_Match_null_success_func_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ok.Match<int>(null!, _ => -1));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<ArgumentNullException>(() => ok.Match<int>(null!, _ => -1));
     }
 
     /// <summary>
@@ -117,7 +114,8 @@ public class ResultMatchTests
     [Test]
     public void Result_Match_null_failure_func_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _fail.Match(value => value + 1, null!));
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<ArgumentNullException>(() => fail.Match(value => value + 1, null!));
     }
 
     /// <summary>
@@ -126,7 +124,8 @@ public class ResultMatchTests
     [Test]
     public void Result_Ok_Match_success_func_returning_null_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ok.Match(_ => (string)null!, _ => "fallback"));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<InvalidOperationException>(() => ok.Match(_ => (string)null!, _ => "fallback"));
     }
 
     /// <summary>
@@ -135,7 +134,8 @@ public class ResultMatchTests
     [Test]
     public void Result_Fail_Match_failure_func_returning_null_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _fail.Match(_ => "success", _ => (string)null!));
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<InvalidOperationException>(() => fail.Match(_ => "success", _ => (string)null!));
     }
 
     /// <summary>
@@ -144,7 +144,8 @@ public class ResultMatchTests
     [Test]
     public void Result_Ok_Match_should_not_evaluate_null_returning_failure_func()
     {
-        var result = _ok.Match(value => $"value:{value}", _ => (string)null!);
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Match(value => $"value:{value}", _ => (string)null!);
 
         Assert.That(result, Is.EqualTo("value:5"));
     }
@@ -155,7 +156,8 @@ public class ResultMatchTests
     [Test]
     public void Result_Fail_Match_should_not_evaluate_null_returning_success_func()
     {
-        var result = _fail.Match(_ => (string)null!, error => $"error:{error}");
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Match(_ => (string)null!, error => $"error:{error}");
 
         Assert.That(result, Is.EqualTo("error:error"));
     }
@@ -178,10 +180,11 @@ public class ResultMatchTests
     [Test]
     public void Result_Ok_Match_null_unused_failure_func_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Func<string, int>? onFailure = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _ok.Match(value => value + 1, onFailure!));
+            ok.Match(value => value + 1, onFailure!));
     }
 
     /// <summary>
@@ -190,9 +193,10 @@ public class ResultMatchTests
     [Test]
     public void Result_Fail_Match_null_unused_success_func_should_throw()
     {
+        var fail = Result<string, int>.Fail("error");
         Func<int, int>? onSuccess = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _fail.Match(onSuccess!, _ => -1));
+            fail.Match(onSuccess!, _ => -1));
     }
 }

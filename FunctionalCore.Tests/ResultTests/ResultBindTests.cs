@@ -2,23 +2,14 @@
 
 public class ResultBindTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.Bind は binder を実行し、その Result を返す
     /// </summary>
     [Test]
     public void Result_Ok_Bind_should_return_binder_result()
     {
-        var result = _ok.Bind(x => Result<string, int>.Ok(x + 1));
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Bind(x => Result<string, int>.Ok(x + 1));
 
         Assert.Multiple(() =>
         {
@@ -34,7 +25,8 @@ public class ResultBindTests
     [Test]
     public void Result_Ok_Bind_should_change_value_type()
     {
-        var result = _ok.Bind(x => Result<string, string>.Ok($"value:{x}"));
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Bind(x => Result<string, string>.Ok($"value:{x}"));
 
         Assert.Multiple(() =>
         {
@@ -49,7 +41,8 @@ public class ResultBindTests
     [Test]
     public void Result_Ok_Bind_should_return_failure_when_binder_fails()
     {
-        var result = _ok.Bind(_ => Result<string, int>.Fail("bind error"));
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Bind(_ => Result<string, int>.Fail("bind error"));
 
         Assert.Multiple(() =>
         {
@@ -65,9 +58,10 @@ public class ResultBindTests
     [Test]
     public void Result_Ok_Bind_should_invoke_binder_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.Bind(x =>
+        ok.Bind(x =>
         {
             count++;
             return Result<string, int>.Ok(x + 1);
@@ -82,9 +76,10 @@ public class ResultBindTests
     [Test]
     public void Result_Fail_Bind_should_not_invoke_binder()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.Bind(x =>
+        fail.Bind(x =>
         {
             count++;
             return Result<string, int>.Ok(x + 1);
@@ -99,7 +94,8 @@ public class ResultBindTests
     [Test]
     public void Result_Fail_Bind_should_keep_original_error()
     {
-        var result = _fail.Bind(x => Result<string, int>.Ok(x + 1));
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Bind(x => Result<string, int>.Ok(x + 1));
 
         Assert.Multiple(() =>
         {
@@ -115,7 +111,8 @@ public class ResultBindTests
     [Test]
     public void Result_Ok_Bind_null_binder_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ok.Bind<string>(null!));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<ArgumentNullException>(() => ok.Bind<string>(null!));
     }
 
     /// <summary>
@@ -124,7 +121,8 @@ public class ResultBindTests
     [Test]
     public void Result_Ok_Bind_uninitialized_result_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ok.Bind(_ => default(Result<string, string>)));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<InvalidOperationException>(() => ok.Bind(_ => default(Result<string, string>)));
     }
 
     /// <summary>
@@ -133,7 +131,8 @@ public class ResultBindTests
     [Test]
     public void Result_Fail_Bind_should_not_evaluate_uninitialized_binder_result()
     {
-        var result = _fail.Bind(_ => default(Result<string, string>));
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Bind(_ => default(Result<string, string>));
 
         Assert.Multiple(() =>
         {

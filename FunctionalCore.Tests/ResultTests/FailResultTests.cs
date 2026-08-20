@@ -2,21 +2,13 @@
 
 public class FailResultTests
 {
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Fail は内部の Error をそのまま返す
     /// </summary>
     [Test]
     public void Result_Fail_should_return_inner_Error()
     {
-        Assert.That(_fail.Error, Is.EqualTo("error"));
+        Assert.That(Result<string, int>.Fail("error").Error, Is.EqualTo("error"));
     }
 
     /// <summary>
@@ -25,10 +17,12 @@ public class FailResultTests
     [Test]
     public void Result_Fail_should_be_failure()
     {
+        var fail = Result<string, int>.Fail("error");
+
         Assert.Multiple(() =>
         {
-            Assert.That(_fail.IsSuccess, Is.False);
-            Assert.That(_fail.IsFailure, Is.True);
+            Assert.That(fail.IsSuccess, Is.False);
+            Assert.That(fail.IsFailure, Is.True);
         });
     }
 
@@ -38,7 +32,8 @@ public class FailResultTests
     [Test]
     public void Result_Fail_accessing_Value_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = _fail.Value);
+        var fail = Result<string, int>.Fail("error");
+        Assert.Throws<InvalidOperationException>(() => _ = fail.Value);
     }
 
     /// <summary>
@@ -56,13 +51,14 @@ public class FailResultTests
     [Test]
     public void Fail_with_same_error_should_be_equal()
     {
+        var fail = Result<string, int>.Fail("error");
         var other = Result<string, int>.Fail("error");
 
         Assert.Multiple(() =>
         {
-            Assert.That(_fail == other, Is.True);
-            Assert.That(_fail.Equals(other), Is.True);
-            Assert.That(_fail.GetHashCode(), Is.EqualTo(other.GetHashCode()));
+            Assert.That(fail == other, Is.True);
+            Assert.That(fail.Equals(other), Is.True);
+            Assert.That(fail.GetHashCode(), Is.EqualTo(other.GetHashCode()));
         });
     }
 
@@ -72,12 +68,13 @@ public class FailResultTests
     [Test]
     public void Fail_with_different_error_should_not_be_equal()
     {
+        var fail = Result<string, int>.Fail("error");
         var other = Result<string, int>.Fail("other");
 
         Assert.Multiple(() =>
         {
-            Assert.That(_fail != other, Is.True);
-            Assert.That(_fail.Equals(other), Is.False);
+            Assert.That(fail != other, Is.True);
+            Assert.That(fail.Equals(other), Is.False);
         });
     }
 
@@ -87,13 +84,14 @@ public class FailResultTests
     [Test]
     public void Fail_and_Ok_should_not_be_equal()
     {
+        var fail = Result<string, int>.Fail("error");
         var ok = Result<string, int>.Ok(5);
 
         Assert.Multiple(() =>
         {
-            Assert.That(_fail == ok, Is.False);
-            Assert.That(_fail != ok, Is.True);
-            Assert.That(_fail.Equals(ok), Is.False);
+            Assert.That(fail == ok, Is.False);
+            Assert.That(fail != ok, Is.True);
+            Assert.That(fail.Equals(ok), Is.False);
         });
     }
 
@@ -103,6 +101,7 @@ public class FailResultTests
     [Test]
     public void Fail_ToString_should_return_formatted_value()
     {
-        Assert.That(_fail.ToString(), Is.EqualTo("Fail(error)"));
+        var fail = Result<string, int>.Fail("error");
+        Assert.That(fail.ToString(), Is.EqualTo("Fail(error)"));
     }
 }

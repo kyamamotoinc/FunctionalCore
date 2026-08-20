@@ -4,25 +4,15 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 
 public class ResultCombineTests
 {
-    private Result<string, int> _ok3;
-    private Result<string, int> _ok5;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok3 = Result<string, int>.Ok(3);
-        _ok5 = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. 両方が Ok の場合は selector を実行し、組み合わせた値を持つ Ok を返す
     /// </summary>
     [Test]
     public void Result_Ok_Ok_Combine_should_return_combined_value()
     {
-        var result = _ok3.Combine(_ok5, (x, y) => x + y);
+        var ok3 = Result<string, int>.Ok(3);
+        var ok5 = Result<string, int>.Ok(5);
+        var result = ok3.Combine(ok5, (x, y) => x + y);
 
         Assert.Multiple(() =>
         {
@@ -38,7 +28,9 @@ public class ResultCombineTests
     [Test]
     public void Result_Ok_Ok_Combine_should_change_value_type()
     {
-        var result = _ok3.Combine(_ok5, (x, y) => $"{x}:{y}");
+        var ok3 = Result<string, int>.Ok(3);
+        var ok5 = Result<string, int>.Ok(5);
+        var result = ok3.Combine(ok5, (x, y) => $"{x}:{y}");
 
         Assert.Multiple(() =>
         {
@@ -53,9 +45,11 @@ public class ResultCombineTests
     [Test]
     public void Result_Ok_Ok_Combine_should_invoke_selector_once()
     {
+        var ok3 = Result<string, int>.Ok(3);
+        var ok5 = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok3.Combine(_ok5, (x, y) =>
+        ok3.Combine(ok5, (x, y) =>
         {
             count++;
             return x + y;
@@ -70,7 +64,9 @@ public class ResultCombineTests
     [Test]
     public void Result_Fail_Ok_Combine_should_return_first_error()
     {
-        var result = _fail.Combine(_ok5, (x, y) => x + y);
+        var fail = Result<string, int>.Fail("error");
+        var ok5 = Result<string, int>.Ok(5);
+        var result = fail.Combine(ok5, (x, y) => x + y);
 
         Assert.Multiple(() =>
         {
@@ -85,7 +81,9 @@ public class ResultCombineTests
     [Test]
     public void Result_Ok_Fail_Combine_should_return_second_error()
     {
-        var result = _ok3.Combine(_fail, (x, y) => x + y);
+        var ok3 = Result<string, int>.Ok(3);
+        var fail = Result<string, int>.Fail("error");
+        var result = ok3.Combine(fail, (x, y) => x + y);
 
         Assert.Multiple(() =>
         {
@@ -118,9 +116,11 @@ public class ResultCombineTests
     [Test]
     public void Result_Fail_Ok_Combine_should_not_invoke_selector()
     {
+        var fail = Result<string, int>.Fail("error");
+        var ok5 = Result<string, int>.Ok(5);
         int count = 0;
 
-        _fail.Combine(_ok5, (x, y) =>
+        fail.Combine(ok5, (x, y) =>
         {
             count++;
             return x + y;
@@ -135,9 +135,11 @@ public class ResultCombineTests
     [Test]
     public void Result_Ok_Fail_Combine_should_not_invoke_selector()
     {
+        var ok3 = Result<string, int>.Ok(3);
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _ok3.Combine(_fail, (x, y) =>
+        ok3.Combine(fail, (x, y) =>
         {
             count++;
             return x + y;
@@ -152,9 +154,11 @@ public class ResultCombineTests
     [Test]
     public void Result_Combine_null_selector_should_throw()
     {
+        var ok3 = Result<string, int>.Ok(3);
+        var ok5 = Result<string, int>.Ok(5);
         Func<int, int, int>? selector = null;
 
-        Assert.Throws<ArgumentNullException>(() => _ok3.Combine(_ok5, selector!));
+        Assert.Throws<ArgumentNullException>(() => ok3.Combine(ok5, selector!));
     }
 
     /// <summary>
@@ -163,7 +167,9 @@ public class ResultCombineTests
     [Test]
     public void Result_Ok_Ok_Combine_selector_returning_null_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ok3.Combine(_ok5, (_, _) => (string)null!));
+        var ok3 = Result<string, int>.Ok(3);
+        var ok5 = Result<string, int>.Ok(5);
+        Assert.Throws<InvalidOperationException>(() => ok3.Combine(ok5, (_, _) => (string)null!));
     }
 
     /// <summary>
@@ -172,7 +178,9 @@ public class ResultCombineTests
     [Test]
     public void Result_Fail_Ok_Combine_should_not_evaluate_null_returning_selector()
     {
-        var result = _fail.Combine(_ok5, (_, _) => (string)null!);
+        var fail = Result<string, int>.Fail("error");
+        var ok5 = Result<string, int>.Ok(5);
+        var result = fail.Combine(ok5, (_, _) => (string)null!);
 
         Assert.Multiple(() =>
         {
@@ -187,7 +195,9 @@ public class ResultCombineTests
     [Test]
     public void Result_Ok_Fail_Combine_should_not_evaluate_null_returning_selector()
     {
-        var result = _ok3.Combine(_fail, (_, _) => (string)null!);
+        var ok3 = Result<string, int>.Ok(3);
+        var fail = Result<string, int>.Fail("error");
+        var result = ok3.Combine(fail, (_, _) => (string)null!);
 
         Assert.Multiple(() =>
         {
@@ -202,9 +212,10 @@ public class ResultCombineTests
     [Test]
     public void Result_Combine_uninitialized_first_result_should_throw()
     {
+        var ok3 = Result<string, int>.Ok(3);
         var first = default(Result<string, int>);
 
-        Assert.Throws<InvalidOperationException>(() => first.Combine(_ok5, (x, y) => x + y));
+        Assert.Throws<InvalidOperationException>(() => first.Combine(ok3, (x, y) => x + y));
     }
 
     /// <summary>
@@ -213,8 +224,9 @@ public class ResultCombineTests
     [Test]
     public void Result_Combine_uninitialized_second_result_should_throw()
     {
+        var ok3 = Result<string, int>.Ok(3);
         var second = default(Result<string, int>);
 
-        Assert.Throws<InvalidOperationException>(() => _ok3.Combine(second, (x, y) => x + y));
+        Assert.Throws<InvalidOperationException>(() => ok3.Combine(second, (x, y) => x + y));
     }
 }

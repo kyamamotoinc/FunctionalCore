@@ -4,23 +4,14 @@ namespace FunctionalCore.Tests.ResultTests.Linq;
 
 public class ResultSelectTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.Select は selector を実行し、変換後の値を持つ Ok を返す
     /// </summary>
     [Test]
     public void Result_Ok_Select_should_return_selector_result()
     {
-        var result = _ok.Select(x => x + 1);
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Select(x => x + 1);
 
         Assert.Multiple(() =>
         {
@@ -36,7 +27,8 @@ public class ResultSelectTests
     [Test]
     public void Result_Ok_Select_should_change_value_type()
     {
-        var result = _ok.Select(x => $"value:{x}");
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Select(x => $"value:{x}");
 
         Assert.Multiple(() =>
         {
@@ -51,9 +43,10 @@ public class ResultSelectTests
     [Test]
     public void Result_Ok_Select_should_invoke_selector_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.Select(x =>
+        ok.Select(x =>
         {
             count++;
             return x + 1;
@@ -68,9 +61,10 @@ public class ResultSelectTests
     [Test]
     public void Result_Fail_Select_should_not_invoke_selector()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.Select(x =>
+        fail.Select(x =>
         {
             count++;
             return x + 1;
@@ -85,7 +79,8 @@ public class ResultSelectTests
     [Test]
     public void Result_Fail_Select_should_keep_original_error()
     {
-        var result = _fail.Select(x => x + 1);
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Select(x => x + 1);
 
         Assert.Multiple(() =>
         {
@@ -101,9 +96,10 @@ public class ResultSelectTests
     [Test]
     public void Result_Select_null_selector_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Func<int, string>? selector = null;
 
-        Assert.Throws<ArgumentNullException>(() => _ok.Select(selector!));
+        Assert.Throws<ArgumentNullException>(() => ok.Select(selector!));
     }
 
     /// <summary>
@@ -112,7 +108,8 @@ public class ResultSelectTests
     [Test]
     public void Result_Ok_Select_selector_returning_null_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ok.Select(_ => (string)null!));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<InvalidOperationException>(() => ok.Select(_ => (string)null!));
     }
 
     /// <summary>
@@ -121,7 +118,8 @@ public class ResultSelectTests
     [Test]
     public void Result_Fail_Select_should_not_evaluate_null_returning_selector()
     {
-        var result = _fail.Select(_ => (string)null!);
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Select(_ => (string)null!);
 
         Assert.Multiple(() =>
         {
@@ -136,8 +134,9 @@ public class ResultSelectTests
     [Test]
     public void Result_Select_should_support_query_syntax()
     {
+        var ok = Result<string, int>.Ok(5);
         var result =
-            from x in _ok
+            from x in ok
             select x + 1;
 
         Assert.Multiple(() =>
@@ -153,8 +152,9 @@ public class ResultSelectTests
     [Test]
     public void Result_Fail_Select_query_syntax_should_keep_original_error()
     {
+        var fail = Result<string, int>.Fail("error");
         var result =
-            from x in _fail
+            from x in fail
             select x + 1;
 
         Assert.Multiple(() =>

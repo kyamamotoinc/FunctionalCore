@@ -4,23 +4,14 @@ namespace FunctionalCore.Tests.ResultTests.Linq;
 
 public class ResultSelectManyTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. 元の Result と中間 Result がともに Ok の場合は projector の結果を持つ Ok を返す
     /// </summary>
     [Test]
     public void Result_Ok_SelectMany_should_return_projected_value()
     {
-        var result = _ok.SelectMany(
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.SelectMany(
             x => Result<string, int>.Ok(x + 1),
             (x, y) => x + y);
 
@@ -38,7 +29,8 @@ public class ResultSelectManyTests
     [Test]
     public void Result_Ok_SelectMany_should_change_value_type()
     {
-        var result = _ok.SelectMany(
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.SelectMany(
             x => Result<string, int>.Ok(x + 1),
             (x, y) => $"{x}:{y}");
 
@@ -55,9 +47,10 @@ public class ResultSelectManyTests
     [Test]
     public void Result_Ok_SelectMany_should_invoke_selector_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.SelectMany(
+        ok.SelectMany(
             x =>
             {
                 count++;
@@ -74,9 +67,10 @@ public class ResultSelectManyTests
     [Test]
     public void Result_Fail_SelectMany_should_not_invoke_selector()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.SelectMany(
+        fail.SelectMany(
             x =>
             {
                 count++;
@@ -93,7 +87,8 @@ public class ResultSelectManyTests
     [Test]
     public void Result_Fail_SelectMany_should_keep_original_error()
     {
-        var result = _fail.SelectMany(
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.SelectMany(
             x => Result<string, int>.Ok(x + 1),
             (x, y) => x + y);
 
@@ -110,7 +105,8 @@ public class ResultSelectManyTests
     [Test]
     public void Result_Ok_SelectMany_selector_returning_failure_should_return_failure()
     {
-        var result = _ok.SelectMany(
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.SelectMany(
             _ => Result<string, int>.Fail("selector error"),
             (x, y) => x + y);
 
@@ -127,9 +123,10 @@ public class ResultSelectManyTests
     [Test]
     public void Result_Ok_SelectMany_selector_failure_should_not_invoke_projector()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.SelectMany(
+        ok.SelectMany(
             _ => Result<string, int>.Fail("selector error"),
             (x, y) =>
             {
@@ -146,9 +143,10 @@ public class ResultSelectManyTests
     [Test]
     public void Result_Ok_SelectMany_should_invoke_projector_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.SelectMany(
+        ok.SelectMany(
             x => Result<string, int>.Ok(x + 1),
             (x, y) =>
             {
@@ -165,10 +163,11 @@ public class ResultSelectManyTests
     [Test]
     public void Result_SelectMany_null_selector_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Func<int, Result<string, int>>? selector = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _ok.SelectMany(selector!, (x, y) => x + y));
+            ok.SelectMany(selector!, (x, y) => x + y));
     }
 
     /// <summary>
@@ -177,10 +176,11 @@ public class ResultSelectManyTests
     [Test]
     public void Result_SelectMany_null_projector_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Func<int, int, int>? projector = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _ok.SelectMany(x => Result<string, int>.Ok(x + 1), projector!));
+            ok.SelectMany(x => Result<string, int>.Ok(x + 1), projector!));
     }
 
     /// <summary>
@@ -189,8 +189,9 @@ public class ResultSelectManyTests
     [Test]
     public void Result_Ok_SelectMany_selector_returning_uninitialized_result_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Assert.Throws<InvalidOperationException>(() =>
-            _ok.SelectMany(
+            ok.SelectMany(
                 _ => default(Result<string, int>),
                 (x, y) => x + y));
     }
@@ -201,8 +202,9 @@ public class ResultSelectManyTests
     [Test]
     public void Result_Ok_SelectMany_projector_returning_null_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Assert.Throws<InvalidOperationException>(() =>
-            _ok.SelectMany(
+            ok.SelectMany(
                 x => Result<string, int>.Ok(x + 1),
                 (_, _) => (string)null!));
     }
@@ -213,7 +215,8 @@ public class ResultSelectManyTests
     [Test]
     public void Result_Fail_SelectMany_should_not_evaluate_uninitialized_selector_result()
     {
-        var result = _fail.SelectMany(
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.SelectMany(
             _ => default(Result<string, int>),
             (x, y) => x + y);
 
@@ -230,7 +233,8 @@ public class ResultSelectManyTests
     [Test]
     public void Result_SelectMany_selector_failure_should_not_evaluate_null_returning_projector()
     {
-        var result = _ok.SelectMany(
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.SelectMany(
             _ => Result<string, int>.Fail("selector error"),
             (_, _) => (string)null!);
 
@@ -247,8 +251,9 @@ public class ResultSelectManyTests
     [Test]
     public void Result_SelectMany_should_support_query_syntax()
     {
+        var ok = Result<string, int>.Ok(5);
         var result =
-            from x in _ok
+            from x in ok
             from y in Result<string, int>.Ok(x + 1)
             select x + y;
 
@@ -265,8 +270,9 @@ public class ResultSelectManyTests
     [Test]
     public void Result_SelectMany_query_syntax_intermediate_failure_should_return_failure()
     {
+        var ok = Result<string, int>.Ok(5);
         var result =
-            from x in _ok
+            from x in ok
             from y in Result<string, int>.Fail("selector error")
             select x + y;
 
@@ -283,8 +289,9 @@ public class ResultSelectManyTests
     [Test]
     public void Result_SelectMany_query_syntax_source_failure_should_keep_original_error()
     {
+        var fail = Result<string, int>.Fail("error");
         var result =
-            from x in _fail
+            from x in fail
             from y in Result<string, int>.Ok(x + 1)
             select x + y;
 

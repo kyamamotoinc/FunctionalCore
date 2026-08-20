@@ -2,25 +2,16 @@
 
 public class ResultTapTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.Tap は action を1回だけ実行する
     /// </summary>
     [Test]
     public void Result_Ok_Tap_should_invoke_action_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.Tap(_ => count++);
+        ok.Tap(_ => count++);
 
         Assert.That(count, Is.EqualTo(1));
     }
@@ -31,9 +22,10 @@ public class ResultTapTests
     [Test]
     public void Result_Ok_Tap_should_pass_value_to_action()
     {
+        var ok = Result<string, int>.Ok(5);
         int received = 0;
 
-        _ok.Tap(value => received = value);
+        ok.Tap(value => received = value);
 
         Assert.That(received, Is.EqualTo(5));
     }
@@ -44,9 +36,10 @@ public class ResultTapTests
     [Test]
     public void Result_Fail_Tap_should_not_invoke_action()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.Tap(_ => count++);
+        fail.Tap(_ => count++);
 
         Assert.That(count, Is.EqualTo(0));
     }
@@ -57,9 +50,10 @@ public class ResultTapTests
     [Test]
     public void Result_Ok_Tap_should_return_original_result()
     {
-        var result = _ok.Tap(_ => { });
+        var ok = Result<string, int>.Ok(5);
+        var result = ok.Tap(_ => { });
 
-        Assert.That(result, Is.EqualTo(_ok));
+        Assert.That(result, Is.EqualTo(ok));
     }
 
     /// <summary>
@@ -68,9 +62,10 @@ public class ResultTapTests
     [Test]
     public void Result_Fail_Tap_should_return_original_result()
     {
-        var result = _fail.Tap(_ => { });
+        var fail = Result<string, int>.Fail("error");
+        var result = fail.Tap(_ => { });
 
-        Assert.That(result, Is.EqualTo(_fail));
+        Assert.That(result, Is.EqualTo(fail));
     }
 
     /// <summary>
@@ -79,6 +74,7 @@ public class ResultTapTests
     [Test]
     public void Result_Tap_null_action_should_throw()
     {
-        Assert.Throws<ArgumentNullException>(() => _ok.Tap(null!));
+        var ok = Result<string, int>.Ok(5);
+        Assert.Throws<ArgumentNullException>(() => ok.Tap(null!));
     }
 }

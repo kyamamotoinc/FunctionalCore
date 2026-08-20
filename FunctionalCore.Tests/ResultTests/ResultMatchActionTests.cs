@@ -2,25 +2,16 @@
 
 public class ResultMatchActionTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.Match は成功側の action を1回だけ実行する
     /// </summary>
     [Test]
     public void Result_Ok_MatchAction_should_invoke_success_action_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.Match(
+        ok.Match(
             _ => count++,
             _ => { });
 
@@ -33,9 +24,10 @@ public class ResultMatchActionTests
     [Test]
     public void Result_Ok_MatchAction_should_pass_value_to_success_action()
     {
+        var ok = Result<string, int>.Ok(5);
         int received = 0;
 
-        _ok.Match(
+        ok.Match(
             value => received = value,
             _ => { });
 
@@ -48,9 +40,10 @@ public class ResultMatchActionTests
     [Test]
     public void Result_Ok_MatchAction_should_not_invoke_failure_action()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        _ok.Match(
+        ok.Match(
             _ => { },
             _ => count++);
 
@@ -63,9 +56,10 @@ public class ResultMatchActionTests
     [Test]
     public void Result_Fail_MatchAction_should_invoke_failure_action_once()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.Match(
+        fail.Match(
             _ => { },
             _ => count++);
 
@@ -78,9 +72,10 @@ public class ResultMatchActionTests
     [Test]
     public void Result_Fail_MatchAction_should_pass_error_to_failure_action()
     {
+        var fail = Result<string, int>.Fail("error");
         string? received = null;
 
-        _fail.Match(
+        fail.Match(
             _ => { },
             error => received = error);
 
@@ -93,9 +88,10 @@ public class ResultMatchActionTests
     [Test]
     public void Result_Fail_MatchAction_should_not_invoke_success_action()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        _fail.Match(
+        fail.Match(
             _ => count++,
             _ => { });
 
@@ -108,10 +104,11 @@ public class ResultMatchActionTests
     [Test]
     public void Result_MatchAction_null_success_action_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Action<int>? onSuccess = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _ok.Match(onSuccess!, _ => { }));
+            ok.Match(onSuccess!, _ => { }));
     }
 
     /// <summary>
@@ -120,10 +117,11 @@ public class ResultMatchActionTests
     [Test]
     public void Result_MatchAction_null_failure_action_should_throw()
     {
+        var fail = Result<string, int>.Fail("error");
         Action<string>? onFailure = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _fail.Match(_ => { }, onFailure!));
+            fail.Match(_ => { }, onFailure!));
     }
 
     /// <summary>
@@ -132,10 +130,11 @@ public class ResultMatchActionTests
     [Test]
     public void Result_Ok_MatchAction_null_unused_failure_action_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Action<string>? onFailure = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _ok.Match(_ => { }, onFailure!));
+            ok.Match(_ => { }, onFailure!));
     }
 
     /// <summary>
@@ -144,10 +143,11 @@ public class ResultMatchActionTests
     [Test]
     public void Result_Fail_MatchAction_null_unused_success_action_should_throw()
     {
+        var fail = Result<string, int>.Fail("error");
         Action<int>? onSuccess = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _fail.Match(onSuccess!, _ => { }));
+            fail.Match(onSuccess!, _ => { }));
     }
 
     /// <summary>

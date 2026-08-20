@@ -4,23 +4,14 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 
 public class ResultGetValueOrTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.GetValueOr は成功値を返す
     /// </summary>
     [Test]
     public void Result_Ok_GetValueOr_should_return_value()
     {
-        var value = _ok.GetValueOr(10);
+        var ok = Result<string, int>.Ok(5);
+        var value = ok.GetValueOr(10);
 
         Assert.That(value, Is.EqualTo(5));
     }
@@ -31,7 +22,8 @@ public class ResultGetValueOrTests
     [Test]
     public void Result_Fail_GetValueOr_should_return_default_value()
     {
-        var value = _fail.GetValueOr(10);
+        var fail = Result<string, int>.Fail("error");
+        var value = fail.GetValueOr(10);
 
         Assert.That(value, Is.EqualTo(10));
     }
