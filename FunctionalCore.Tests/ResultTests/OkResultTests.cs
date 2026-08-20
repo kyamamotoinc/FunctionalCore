@@ -2,14 +2,6 @@
 
 public class OkResultTests
 {
-    //private Result<string, int> _ok;
-
-    //[SetUp]
-    //public void Setup()
-    //{
-    //    _ok = Result<string, int>.Ok(5);
-    //}
-
     /// <summary>
     /// 1. Ok は内部の Value をそのまま返す
     /// </summary>
