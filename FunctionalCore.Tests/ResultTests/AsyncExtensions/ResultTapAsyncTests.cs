@@ -4,25 +4,16 @@ namespace FunctionalCore.Tests.ResultTests.AsyncExtensions;
 
 public class ResultTapAsyncTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.TapAsync は onSuccess を1回だけ実行する
     /// </summary>
     [Test]
     public async Task Result_Ok_TapAsync_should_invoke_action_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        await _ok.AsTask().TapAsync(_ =>
+        await ok.AsTask().TapAsync(_ =>
         {
             count++;
             return Task.CompletedTask;
@@ -37,9 +28,10 @@ public class ResultTapAsyncTests
     [Test]
     public async Task Result_Ok_TapAsync_should_pass_value_to_action()
     {
+        var ok = Result<string, int>.Ok(5);
         int received = 0;
 
-        await _ok.AsTask().TapAsync(value =>
+        await ok.AsTask().TapAsync(value =>
         {
             received = value;
             return Task.CompletedTask;
@@ -54,9 +46,10 @@ public class ResultTapAsyncTests
     [Test]
     public async Task Result_Fail_TapAsync_should_not_invoke_action()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        var result = await _fail.AsTask().TapAsync(_ =>
+        var result = await fail.AsTask().TapAsync(_ =>
         {
             count++;
             return Task.CompletedTask;
@@ -76,9 +69,10 @@ public class ResultTapAsyncTests
     [Test]
     public async Task Result_Ok_TapAsync_should_return_original_result()
     {
-        var result = await _ok.AsTask().TapAsync(_ => Task.CompletedTask);
+        var ok = Result<string, int>.Ok(5);
+        var result = await ok.AsTask().TapAsync(_ => Task.CompletedTask);
 
-        Assert.That(result, Is.EqualTo(_ok));
+        Assert.That(result, Is.EqualTo(ok));
     }
 
     /// <summary>
@@ -87,9 +81,10 @@ public class ResultTapAsyncTests
     [Test]
     public async Task Result_Fail_TapAsync_should_return_original_result()
     {
-        var result = await _fail.AsTask().TapAsync(_ => Task.CompletedTask);
+        var fail = Result<string, int>.Fail("error");
+        var result = await fail.AsTask().TapAsync(_ => Task.CompletedTask);
 
-        Assert.That(result, Is.EqualTo(_fail));
+        Assert.That(result, Is.EqualTo(fail));
     }
 
     /// <summary>
@@ -98,10 +93,11 @@ public class ResultTapAsyncTests
     [Test]
     public void Result_TapAsync_null_action_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Func<int, Task>? onSuccess = null;
 
         Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _ok.AsTask().TapAsync(onSuccess!));
+            await ok.AsTask().TapAsync(onSuccess!));
     }
 
     /// <summary>
@@ -122,10 +118,11 @@ public class ResultTapAsyncTests
     [Test]
     public void Result_Ok_TapAsync_action_returning_null_task_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Func<int, Task> onSuccess = _ => null!;
 
         Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _ok.AsTask().TapAsync(onSuccess));
+            await ok.AsTask().TapAsync(onSuccess));
     }
 
     /// <summary>
@@ -134,9 +131,10 @@ public class ResultTapAsyncTests
     [Test]
     public async Task Result_Fail_TapAsync_should_not_evaluate_null_task_action()
     {
+        var fail = Result<string, int>.Fail("error");
         Func<int, Task> onSuccess = _ => null!;
 
-        var result = await _fail.AsTask().TapAsync(onSuccess);
+        var result = await fail.AsTask().TapAsync(onSuccess);
 
         Assert.Multiple(() =>
         {

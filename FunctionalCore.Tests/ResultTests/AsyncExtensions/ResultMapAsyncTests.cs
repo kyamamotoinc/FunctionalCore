@@ -4,23 +4,14 @@ namespace FunctionalCore.Tests.ResultTests.AsyncExtensions;
 
 public class ResultMapAsyncTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.MapAsync は selector を実行し、変換後の値を持つ Ok を返す
     /// </summary>
     [Test]
     public async Task Result_Ok_MapAsync_should_return_selector_result()
     {
-        var result = await _ok.AsTask().MapAsync(x => Task.FromResult(x + 1));
+        var ok = Result<string, int>.Ok(5);
+        var result = await ok.AsTask().MapAsync(x => Task.FromResult(x + 1));
 
         Assert.Multiple(() =>
         {
@@ -36,7 +27,8 @@ public class ResultMapAsyncTests
     [Test]
     public async Task Result_Ok_MapAsync_should_change_value_type()
     {
-        var result = await _ok.AsTask().MapAsync(x => Task.FromResult($"value:{x}"));
+        var ok = Result<string, int>.Ok(5);
+        var result = await ok.AsTask().MapAsync(x => Task.FromResult($"value:{x}"));
 
         Assert.Multiple(() =>
         {
@@ -51,9 +43,10 @@ public class ResultMapAsyncTests
     [Test]
     public async Task Result_Ok_MapAsync_should_invoke_selector_once()
     {
+        var ok = Result<string, int>.Ok(5);
         int count = 0;
 
-        await _ok.AsTask().MapAsync(x =>
+        await ok.AsTask().MapAsync(x =>
         {
             count++;
             return Task.FromResult(x + 1);
@@ -68,9 +61,10 @@ public class ResultMapAsyncTests
     [Test]
     public async Task Result_Fail_MapAsync_should_not_invoke_selector()
     {
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
-        var result = await _fail.AsTask().MapAsync(x =>
+        var result = await fail.AsTask().MapAsync(x =>
         {
             count++;
             return Task.FromResult(x + 1);
@@ -90,7 +84,8 @@ public class ResultMapAsyncTests
     [Test]
     public async Task Result_Fail_MapAsync_should_keep_original_error()
     {
-        var result = await _fail.AsTask().MapAsync(x => Task.FromResult(x + 1));
+        var fail = Result<string, int>.Fail("error");
+        var result = await fail.AsTask().MapAsync(x => Task.FromResult(x + 1));
 
         Assert.Multiple(() =>
         {
@@ -106,10 +101,11 @@ public class ResultMapAsyncTests
     [Test]
     public void Result_MapAsync_null_selector_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Func<int, Task<string>>? selector = null;
 
         Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _ok.AsTask().MapAsync(selector!));
+            await ok.AsTask().MapAsync(selector!));
     }
 
     /// <summary>
@@ -130,10 +126,11 @@ public class ResultMapAsyncTests
     [Test]
     public void Result_Ok_MapAsync_selector_returning_null_task_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Func<int, Task<string>> selector = _ => null!;
 
         Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _ok.AsTask().MapAsync(selector));
+            await ok.AsTask().MapAsync(selector));
     }
 
     /// <summary>
@@ -142,8 +139,9 @@ public class ResultMapAsyncTests
     [Test]
     public void Result_Ok_MapAsync_selector_returning_null_value_should_throw()
     {
+        var ok = Result<string, int>.Ok(5);
         Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _ok.AsTask().MapAsync(_ => Task.FromResult((string)null!)));
+            await ok.AsTask().MapAsync(_ => Task.FromResult((string)null!)));
     }
 
     /// <summary>
@@ -164,9 +162,10 @@ public class ResultMapAsyncTests
     [Test]
     public async Task Result_Fail_MapAsync_should_not_evaluate_null_task_selector()
     {
+        var fail = Result<string, int>.Fail("error");
         Func<int, Task<string>> selector = _ => null!;
 
-        var result = await _fail.AsTask().MapAsync(selector);
+        var result = await fail.AsTask().MapAsync(selector);
 
         Assert.Multiple(() =>
         {
@@ -181,7 +180,8 @@ public class ResultMapAsyncTests
     [Test]
     public async Task Result_Fail_MapAsync_should_not_evaluate_null_value_selector()
     {
-        var result = await _fail.AsTask().MapAsync(_ => Task.FromResult((string)null!));
+        var fail = Result<string, int>.Fail("error");
+        var result = await fail.AsTask().MapAsync(_ => Task.FromResult((string)null!));
 
         Assert.Multiple(() =>
         {

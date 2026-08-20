@@ -4,27 +4,18 @@ namespace FunctionalCore.Tests.ResultTests.AsyncExtensions;
 
 public class ResultAsTaskTests
 {
-    private Result<string, int> _ok;
-    private Result<string, int> _fail;
-
-    [SetUp]
-    public void Setup()
-    {
-        _ok = Result<string, int>.Ok(5);
-        _fail = Result<string, int>.Fail("error");
-    }
-
     /// <summary>
     /// 1. Ok.AsTask は元の Ok を保持する完了済み Task を返す
     /// </summary>
     [Test]
     public async Task Result_Ok_AsTask_should_return_original_result()
     {
-        var result = await _ok.AsTask();
+        var ok = Result<string, int>.Ok(5);
+        var result = await ok.AsTask();
 
         Assert.Multiple(() =>
         {
-            Assert.That(result, Is.EqualTo(_ok));
+            Assert.That(result, Is.EqualTo(ok));
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value, Is.EqualTo(5));
         });
@@ -36,11 +27,12 @@ public class ResultAsTaskTests
     [Test]
     public async Task Result_Fail_AsTask_should_return_original_result()
     {
-        var result = await _fail.AsTask();
+        var fail = Result<string, int>.Fail("error");
+        var result = await fail.AsTask();
 
         Assert.Multiple(() =>
         {
-            Assert.That(result, Is.EqualTo(_fail));
+            Assert.That(result, Is.EqualTo(fail));
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
         });
@@ -52,7 +44,8 @@ public class ResultAsTaskTests
     [Test]
     public void Result_Ok_AsTask_should_return_completed_task()
     {
-        var task = _ok.AsTask();
+        var ok = Result<string, int>.Ok(5);
+        var task = ok.AsTask();
 
         Assert.That(task.IsCompletedSuccessfully, Is.True);
     }
@@ -63,7 +56,8 @@ public class ResultAsTaskTests
     [Test]
     public void Result_Fail_AsTask_should_return_completed_task()
     {
-        var task = _fail.AsTask();
+        var fail = Result<string, int>.Fail("error");
+        var task = fail.AsTask();
 
         Assert.That(task.IsCompletedSuccessfully, Is.True);
     }
