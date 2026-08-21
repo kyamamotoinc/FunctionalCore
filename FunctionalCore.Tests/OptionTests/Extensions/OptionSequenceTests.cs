@@ -4,20 +4,6 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 
 public class OptionSequenceTests
 {
-    //private Option<int> _some1;
-    //private Option<int> _some2;
-    //private Option<int> _some3;
-    //private Option<int> _none;
-
-    //[SetUp]
-    //public void Setup()
-    //{
-    //    var some1 = Option<int>.Some(1);
-    //    var some2 = Option<int>.Some(2);
-    //    var some3 = Option<int>.Some(3);
-    //    var none = Option<int>.None;
-    //}
-
     /// <summary>
     /// 1. すべて Some の場合は、すべての値を持つ Some を返す
     /// </summary>

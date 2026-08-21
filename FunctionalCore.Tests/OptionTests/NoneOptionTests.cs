@@ -2,14 +2,6 @@
 
 public class NoneOptionTests
 {
-    //private Option<int> _none;
-
-    //[SetUp]
-    //public void Setup()
-    //{
-    //    var none = Option<int>.None;
-    //}
-
     /// <summary>
     /// 1. None は値を保持していない状態である
     /// </summary>
