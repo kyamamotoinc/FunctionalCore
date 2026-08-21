@@ -307,31 +307,51 @@ public readonly struct Result<E, T> : IEquatable<Result<E, T>>
     }
 
     /// <summary>
-    /// Transforms the value if successful.
-    /// <para>成功時のみ値を変換する。</para>
+    /// Transforms the successful value by using the specified selector.
+    /// <para>成功値を指定された selector で変換する。</para>
     ///
-    /// If selector returns null, it throws.
-    /// <para>nullは許可されない。（例外を投げる）</para>
+    /// If this Result is a failure, the original error is preserved and
+    /// <paramref name="selector"/> is not invoked.
+    /// If <paramref name="selector"/> returns null,
+    /// an <see cref="InvalidOperationException"/> is thrown.
+    /// <para>
+    /// この Result が失敗している場合は元のエラーを保持し、
+    /// <paramref name="selector"/> は実行しない。
+    /// <paramref name="selector"/> が null を返した場合は、
+    /// <see cref="InvalidOperationException"/> をスローする。
+    /// </para>
     /// </summary>
     /// <typeparam name="U">
     /// The type of the transformed value.
     /// <para>変換後の値の型。</para>
     /// </typeparam>
     /// <param name="selector">
-    /// A function to transform the value. Must not return null.
-    /// <para>値を変換する関数。nullを返してはならない。</para>
+    /// A function that transforms the successful value.
+    /// Must not be null and must not return null.
+    /// <para>
+    /// 成功値を変換する関数。
+    /// null は許可されず、null を返してはならない。
+    /// </para>
     /// </param>
     /// <returns>
-    /// A Result with the transformed value, or the original failure.
-    /// <para>変換後の値を持つResult、または元の失敗Result。</para>
+    /// A Result containing the transformed value when successful;
+    /// otherwise a failed Result containing the original error.
+    /// <para>
+    /// 成功している場合は変換後の値を保持する Result。
+    /// 失敗している場合は元のエラーを保持する失敗 Result。
+    /// </para>
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    /// Thrown if selector is null.
-    /// <para>selectorがnullの場合に投げられる。</para>
+    /// Thrown when <paramref name="selector"/> is null.
+    /// <para><paramref name="selector"/> が null の場合にスローされる。</para>
     /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if this Result is uninitialized or if selector returns null.
-    /// <para>この Result が未初期化、または selector がnullを返した場合に投げられる。</para>
+    /// Thrown when this Result is uninitialized,
+    /// or when <paramref name="selector"/> returns null.
+    /// <para>
+    /// この Result が未初期化、
+    /// または <paramref name="selector"/> が null を返した場合にスローされる。
+    /// </para>
     /// </exception>
     public Result<E, U> Map<U>(Func<T, U> selector)
     {

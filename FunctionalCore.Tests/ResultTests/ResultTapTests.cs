@@ -3,10 +3,10 @@
 public class ResultTapTests
 {
     /// <summary>
-    /// 1. Ok.Tap は action を1回だけ実行する
+    /// 1. ResultがOkの場合はactionを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Ok_Tap_should_invoke_action_once()
+    public void Ok_Tap_should_invoke_action_once()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -17,10 +17,10 @@ public class ResultTapTests
     }
 
     /// <summary>
-    /// 2. Ok.Tap は成功値を action に渡す
+    /// 2. ResultがOkの場合は成功値をactionに渡す。
     /// </summary>
     [Test]
-    public void Result_Ok_Tap_should_pass_value_to_action()
+    public void Ok_Tap_should_pass_value_to_action()
     {
         var ok = Result<string, int>.Ok(5);
         int received = 0;
@@ -31,10 +31,10 @@ public class ResultTapTests
     }
 
     /// <summary>
-    /// 3. Fail.Tap は action を実行しない
+    /// 3. ResultがFailの場合はactionを実行しない。
     /// </summary>
     [Test]
-    public void Result_Fail_Tap_should_not_invoke_action()
+    public void Fail_Tap_should_not_invoke_action()
     {
         var fail = Result<string, int>.Fail("error");
         int count = 0;
@@ -45,10 +45,10 @@ public class ResultTapTests
     }
 
     /// <summary>
-    /// 4. Ok.Tap は元の Result を変更せずに返す
+    /// 4. ResultがOkの場合は元のResultをそのまま返す。
     /// </summary>
     [Test]
-    public void Result_Ok_Tap_should_return_original_result()
+    public void Ok_Tap_should_return_original_result()
     {
         var ok = Result<string, int>.Ok(5);
         var result = ok.Tap(_ => { });
@@ -57,10 +57,10 @@ public class ResultTapTests
     }
 
     /// <summary>
-    /// 5. Fail.Tap は元の Result を変更せずに返す
+    /// 5. ResultがFailの場合は元のResultをそのまま返す。
     /// </summary>
     [Test]
-    public void Result_Fail_Tap_should_return_original_result()
+    public void Fail_Tap_should_return_original_result()
     {
         var fail = Result<string, int>.Fail("error");
         var result = fail.Tap(_ => { });
@@ -69,12 +69,36 @@ public class ResultTapTests
     }
 
     /// <summary>
-    /// 6. Tap の action が null の場合は ArgumentNullException が発生する
+    /// 6. ResultがOkの場合でもactionがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Tap_null_action_should_throw()
+    public void Ok_Tap_should_throw_argument_null_exception_when_action_is_null()
     {
         var ok = Result<string, int>.Ok(5);
+
         Assert.Throws<ArgumentNullException>(() => ok.Tap(null!));
+    }
+
+    /// <summary>
+    /// 7. ResultがFailの場合でもactionがnullの場合はArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Fail_Tap_should_throw_argument_null_exception_when_action_is_null()
+    {
+        var fail = Result<string, int>.Fail("error");
+
+        Assert.Throws<ArgumentNullException>(() => fail.Tap(null!));
+    }
+
+    /// <summary>
+    /// 8. Resultがdefaultでactionもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_Tap_should_throw_invalid_operation_exception_before_action_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Tap(null!));
     }
 }

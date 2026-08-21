@@ -123,6 +123,7 @@ public static class ResultLinq
     /// </exception>
     public static Result<E, V> SelectMany<E, T, U, V>(this Result<E, T> result, Func<T, Result<E, U>> selector, Func<T, U, V> projector)
     {
+        result.ThrowIfNotInitialized();
         ArgumentNullException.ThrowIfNull(selector);
         ArgumentNullException.ThrowIfNull(projector);
 

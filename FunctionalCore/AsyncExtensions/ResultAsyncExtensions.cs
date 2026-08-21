@@ -37,6 +37,73 @@ public static class ResultAsyncExtensions
     }
 
     /// <summary>
+    /// Matches success or failure asynchronously and returns a value.
+    /// <para>成功/失敗に応じた非同期関数を実行し、値を返す。</para>
+    /// </summary>
+    /// <typeparam name="E">
+    /// The error type.
+    /// <para>エラーの型。</para>
+    /// </typeparam>
+    /// <typeparam name="T">
+    /// The success value type.
+    /// <para>成功値の型。</para>
+    /// </typeparam>
+    /// <typeparam name="U">
+    /// The return type.
+    /// <para>戻り値の型。</para>
+    /// </typeparam>
+    /// <param name="resultTask">
+    /// A Task that produces the source Result.
+    /// <para>元の Result を生成する Task。</para>
+    /// </param>
+    /// <param name="onSuccess">
+    /// An asynchronous function to execute if successful. Must not return a null Task or a null value.
+    /// <para>成功時に実行する非同期関数。null の Task または null の値を返してはならない。</para>
+    /// </param>
+    /// <param name="onFailure">
+    /// An asynchronous function to execute if failed. Must not return a null Task or a null value.
+    /// <para>失敗時に実行する非同期関数。null の Task または null の値を返してはならない。</para>
+    /// </param>
+    /// <returns>
+    /// A Task that produces the value returned by the selected function.
+    /// <para>選択された関数の戻り値を生成する Task。</para>
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if resultTask, onSuccess, or onFailure is null.
+    /// <para>resultTask、onSuccess、または onFailure が null の場合に投げられる。</para>
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the source Result is uninitialized,
+    /// if the selected function returns a null Task,
+    /// or if the Task returns null.
+    /// <para>
+    /// 元の Result が未初期化、選択された関数が null の Task を返した、
+    /// または Task が null を返した場合に投げられる。
+    /// </para>
+    /// </exception>
+    public static async Task<U> MatchAsync<E, T, U>(this Task<Result<E, T>> resultTask, Func<T, Task<U>> onSuccess, Func<E, Task<U>> onFailure)
+    {
+        ArgumentNullException.ThrowIfNull(resultTask);
+        ArgumentNullException.ThrowIfNull(onSuccess);
+        ArgumentNullException.ThrowIfNull(onFailure);
+
+        var result = await resultTask.ConfigureAwait(false);
+        result.ThrowIfNotInitialized();
+
+        var valueTask = result.IsSuccess ? onSuccess(result.Value) : onFailure(result.Error);
+
+        if (valueTask is null)
+            throw new InvalidOperationException("Match function must not return a null Task.");
+
+        var value = await valueTask.ConfigureAwait(false);
+
+        if (value is null)
+            throw new InvalidOperationException("Match function must not return null.");
+
+        return value;
+    }
+
+    /// <summary>
     /// Binds a successful Result value to the next asynchronous Result-producing operation.
     /// <para>成功している Result の値を使って、次の非同期 Result 処理へ接続する。</para>
     /// </summary>

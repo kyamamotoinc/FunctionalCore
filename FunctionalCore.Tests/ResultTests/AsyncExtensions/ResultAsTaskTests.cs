@@ -5,12 +5,13 @@ namespace FunctionalCore.Tests.ResultTests.AsyncExtensions;
 public class ResultAsTaskTests
 {
     /// <summary>
-    /// 1. Ok.AsTask は元の Ok を保持する完了済み Task を返す
+    /// 1. ResultがOkの場合は元のOkを保持するTaskを返す。
     /// </summary>
     [Test]
-    public async Task Result_Ok_AsTask_should_return_original_result()
+    public async Task Ok_AsTask_should_return_original_result()
     {
         var ok = Result<string, int>.Ok(5);
+
         var result = await ok.AsTask();
 
         Assert.Multiple(() =>
@@ -22,12 +23,13 @@ public class ResultAsTaskTests
     }
 
     /// <summary>
-    /// 2. Fail.AsTask は元の Fail を保持する完了済み Task を返す
+    /// 2. ResultがFailの場合は元のFailを保持するTaskを返す。
     /// </summary>
     [Test]
-    public async Task Result_Fail_AsTask_should_return_original_result()
+    public async Task Fail_AsTask_should_return_original_result()
     {
         var fail = Result<string, int>.Fail("error");
+
         var result = await fail.AsTask();
 
         Assert.Multiple(() =>
@@ -39,37 +41,39 @@ public class ResultAsTaskTests
     }
 
     /// <summary>
-    /// 3. Ok.AsTask は完了済み Task を返す
+    /// 3. ResultがOkの場合は完了済みTaskを返す。
     /// </summary>
     [Test]
-    public void Result_Ok_AsTask_should_return_completed_task()
+    public void Ok_AsTask_should_return_completed_task()
     {
         var ok = Result<string, int>.Ok(5);
+
         var task = ok.AsTask();
 
         Assert.That(task.IsCompletedSuccessfully, Is.True);
     }
 
     /// <summary>
-    /// 4. Fail.AsTask は完了済み Task を返す
+    /// 4. ResultがFailの場合は完了済みTaskを返す。
     /// </summary>
     [Test]
-    public void Result_Fail_AsTask_should_return_completed_task()
+    public void Fail_AsTask_should_return_completed_task()
     {
         var fail = Result<string, int>.Fail("error");
+
         var task = fail.AsTask();
 
         Assert.That(task.IsCompletedSuccessfully, Is.True);
     }
 
     /// <summary>
-    /// 5. 未初期化 Result を AsTask すると InvalidOperationException が発生する
+    /// 5. Resultがdefaultの場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Default_AsTask_should_throw()
+    public void Default_AsTask_should_throw_invalid_operation_exception()
     {
-        var result = default(Result<string, int>);
+        var uninitialized = default(Result<string, int>);
 
-        Assert.Throws<InvalidOperationException>(() => result.AsTask());
+        Assert.Throws<InvalidOperationException>(() => uninitialized.AsTask());
     }
 }

@@ -5,15 +5,15 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 public class ResultRecoverWithTests
 {
     /// <summary>
-    /// 1. ResultがOkの場合、元の成功値を維持し、recoveryを実行しない。
+    /// 1. ResultがOkの場合は元のOkをそのまま返し、recoveryを実行しない。
     /// </summary>
     [Test]
-    public void RecoverWith_should_not_invoke_recovery_when_result_is_ok()
+    public void Ok_RecoverWith_should_return_original_ok_without_invoking_recovery()
     {
-        var result = Result<string, int>.Ok(10);
+        var ok = Result<string, int>.Ok(10);
         int count = 0;
 
-        var actual = result.RecoverWith(error =>
+        var recoveredResult = ok.RecoverWith(error =>
         {
             count++;
             return Result<string, int>.Ok(20);
@@ -21,22 +21,22 @@ public class ResultRecoverWithTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(actual, Is.EqualTo(result));
+            Assert.That(recoveredResult, Is.EqualTo(ok));
             Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 2. ResultがFailの場合、recovery関数を実行し、その結果を返す。
+    /// 2. ResultがFailの場合はrecoveryを1回実行し、そのResultを返す。
     /// </summary>
     [Test]
-    public void RecoverWith_should_invoke_recovery_when_result_is_fail()
+    public void Fail_RecoverWith_should_invoke_recovery_once_and_return_its_result()
     {
-        var result = Result<string, int>.Fail("error");
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
         string? receivedError = null;
 
-        var actual = result.RecoverWith(error =>
+        var recoveredResult = fail.RecoverWith(error =>
         {
             count++;
             receivedError = error;
@@ -45,24 +45,24 @@ public class ResultRecoverWithTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(actual.IsSuccess, Is.True);
-            Assert.That(actual.Value, Is.EqualTo(20));
+            Assert.That(recoveredResult.IsSuccess, Is.True);
+            Assert.That(recoveredResult.Value, Is.EqualTo(20));
             Assert.That(count, Is.EqualTo(1));
             Assert.That(receivedError, Is.EqualTo("error"));
         });
     }
 
     /// <summary>
-    /// 3. Resultがdefaultの場合は InvalidOperationException を発生させる。
-    ///    recovery関数は実行されない。
+    /// 3. Resultがdefaultの場合はInvalidOperationExceptionを発生させる。
+    /// recoveryは実行しない。
     /// </summary>
     [Test]
-    public void RecoverWith_should_throw_exception_when_result_is_default()
+    public void Default_RecoverWith_should_throw_invalid_operation_exception_without_invoking_recovery()
     {
-        var result = default(Result<string, int>);
+        var uninitialized = default(Result<string, int>);
         int count = 0;
 
-        Assert.Throws<InvalidOperationException>(() => result.RecoverWith(error =>
+        Assert.Throws<InvalidOperationException>(() => uninitialized.RecoverWith(error =>
         {
             count++;
             return Result<string, int>.Ok(20);
@@ -72,77 +72,78 @@ public class ResultRecoverWithTests
     }
 
     /// <summary>
-    /// 4. ResultがOkの場合でもrecovery関数がnullの場合は ArgumentNullException を発生させる。
+    /// 4. ResultがOkの場合でもrecoveryがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Ok_RecoverWith_should_throw_exception_when_recovery_function_is_null()
+    public void Ok_RecoverWith_should_throw_argument_null_exception_when_recovery_is_null()
     {
-        var result = Result<string, int>.Ok(10);
+        var ok = Result<string, int>.Ok(10);
 
-        Assert.Throws<ArgumentNullException>(() => result.RecoverWith(null!));
+        Assert.Throws<ArgumentNullException>(() => ok.RecoverWith(null!));
     }
 
     /// <summary>
-    /// 5. ResultがFailの場合でもrecovery関数がnullの場合は ArgumentNullException を発生させる。
+    /// 5. ResultがFailの場合でもrecoveryがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Fail_RecoverWith_should_throw_exception_when_recovery_function_is_null()
+    public void Fail_RecoverWith_should_throw_argument_null_exception_when_recovery_is_null()
     {
-        var result = Result<string, int>.Fail("error");
+        var fail = Result<string, int>.Fail("error");
 
-        Assert.Throws<ArgumentNullException>(() => result.RecoverWith(null!));
+        Assert.Throws<ArgumentNullException>(() => fail.RecoverWith(null!));
     }
 
     /// <summary>
-    /// 6. Resultがdefaultでrecovery関数もnullの場合は、
-    /// Resultの未初期化を優先して InvalidOperationException を発生させる。
+    /// 6. Resultがdefaultでrecoveryもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Default_RecoverWith_should_throw_invalid_operation_exception_before_null_recovery_check()
+    public void Default_RecoverWith_should_throw_invalid_operation_exception_before_recovery_null_check()
     {
-        var result = default(Result<string, int>);
+        var uninitialized = default(Result<string, int>);
 
-        Assert.Throws<InvalidOperationException>(() => result.RecoverWith(null!));
+        Assert.Throws<InvalidOperationException>(() => uninitialized.RecoverWith(null!));
     }
 
     /// <summary>
-    /// 7. recovery関数がdefaultのResultを返した場合は InvalidOperationException を発生させる。
+    /// 7. ResultがFailでrecoveryが未初期化Resultを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void RecoverWith_should_throw_invalid_operation_exception_when_recovery_function_returns_default_value()
+    public void Fail_RecoverWith_should_throw_invalid_operation_exception_when_recovery_returns_uninitialized_result()
     {
-        var result = Result<string, int>.Fail("error");
+        var fail = Result<string, int>.Fail("error");
 
-        Assert.Throws<InvalidOperationException>(() => result.RecoverWith(_ => default(Result<string, int>)));
+        Assert.Throws<InvalidOperationException>(() => fail.RecoverWith(_ => default(Result<string, int>)));
     }
 
     /// <summary>
-    /// 8. recovery関数がFail結果を返した場合は、そのFail結果を返す。
+    /// 8. ResultがFailでrecoveryがFailを返した場合は、そのFailをそのまま返す。
     /// </summary>
     [Test]
-    public void RecoverWith_should_return_recovered_Fail_result_when_recovery_function_returns_Fail_result()
+    public void Fail_RecoverWith_should_return_recovered_fail_when_recovery_returns_fail()
     {
-        var original = Result<string, int>.Fail("original error");
-        var actual = original.RecoverWith(_ => Result<string, int>.Fail("recovery error"));
+        var fail = Result<string, int>.Fail("original error");
+        var recoveredResult = fail.RecoverWith(_ => Result<string, int>.Fail("recovery error"));
 
         Assert.Multiple(() =>
         {
-            Assert.That(actual.IsFailure, Is.True);
-            Assert.That(actual.Error, Is.EqualTo("recovery error"));
+            Assert.That(recoveredResult.IsFailure, Is.True);
+            Assert.That(recoveredResult.Error, Is.EqualTo("recovery error"));
         });
     }
 
     /// <summary>
-    /// 9. recovery関数が例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// 9. ResultがFailでrecoveryが例外を発生させた場合は、
+    /// その例外をそのまま伝播させる。
     /// </summary>
     [Test]
-    public void RecoverWith_should_propagate_exception_thrown_by_recovery_function()
+    public void Fail_RecoverWith_should_propagate_exception_when_recovery_throws()
     {
-        var result = Result<string, int>.Fail("error");
-        var exception = new NotSupportedException("recovery error");
+        var fail = Result<string, int>.Fail("error");
+        var expectedException = new NotSupportedException("recovery error");
 
-        var actual = Assert.Throws<NotSupportedException>(() => result.RecoverWith(_ => throw exception));
+        var actualException = Assert.Throws<NotSupportedException>(() => fail.RecoverWith(_ => throw expectedException));
 
-        Assert.That(actual, Is.SameAs(exception));
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

@@ -7,10 +7,10 @@
 public class UnitTests
 {
     /// <summary>
-    /// 1. Unit 同士は等しい
+    /// 1. 2つのUnitは等しい。
     /// </summary>
     [Test]
-    public void Unit_Equals_should_return_true()
+    public void Unit_Equals_should_return_true_when_other_is_unit()
     {
         var left = Unit.Value;
         var right = Unit.Value;
@@ -19,10 +19,10 @@ public class UnitTests
     }
 
     /// <summary>
-    /// 2. object として比較した Unit 同士も等しい
+    /// 2. objectとして比較した2つのUnitも等しい。
     /// </summary>
     [Test]
-    public void Unit_Equals_object_should_return_true()
+    public void Unit_Equals_object_should_return_true_when_other_is_unit()
     {
         var unit = Unit.Value;
         object other = Unit.Value;
@@ -31,10 +31,10 @@ public class UnitTests
     }
 
     /// <summary>
-    /// 3. Unit 以外の object とは等しくない
+    /// 3. objectとして異なる型と比較した場合はfalseを返す。
     /// </summary>
     [Test]
-    public void Unit_Equals_non_unit_object_should_return_false()
+    public void Unit_Equals_object_should_return_false_when_other_is_different_type()
     {
         var unit = Unit.Value;
         object other = new();
@@ -43,7 +43,7 @@ public class UnitTests
     }
 
     /// <summary>
-    /// 4. Unit のハッシュコードは常に 0 を返す
+    /// 4. Unitのハッシュコードは常に0を返す。
     /// </summary>
     [Test]
     public void Unit_GetHashCode_should_return_zero()
@@ -54,7 +54,7 @@ public class UnitTests
     }
 
     /// <summary>
-    /// 5. == 演算子では Unit 同士は等しい
+    /// 5. ==演算子で2つのUnitを比較した場合はtrueを返す。
     /// </summary>
     [Test]
     public void Unit_Equality_operator_should_return_true()
@@ -66,7 +66,7 @@ public class UnitTests
     }
 
     /// <summary>
-    /// 6. != 演算子では Unit 同士は等しくないとは判定されない
+    /// 6. !=演算子で2つのUnitを比較した場合はfalseを返す。
     /// </summary>
     [Test]
     public void Unit_Inequality_operator_should_return_false()
@@ -78,7 +78,7 @@ public class UnitTests
     }
 
     /// <summary>
-    /// 7. ToString は "()" を返す
+    /// 7. UnitのToStringは"()"を返す。
     /// </summary>
     [Test]
     public void Unit_ToString_should_return_parentheses()
@@ -89,7 +89,7 @@ public class UnitTests
     }
 
     /// <summary>
-    /// 8. default(Unit) は Unit.Value と等しい
+    /// 8. default(Unit)はUnit.Valueと等しい。
     /// </summary>
     [Test]
     public void Default_Unit_should_equal_Unit_Value()

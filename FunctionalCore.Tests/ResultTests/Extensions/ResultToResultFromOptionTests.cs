@@ -5,14 +5,14 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 public class ResultToResultFromOptionTests
 {
     /// <summary>
-    /// 1. Some.ToResult(error) は Value を持つ Ok を返す
+    /// 1. OptionがSomeの場合はValueを保持するOkを返す。
     /// </summary>
     [Test]
-    public void Option_Some_ToResult_should_return_ok()
+    public void Some_ToResult_should_return_ok()
     {
-        var option = Option<int>.Some(5);
+        var some = Option<int>.Some(5);
 
-        var result = option.ToResult<string, int>("error");
+        var result = some.ToResult<string, int>("error");
 
         Assert.Multiple(() =>
         {
@@ -23,32 +23,44 @@ public class ResultToResultFromOptionTests
     }
 
     /// <summary>
-    /// 2. None.ToResult(error) は指定した Error を持つ Fail を返す
+    /// 2. OptionがNoneの場合は指定されたErrorを保持するFailを返す。
     /// </summary>
     [Test]
-    public void Option_None_ToResult_should_return_failure()
+    public void None_ToResult_should_return_fail()
     {
-        var option = Option<int>.None;
+        var none = Option<int>.None;
 
-        var result = option.ToResult<string, int>("error");
+        var result = none.ToResult<string, int>("error");
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Error, Is.EqualTo("error"));
         });
     }
 
     /// <summary>
-    /// 3. error が null の場合は ArgumentNullException が発生する
+    /// 3. OptionがSomeの場合でもerrorがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_ToResult_null_error_should_throw()
+    public void Some_ToResult_should_throw_argument_null_exception_when_error_is_null()
     {
-        var option = Option<int>.Some(5);
+        var some = Option<int>.Some(5);
         string? error = null;
 
-        Assert.Throws<ArgumentNullException>(() => option.ToResult<string, int>(error!));
+        Assert.Throws<ArgumentNullException>(() => some.ToResult<string, int>(error!));
+    }
+
+    /// <summary>
+    /// 4. OptionがNoneの場合でもerrorがnullの場合はArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void None_ToResult_should_throw_argument_null_exception_when_error_is_null()
+    {
+        var none = Option<int>.None;
+        string? error = null;
+
+        Assert.Throws<ArgumentNullException>(() => none.ToResult<string, int>(error!));
     }
 }

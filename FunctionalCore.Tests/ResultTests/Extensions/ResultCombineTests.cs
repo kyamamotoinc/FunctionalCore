@@ -5,14 +5,15 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 public class ResultCombineTests
 {
     /// <summary>
-    /// 1. 両方が Ok の場合は selector を実行し、組み合わせた値を持つ Ok を返す
+    /// 1. 両方のResultがOkの場合はselectorを実行し、組み合わせた値を保持するOkを返す。
     /// </summary>
     [Test]
-    public void Result_Ok_Ok_Combine_should_return_combined_value()
+    public void Ok_Ok_Combine_should_return_combined_result()
     {
-        var ok3 = Result<string, int>.Ok(3);
-        var ok5 = Result<string, int>.Ok(5);
-        var result = ok3.Combine(ok5, (x, y) => x + y);
+        var first = Result<string, int>.Ok(3);
+        var second = Result<string, int>.Ok(5);
+
+        var result = first.Combine(second, (x, y) => x + y);
 
         Assert.Multiple(() =>
         {
@@ -23,14 +24,15 @@ public class ResultCombineTests
     }
 
     /// <summary>
-    /// 2. Combine は成功値の型を変更できる
+    /// 2. 両方のResultがOkの場合はselectorによって成功値の型を変更できる。
     /// </summary>
     [Test]
-    public void Result_Ok_Ok_Combine_should_change_value_type()
+    public void Ok_Ok_Combine_should_change_value_type()
     {
-        var ok3 = Result<string, int>.Ok(3);
-        var ok5 = Result<string, int>.Ok(5);
-        var result = ok3.Combine(ok5, (x, y) => $"{x}:{y}");
+        var first = Result<string, int>.Ok(3);
+        var second = Result<string, int>.Ok(5);
+
+        var result = first.Combine(second, (x, y) => $"{x}:{y}");
 
         Assert.Multiple(() =>
         {
@@ -40,16 +42,16 @@ public class ResultCombineTests
     }
 
     /// <summary>
-    /// 3. 両方が Ok の場合は selector を1回だけ実行する
+    /// 3. 両方のResultがOkの場合はselectorを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Ok_Ok_Combine_should_invoke_selector_once()
+    public void Ok_Ok_Combine_should_invoke_selector_once()
     {
-        var ok3 = Result<string, int>.Ok(3);
-        var ok5 = Result<string, int>.Ok(5);
+        var first = Result<string, int>.Ok(3);
+        var second = Result<string, int>.Ok(5);
         int count = 0;
 
-        ok3.Combine(ok5, (x, y) =>
+        first.Combine(second, (x, y) =>
         {
             count++;
             return x + y;
@@ -59,44 +61,46 @@ public class ResultCombineTests
     }
 
     /// <summary>
-    /// 4. 1つ目が Fail の場合は1つ目の Error を返す
+    /// 4. 1つ目のResultがFailの場合は1つ目のErrorを返す。
     /// </summary>
     [Test]
-    public void Result_Fail_Ok_Combine_should_return_first_error()
+    public void Fail_Ok_Combine_should_return_first_error()
     {
-        var fail = Result<string, int>.Fail("error");
-        var ok5 = Result<string, int>.Ok(5);
-        var result = fail.Combine(ok5, (x, y) => x + y);
+        var first = Result<string, int>.Fail("first error");
+        var second = Result<string, int>.Ok(5);
+
+        var result = first.Combine(second, (x, y) => x + y);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsFailure, Is.True);
-            Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(result.Error, Is.EqualTo("first error"));
         });
     }
 
     /// <summary>
-    /// 5. 2つ目が Fail の場合は2つ目の Error を返す
+    /// 5. 2つ目のResultがFailの場合は2つ目のErrorを返す。
     /// </summary>
     [Test]
-    public void Result_Ok_Fail_Combine_should_return_second_error()
+    public void Ok_Fail_Combine_should_return_second_error()
     {
-        var ok3 = Result<string, int>.Ok(3);
-        var fail = Result<string, int>.Fail("error");
-        var result = ok3.Combine(fail, (x, y) => x + y);
+        var first = Result<string, int>.Ok(3);
+        var second = Result<string, int>.Fail("second error");
+
+        var result = first.Combine(second, (x, y) => x + y);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsFailure, Is.True);
-            Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(result.Error, Is.EqualTo("second error"));
         });
     }
 
     /// <summary>
-    /// 6. 両方が Fail の場合は1つ目の Error を優先する
+    /// 6. 両方のResultがFailの場合は1つ目のErrorを優先して返す。
     /// </summary>
     [Test]
-    public void Result_Fail_Fail_Combine_should_return_first_error()
+    public void Fail_Fail_Combine_should_return_first_error()
     {
         var first = Result<string, int>.Fail("first error");
         var second = Result<string, int>.Fail("second error");
@@ -111,16 +115,16 @@ public class ResultCombineTests
     }
 
     /// <summary>
-    /// 7. 1つ目が Fail の場合は selector を実行しない
+    /// 7. 1つ目のResultがFailの場合はselectorを実行しない。
     /// </summary>
     [Test]
-    public void Result_Fail_Ok_Combine_should_not_invoke_selector()
+    public void Fail_Ok_Combine_should_not_invoke_selector()
     {
-        var fail = Result<string, int>.Fail("error");
-        var ok5 = Result<string, int>.Ok(5);
+        var first = Result<string, int>.Fail("error");
+        var second = Result<string, int>.Ok(5);
         int count = 0;
 
-        fail.Combine(ok5, (x, y) =>
+        first.Combine(second, (x, y) =>
         {
             count++;
             return x + y;
@@ -130,16 +134,16 @@ public class ResultCombineTests
     }
 
     /// <summary>
-    /// 8. 2つ目が Fail の場合は selector を実行しない
+    /// 8. 2つ目のResultがFailの場合はselectorを実行しない。
     /// </summary>
     [Test]
-    public void Result_Ok_Fail_Combine_should_not_invoke_selector()
+    public void Ok_Fail_Combine_should_not_invoke_selector()
     {
-        var ok3 = Result<string, int>.Ok(3);
-        var fail = Result<string, int>.Fail("error");
+        var first = Result<string, int>.Ok(3);
+        var second = Result<string, int>.Fail("error");
         int count = 0;
 
-        ok3.Combine(fail, (x, y) =>
+        first.Combine(second, (x, y) =>
         {
             count++;
             return x + y;
@@ -149,84 +153,148 @@ public class ResultCombineTests
     }
 
     /// <summary>
-    /// 9. selector が null の場合は ArgumentNullException が発生する
+    /// 9. 両方のResultがOkの場合でもselectorがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Combine_null_selector_should_throw()
+    public void Ok_Ok_Combine_should_throw_argument_null_exception_when_selector_is_null()
     {
-        var ok3 = Result<string, int>.Ok(3);
-        var ok5 = Result<string, int>.Ok(5);
-        Func<int, int, int>? selector = null;
+        var first = Result<string, int>.Ok(3);
+        var second = Result<string, int>.Ok(5);
 
-        Assert.Throws<ArgumentNullException>(() => ok3.Combine(ok5, selector!));
+        Assert.Throws<ArgumentNullException>(() => first.Combine(second, (Func<int, int, int>)null!));
     }
 
     /// <summary>
-    /// 10. selector が null を返した場合は InvalidOperationException が発生する
+    /// 10. 1つ目のResultがFailの場合でもselectorがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ok_Ok_Combine_selector_returning_null_should_throw()
+    public void Fail_Ok_Combine_should_throw_argument_null_exception_when_selector_is_null()
     {
-        var ok3 = Result<string, int>.Ok(3);
-        var ok5 = Result<string, int>.Ok(5);
-        Assert.Throws<InvalidOperationException>(() => ok3.Combine(ok5, (_, _) => (string)null!));
+        var first = Result<string, int>.Fail("error");
+        var second = Result<string, int>.Ok(5);
+
+        Assert.Throws<ArgumentNullException>(() => first.Combine(second, (Func<int, int, int>)null!));
     }
 
     /// <summary>
-    /// 11. 1つ目が Fail の場合は null を返す selector でも実行されない
+    /// 11. 2つ目のResultがFailの場合でもselectorがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Fail_Ok_Combine_should_not_evaluate_null_returning_selector()
+    public void Ok_Fail_Combine_should_throw_argument_null_exception_when_selector_is_null()
     {
-        var fail = Result<string, int>.Fail("error");
-        var ok5 = Result<string, int>.Ok(5);
-        var result = fail.Combine(ok5, (_, _) => (string)null!);
+        var first = Result<string, int>.Ok(3);
+        var second = Result<string, int>.Fail("error");
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(result.IsFailure, Is.True);
-            Assert.That(result.Error, Is.EqualTo("error"));
-        });
+        Assert.Throws<ArgumentNullException>(() => first.Combine(second, (Func<int, int, int>)null!));
     }
 
     /// <summary>
-    /// 12. 2つ目が Fail の場合は null を返す selector でも実行されない
+    /// 12. 1つ目のResultがdefaultの場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ok_Fail_Combine_should_not_evaluate_null_returning_selector()
+    public void Default_Ok_Combine_should_throw_invalid_operation_exception()
     {
-        var ok3 = Result<string, int>.Ok(3);
-        var fail = Result<string, int>.Fail("error");
-        var result = ok3.Combine(fail, (_, _) => (string)null!);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(result.IsFailure, Is.True);
-            Assert.That(result.Error, Is.EqualTo("error"));
-        });
-    }
-
-    /// <summary>
-    /// 13. 1つ目の Result が未初期化の場合は InvalidOperationException が発生する
-    /// </summary>
-    [Test]
-    public void Result_Combine_uninitialized_first_result_should_throw()
-    {
-        var ok3 = Result<string, int>.Ok(3);
         var first = default(Result<string, int>);
+        var second = Result<string, int>.Ok(5);
 
-        Assert.Throws<InvalidOperationException>(() => first.Combine(ok3, (x, y) => x + y));
+        Assert.Throws<InvalidOperationException>(() => first.Combine(second, (x, y) => x + y));
     }
 
     /// <summary>
-    /// 14. 2つ目の Result が未初期化の場合は InvalidOperationException が発生する
+    /// 13. 2つ目のResultがdefaultの場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Combine_uninitialized_second_result_should_throw()
+    public void Ok_Default_Combine_should_throw_invalid_operation_exception()
     {
-        var ok3 = Result<string, int>.Ok(3);
+        var first = Result<string, int>.Ok(3);
         var second = default(Result<string, int>);
 
-        Assert.Throws<InvalidOperationException>(() => ok3.Combine(second, (x, y) => x + y));
+        Assert.Throws<InvalidOperationException>(() => first.Combine(second, (x, y) => x + y));
+    }
+
+    /// <summary>
+    /// 14. 1つ目のResultがdefaultでselectorもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_Ok_Combine_should_throw_invalid_operation_exception_before_selector_null_check()
+    {
+        var first = default(Result<string, int>);
+        var second = Result<string, int>.Ok(5);
+
+        Assert.Throws<InvalidOperationException>(() => first.Combine(second, (Func<int, int, int>)null!));
+    }
+
+    /// <summary>
+    /// 15. 2つ目のResultがdefaultでselectorもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Ok_Default_Combine_should_throw_invalid_operation_exception_before_selector_null_check()
+    {
+        var first = Result<string, int>.Ok(3);
+        var second = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => first.Combine(second, (Func<int, int, int>)null!));
+    }
+
+    /// <summary>
+    /// 16. 両方のResultがOkでselectorがnullを返した場合はInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Ok_Ok_Combine_should_throw_invalid_operation_exception_when_selector_returns_null()
+    {
+        var first = Result<string, int>.Ok(3);
+        var second = Result<string, int>.Ok(5);
+
+        Assert.Throws<InvalidOperationException>(() => first.Combine(second, (_, _) => (string)null!));
+    }
+
+    /// <summary>
+    /// 17. 1つ目のResultがFailの場合はnullを返すselectorでも実行せず、1つ目のFailを返す。
+    /// </summary>
+    [Test]
+    public void Fail_Ok_Combine_should_return_first_fail_without_invoking_null_returning_selector()
+    {
+        var first = Result<string, int>.Fail("error");
+        var second = Result<string, int>.Ok(5);
+        int count = 0;
+
+        var result = first.Combine(second, (_, _) =>
+        {
+            count++;
+            return (string)null!;
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(count, Is.EqualTo(0));
+        });
+    }
+
+    /// <summary>
+    /// 18. 2つ目のResultがFailの場合はnullを返すselectorでも実行せず、2つ目のFailを返す。
+    /// </summary>
+    [Test]
+    public void Ok_Fail_Combine_should_return_second_fail_without_invoking_null_returning_selector()
+    {
+        var first = Result<string, int>.Ok(3);
+        var second = Result<string, int>.Fail("error");
+        int count = 0;
+
+        var result = first.Combine(second, (_, _) =>
+        {
+            count++;
+            return (string)null!;
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 }

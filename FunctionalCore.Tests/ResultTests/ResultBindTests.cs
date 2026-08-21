@@ -3,10 +3,10 @@
 public class ResultBindTests
 {
     /// <summary>
-    /// 1. Ok.Bind は binder を実行し、その Result を返す
+    /// 1. ResultがOkの場合はbinderを実行し、そのResultを返す。
     /// </summary>
     [Test]
-    public void Result_Ok_Bind_should_return_binder_result()
+    public void Ok_Bind_should_return_binder_result()
     {
         var ok = Result<string, int>.Ok(5);
         var result = ok.Bind(x => Result<string, int>.Ok(x + 1));
@@ -20,10 +20,10 @@ public class ResultBindTests
     }
 
     /// <summary>
-    /// 2. Ok.Bind は成功値の型を変更できる
+    /// 2. ResultがOkの場合はbinderによって成功値の型を変更できる。
     /// </summary>
     [Test]
-    public void Result_Ok_Bind_should_change_value_type()
+    public void Ok_Bind_should_change_value_type()
     {
         var ok = Result<string, int>.Ok(5);
         var result = ok.Bind(x => Result<string, string>.Ok($"value:{x}"));
@@ -36,27 +36,27 @@ public class ResultBindTests
     }
 
     /// <summary>
-    /// 3. Ok.Bind の binder が Fail を返した場合は失敗になる
+    /// 3. ResultがOkでbinderがFailを返した場合は、そのFailを返す。
     /// </summary>
     [Test]
-    public void Result_Ok_Bind_should_return_failure_when_binder_fails()
+    public void Ok_Bind_should_return_fail_when_binder_returns_fail()
     {
         var ok = Result<string, int>.Ok(5);
         var result = ok.Bind(_ => Result<string, int>.Fail("bind error"));
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Error, Is.EqualTo("bind error"));
         });
     }
 
     /// <summary>
-    /// 4. Ok.Bind は binder を1回だけ実行する
+    /// 4. ResultがOkの場合はbinderを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Ok_Bind_should_invoke_binder_once()
+    public void Ok_Bind_should_invoke_binder_once()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -71,10 +71,10 @@ public class ResultBindTests
     }
 
     /// <summary>
-    /// 5. Fail.Bind は binder を実行しない
+    /// 5. ResultがFailの場合はbinderを実行しない。
     /// </summary>
     [Test]
-    public void Result_Fail_Bind_should_not_invoke_binder()
+    public void Fail_Bind_should_not_invoke_binder()
     {
         var fail = Result<string, int>.Fail("error");
         int count = 0;
@@ -89,55 +89,88 @@ public class ResultBindTests
     }
 
     /// <summary>
-    /// 6. Fail.Bind は元の Error を保持する
+    /// 6. ResultがFailの場合は元のErrorを保持する。
     /// </summary>
     [Test]
-    public void Result_Fail_Bind_should_keep_original_error()
+    public void Fail_Bind_should_keep_original_error()
     {
         var fail = Result<string, int>.Fail("error");
         var result = fail.Bind(x => Result<string, int>.Ok(x + 1));
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Error, Is.EqualTo("error"));
         });
     }
 
     /// <summary>
-    /// 7. binder が null の場合は ArgumentNullException が発生する
+    /// 7. ResultがOkの場合でもbinderがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ok_Bind_null_binder_should_throw()
+    public void Ok_Bind_should_throw_argument_null_exception_when_binder_is_null()
     {
         var ok = Result<string, int>.Ok(5);
+
         Assert.Throws<ArgumentNullException>(() => ok.Bind<string>(null!));
     }
 
     /// <summary>
-    /// 8. binder が未初期化 Result を返した場合は InvalidOperationException が発生する
+    /// 8. ResultがFailの場合でもbinderがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ok_Bind_uninitialized_result_should_throw()
+    public void Fail_Bind_should_throw_argument_null_exception_when_binder_is_null()
+    {
+        var fail = Result<string, int>.Fail("error");
+
+        Assert.Throws<ArgumentNullException>(() => fail.Bind<string>(null!));
+    }
+
+    /// <summary>
+    /// 9. Resultがdefaultでbinderもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_Bind_should_throw_invalid_operation_exception_before_binder_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Bind<string>(null!));
+    }
+
+    /// <summary>
+    /// 10. ResultがOkでbinderが未初期化Resultを返した場合はInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Ok_Bind_should_throw_invalid_operation_exception_when_binder_returns_uninitialized_result()
     {
         var ok = Result<string, int>.Ok(5);
+
         Assert.Throws<InvalidOperationException>(() => ok.Bind(_ => default(Result<string, string>)));
     }
 
     /// <summary>
-    /// 9. Fail.Bind では binder が未初期化 Result を返す関数でも実行されない
+    /// 11. ResultがFailの場合はbinderを実行せず、元のFailを返す。
+    /// binderが未初期化Resultを返す関数でも実行されない。
     /// </summary>
     [Test]
-    public void Result_Fail_Bind_should_not_evaluate_uninitialized_binder_result()
+    public void Fail_Bind_should_return_original_fail_without_invoking_binder()
     {
         var fail = Result<string, int>.Fail("error");
-        var result = fail.Bind(_ => default(Result<string, string>));
+        int count = 0;
+
+        var result = fail.Bind(_ =>
+        {
+            count++;
+            return default(Result<string, string>);
+        });
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 }

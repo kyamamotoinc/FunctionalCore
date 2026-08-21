@@ -3,10 +3,10 @@
 public class ResultEnsureTests
 {
     /// <summary>
-    /// 1. Ok.Ensure で predicate が true の場合は元の Ok を保持する
+    /// 1. ResultがOkでpredicateがtrueを返す場合は元のOkをそのまま返す。
     /// </summary>
     [Test]
-    public void Result_Ok_Ensure_true_should_keep_original_ok()
+    public void Ok_Ensure_should_return_original_ok_when_predicate_returns_true()
     {
         var ok = Result<string, int>.Ok(5);
         var result = ok.Ensure(x => x > 0, _ => "invalid");
@@ -21,27 +21,27 @@ public class ResultEnsureTests
     }
 
     /// <summary>
-    /// 2. Ok.Ensure で predicate が false の場合は Fail に変換する
+    /// 2. ResultがOkでpredicateがfalseを返す場合はerrorFactoryが生成したエラーを持つFailを返す。
     /// </summary>
     [Test]
-    public void Result_Ok_Ensure_false_should_return_failure()
+    public void Ok_Ensure_should_return_fail_when_predicate_returns_false()
     {
         var ok = Result<string, int>.Ok(5);
         var result = ok.Ensure(x => x < 0, _ => "invalid");
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Error, Is.EqualTo("invalid"));
         });
     }
 
     /// <summary>
-    /// 3. Ok.Ensure は predicate を1回だけ実行する
+    /// 3. ResultがOkの場合はpredicateを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Ok_Ensure_should_invoke_predicate_once()
+    public void Ok_Ensure_should_invoke_predicate_once()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -56,10 +56,10 @@ public class ResultEnsureTests
     }
 
     /// <summary>
-    /// 4. predicate が true の場合は errorFactory を実行しない
+    /// 4. ResultがOkでpredicateがtrueを返す場合はerrorFactoryを実行しない。
     /// </summary>
     [Test]
-    public void Result_Ok_Ensure_true_should_not_invoke_error_factory()
+    public void Ok_Ensure_should_not_invoke_errorFactory_when_predicate_returns_true()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -74,10 +74,10 @@ public class ResultEnsureTests
     }
 
     /// <summary>
-    /// 5. predicate が false の場合は errorFactory を1回だけ実行する
+    /// 5. ResultがOkでpredicateがfalseを返す場合はerrorFactoryを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Ok_Ensure_false_should_invoke_error_factory_once()
+    public void Ok_Ensure_should_invoke_errorFactory_once_when_predicate_returns_false()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -97,10 +97,10 @@ public class ResultEnsureTests
     }
 
     /// <summary>
-    /// 6. Fail.Ensure は predicate を実行しない
+    /// 6. ResultがFailの場合はpredicateを実行しない。
     /// </summary>
     [Test]
-    public void Result_Fail_Ensure_should_not_invoke_predicate()
+    public void Fail_Ensure_should_not_invoke_predicate()
     {
         var fail = Result<string, int>.Fail("error");
         int count = 0;
@@ -115,10 +115,10 @@ public class ResultEnsureTests
     }
 
     /// <summary>
-    /// 7. Fail.Ensure は errorFactory を実行しない
+    /// 7. ResultがFailの場合はerrorFactoryを実行しない。
     /// </summary>
     [Test]
-    public void Result_Fail_Ensure_should_not_invoke_error_factory()
+    public void Fail_Ensure_should_not_invoke_errorFactory()
     {
         var fail = Result<string, int>.Fail("error");
         int count = 0;
@@ -133,82 +133,148 @@ public class ResultEnsureTests
     }
 
     /// <summary>
-    /// 8. Fail.Ensure は元の Error を保持する
+    /// 8. ResultがFailの場合は元のFailをそのまま返す。
     /// </summary>
     [Test]
-    public void Result_Fail_Ensure_should_keep_original_error()
+    public void Fail_Ensure_should_return_original_fail()
     {
         var fail = Result<string, int>.Fail("error");
         var result = fail.Ensure(_ => false, _ => "invalid");
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Error, Is.EqualTo("error"));
             Assert.That(result, Is.EqualTo(fail));
         });
     }
 
     /// <summary>
-    /// 9. predicate が null の場合は ArgumentNullException が発生する
+    /// 9. ResultがOkの場合でもpredicateがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ensure_null_predicate_should_throw()
+    public void Ok_Ensure_should_throw_argument_null_exception_when_predicate_is_null()
     {
         var ok = Result<string, int>.Ok(5);
+
         Assert.Throws<ArgumentNullException>(() => ok.Ensure(null!, _ => "invalid"));
     }
 
     /// <summary>
-    /// 10. errorFactory が null の場合は ArgumentNullException が発生する
+    /// 10. ResultがFailの場合でもpredicateがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ensure_null_error_factory_should_throw()
+    public void Fail_Ensure_should_throw_argument_null_exception_when_predicate_is_null()
+    {
+        var fail = Result<string, int>.Fail("error");
+
+        Assert.Throws<ArgumentNullException>(() => fail.Ensure(null!, _ => "invalid"));
+    }
+
+    /// <summary>
+    /// 11. ResultがOkの場合でもerrorFactoryがnullの場合はArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Ok_Ensure_should_throw_argument_null_exception_when_errorFactory_is_null()
     {
         var ok = Result<string, int>.Ok(5);
+
         Assert.Throws<ArgumentNullException>(() => ok.Ensure(_ => false, null!));
     }
 
     /// <summary>
-    /// 11. predicate が false で errorFactory が null を返した場合は InvalidOperationException が発生する
+    /// 12. ResultがFailの場合でもerrorFactoryがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ok_Ensure_error_factory_returning_null_should_throw()
+    public void Fail_Ensure_should_throw_argument_null_exception_when_errorFactory_is_null()
+    {
+        var fail = Result<string, int>.Fail("error");
+
+        Assert.Throws<ArgumentNullException>(() => fail.Ensure(_ => false, null!));
+    }
+
+    /// <summary>
+    /// 13. Resultがdefaultでpredicateもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_Ensure_should_throw_invalid_operation_exception_before_predicate_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Ensure(null!, _ => "invalid"));
+    }
+
+    /// <summary>
+    /// 14. ResultがdefaultでerrorFactoryもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_Ensure_should_throw_invalid_operation_exception_before_errorFactory_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Ensure(_ => true, null!));
+    }
+
+    /// <summary>
+    /// 15. ResultがOkでpredicateがfalseを返し、errorFactoryがnullを返した場合はInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Ok_Ensure_should_throw_invalid_operation_exception_when_errorFactory_returns_null()
     {
         var ok = Result<string, int>.Ok(5);
+
         Assert.Throws<InvalidOperationException>(() => ok.Ensure(_ => false, _ => null!));
     }
 
     /// <summary>
-    /// 12. predicate が true の場合は null を返す errorFactory でも実行されない
+    /// 16. ResultがOkでpredicateがtrueを返す場合は、
+    /// nullを返すerrorFactoryでも実行せず、元のOkを返す。
     /// </summary>
     [Test]
-    public void Result_Ok_Ensure_true_should_not_evaluate_null_returning_error_factory()
+    public void Ok_Ensure_should_return_original_ok_without_invoking_null_returning_errorFactory_when_predicate_returns_true()
     {
         var ok = Result<string, int>.Ok(5);
-        var result = ok.Ensure(_ => true, _ => null!);
+        int count = 0;
+
+        var result = ok.Ensure(_ => true, _ =>
+        {
+            count++;
+            return null!;
+        });
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value, Is.EqualTo(5));
+            Assert.That(result, Is.EqualTo(ok));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 13. Fail.Ensure では null を返す errorFactory でも実行されない
+    /// 17. ResultがFailの場合はnullを返すerrorFactoryも実行せず、元のFailを返す。
     /// </summary>
     [Test]
-    public void Result_Fail_Ensure_should_not_evaluate_null_returning_error_factory()
+    public void Fail_Ensure_should_return_original_fail_without_invoking_null_returning_errorFactory()
     {
         var fail = Result<string, int>.Fail("error");
-        var result = fail.Ensure(_ => false, _ => null!);
+        int count = 0;
+
+        var result = fail.Ensure(_ => false, _ =>
+        {
+            count++;
+            return null!;
+        });
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(result, Is.EqualTo(fail));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 }

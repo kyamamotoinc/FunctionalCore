@@ -5,12 +5,13 @@ namespace FunctionalCore.Tests.ResultTests.Linq;
 public class ResultSelectManyTests
 {
     /// <summary>
-    /// 1. 元の Result と中間 Result がともに Ok の場合は projector の結果を持つ Ok を返す
+    /// 1. 元のResultとselectorが返すResultがともにOkの場合はprojectorの戻り値を保持するOkを返す。
     /// </summary>
     [Test]
-    public void Result_Ok_SelectMany_should_return_projected_value()
+    public void Ok_SelectMany_should_return_projected_result()
     {
         var ok = Result<string, int>.Ok(5);
+
         var result = ok.SelectMany(
             x => Result<string, int>.Ok(x + 1),
             (x, y) => x + y);
@@ -24,12 +25,13 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 2. SelectMany は最終的な成功値の型を変更できる
+    /// 2. SelectManyはprojectorによって最終的な成功値の型を変更できる。
     /// </summary>
     [Test]
-    public void Result_Ok_SelectMany_should_change_value_type()
+    public void Ok_SelectMany_should_change_value_type()
     {
         var ok = Result<string, int>.Ok(5);
+
         var result = ok.SelectMany(
             x => Result<string, int>.Ok(x + 1),
             (x, y) => $"{x}:{y}");
@@ -42,10 +44,10 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 3. Ok.SelectMany は selector を1回だけ実行する
+    /// 3. ResultがOkの場合はselectorを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Ok_SelectMany_should_invoke_selector_once()
+    public void Ok_SelectMany_should_invoke_selector_once()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -62,10 +64,10 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 4. 元の Result が Fail の場合は selector を実行しない
+    /// 4. 元のResultがFailの場合はselectorを実行しない。
     /// </summary>
     [Test]
-    public void Result_Fail_SelectMany_should_not_invoke_selector()
+    public void Fail_SelectMany_should_not_invoke_selector()
     {
         var fail = Result<string, int>.Fail("error");
         int count = 0;
@@ -82,12 +84,13 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 5. 元の Result が Fail の場合は元の Error を保持する
+    /// 5. 元のResultがFailの場合は元のErrorを保持する。
     /// </summary>
     [Test]
-    public void Result_Fail_SelectMany_should_keep_original_error()
+    public void Fail_SelectMany_should_keep_original_error()
     {
         var fail = Result<string, int>.Fail("error");
+
         var result = fail.SelectMany(
             x => Result<string, int>.Ok(x + 1),
             (x, y) => x + y);
@@ -100,12 +103,13 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 6. selector が Fail を返した場合はその Error を持つ Fail を返す
+    /// 6. selectorがFailを返した場合は、そのFailを返す。
     /// </summary>
     [Test]
-    public void Result_Ok_SelectMany_selector_returning_failure_should_return_failure()
+    public void Ok_SelectMany_should_return_fail_when_selector_returns_fail()
     {
         var ok = Result<string, int>.Ok(5);
+
         var result = ok.SelectMany(
             _ => Result<string, int>.Fail("selector error"),
             (x, y) => x + y);
@@ -118,10 +122,10 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 7. selector が Fail を返した場合は projector を実行しない
+    /// 7. selectorがFailを返した場合はprojectorを実行しない。
     /// </summary>
     [Test]
-    public void Result_Ok_SelectMany_selector_failure_should_not_invoke_projector()
+    public void Ok_SelectMany_should_not_invoke_projector_when_selector_returns_fail()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -138,10 +142,10 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 8. 両方が Ok の場合は projector を1回だけ実行する
+    /// 8. 元のResultとselectorが返すResultがともにOkの場合はprojectorを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Ok_SelectMany_should_invoke_projector_once()
+    public void Ok_SelectMany_should_invoke_projector_once()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -158,38 +162,101 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 9. selector が null の場合は ArgumentNullException が発生する
+    /// 9. ResultがOkの場合でもselectorがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_SelectMany_null_selector_should_throw()
+    public void Ok_SelectMany_should_throw_argument_null_exception_when_selector_is_null()
     {
         var ok = Result<string, int>.Ok(5);
         Func<int, Result<string, int>>? selector = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            ok.SelectMany(selector!, (x, y) => x + y));
+        Assert.Throws<ArgumentNullException>(() => ok.SelectMany(selector!, (x, y) => x + y));
     }
 
     /// <summary>
-    /// 10. projector が null の場合は ArgumentNullException が発生する
+    /// 10. ResultがFailの場合でもselectorがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_SelectMany_null_projector_should_throw()
+    public void Fail_SelectMany_should_throw_argument_null_exception_when_selector_is_null()
+    {
+        var fail = Result<string, int>.Fail("error");
+        Func<int, Result<string, int>>? selector = null;
+
+        Assert.Throws<ArgumentNullException>(() => fail.SelectMany(selector!, (x, y) => x + y));
+    }
+
+    /// <summary>
+    /// 11. ResultがOkの場合でもprojectorがnullの場合はArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Ok_SelectMany_should_throw_argument_null_exception_when_projector_is_null()
     {
         var ok = Result<string, int>.Ok(5);
         Func<int, int, int>? projector = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            ok.SelectMany(x => Result<string, int>.Ok(x + 1), projector!));
+        Assert.Throws<ArgumentNullException>(() => ok.SelectMany(x => Result<string, int>.Ok(x + 1), projector!));
     }
 
     /// <summary>
-    /// 11. selector が未初期化 Result を返した場合は InvalidOperationException が発生する
+    /// 12. ResultがFailの場合でもprojectorがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ok_SelectMany_selector_returning_uninitialized_result_should_throw()
+    public void Fail_SelectMany_should_throw_argument_null_exception_when_projector_is_null()
+    {
+        var fail = Result<string, int>.Fail("error");
+        Func<int, int, int>? projector = null;
+
+        Assert.Throws<ArgumentNullException>(() => fail.SelectMany(x => Result<string, int>.Ok(x + 1), projector!));
+    }
+
+    /// <summary>
+    /// 13. Resultがdefaultの場合はInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_SelectMany_should_throw_invalid_operation_exception()
+    {
+        var uninitialized = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            uninitialized.SelectMany(x => Result<string, int>.Ok(x + 1), (x, y) => x + y));
+    }
+
+    /// <summary>
+    /// 14. Resultがdefaultでselectorもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_SelectMany_should_throw_invalid_operation_exception_before_selector_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+        Func<int, Result<string, int>>? selector = null;
+
+        Assert.Throws<InvalidOperationException>(() =>
+            uninitialized.SelectMany(selector!, (x, y) => x + y));
+    }
+
+    /// <summary>
+    /// 15. Resultがdefaultでprojectorもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_SelectMany_should_throw_invalid_operation_exception_before_projector_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+        Func<int, int, int>? projector = null;
+
+        Assert.Throws<InvalidOperationException>(() =>
+            uninitialized.SelectMany(x => Result<string, int>.Ok(x + 1), projector!));
+    }
+
+    /// <summary>
+    /// 16. selectorが未初期化Resultを返した場合はInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Ok_SelectMany_should_throw_invalid_operation_exception_when_selector_returns_uninitialized_result()
     {
         var ok = Result<string, int>.Ok(5);
+
         Assert.Throws<InvalidOperationException>(() =>
             ok.SelectMany(
                 _ => default(Result<string, int>),
@@ -197,12 +264,13 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 12. projector が null を返した場合は InvalidOperationException が発生する
+    /// 17. projectorがnullを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ok_SelectMany_projector_returning_null_should_throw()
+    public void Ok_SelectMany_should_throw_invalid_operation_exception_when_projector_returns_null()
     {
         var ok = Result<string, int>.Ok(5);
+
         Assert.Throws<InvalidOperationException>(() =>
             ok.SelectMany(
                 x => Result<string, int>.Ok(x + 1),
@@ -210,48 +278,65 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 13. 元の Result が Fail の場合は未初期化 Result を返す selector でも実行されない
+    /// 18. 元のResultがFailの場合はselectorを実行せず、元のFailを返す。
+    /// selectorが未初期化Resultを返す関数でも実行されない。
     /// </summary>
     [Test]
-    public void Result_Fail_SelectMany_should_not_evaluate_uninitialized_selector_result()
+    public void Fail_SelectMany_should_return_original_fail_without_invoking_selector()
     {
         var fail = Result<string, int>.Fail("error");
+        int count = 0;
+
         var result = fail.SelectMany(
-            _ => default(Result<string, int>),
+            _ =>
+            {
+                count++;
+                return default(Result<string, int>);
+            },
             (x, y) => x + y);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 14. selector が Fail を返した場合は null を返す projector でも実行されない
+    /// 19. selectorがFailを返した場合はprojectorを実行せず、そのFailを返す。
+    /// projectorがnullを返す関数でも実行されない。
     /// </summary>
     [Test]
-    public void Result_SelectMany_selector_failure_should_not_evaluate_null_returning_projector()
+    public void Ok_SelectMany_should_return_selector_fail_without_invoking_projector()
     {
         var ok = Result<string, int>.Ok(5);
+        int count = 0;
+
         var result = ok.SelectMany(
             _ => Result<string, int>.Fail("selector error"),
-            (_, _) => (string)null!);
+            (_, _) =>
+            {
+                count++;
+                return (string)null!;
+            });
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("selector error"));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 15. LINQ クエリ構文の複数 from で SelectMany が利用できる
+    /// 20. LINQクエリ構文の複数fromでSelectManyを利用できる。
     /// </summary>
     [Test]
-    public void Result_SelectMany_should_support_query_syntax()
+    public void SelectMany_should_support_query_syntax()
     {
         var ok = Result<string, int>.Ok(5);
+
         var result =
             from x in ok
             from y in Result<string, int>.Ok(x + 1)
@@ -265,12 +350,13 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 16. LINQ クエリ構文で中間 Result が Fail の場合はその Error を保持する
+    /// 21. LINQクエリ構文で中間ResultがFailの場合は、そのErrorを保持する。
     /// </summary>
     [Test]
-    public void Result_SelectMany_query_syntax_intermediate_failure_should_return_failure()
+    public void SelectMany_query_syntax_should_return_intermediate_fail()
     {
         var ok = Result<string, int>.Ok(5);
+
         var result =
             from x in ok
             from y in Result<string, int>.Fail("selector error")
@@ -284,12 +370,13 @@ public class ResultSelectManyTests
     }
 
     /// <summary>
-    /// 17. LINQ クエリ構文で元の Result が Fail の場合は元の Error を保持する
+    /// 22. LINQクエリ構文で元のResultがFailの場合は元のErrorを保持する。
     /// </summary>
     [Test]
-    public void Result_SelectMany_query_syntax_source_failure_should_keep_original_error()
+    public void Fail_SelectMany_query_syntax_should_keep_original_error()
     {
         var fail = Result<string, int>.Fail("error");
+
         var result =
             from x in fail
             from y in Result<string, int>.Ok(x + 1)

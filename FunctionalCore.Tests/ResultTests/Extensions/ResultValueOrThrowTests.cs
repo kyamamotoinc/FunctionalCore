@@ -5,22 +5,23 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 public class ResultValueOrThrowTests
 {
     /// <summary>
-    /// 1. Ok.ValueOrThrow は内部の Value を返す
+    /// 1. ResultがOkの場合は成功値を返す。
     /// </summary>
     [Test]
-    public void Result_Ok_ValueOrThrow_should_return_inner_value()
+    public void Ok_ValueOrThrow_should_return_value()
     {
         var ok = Result<string, int>.Ok(5);
+
         var value = ok.ValueOrThrow(error => new InvalidOperationException(error));
 
         Assert.That(value, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 2. Ok.ValueOrThrow は例外 factory を実行しない
+    /// 2. ResultがOkの場合はtoExceptionを実行しない。
     /// </summary>
     [Test]
-    public void Result_Ok_ValueOrThrow_should_not_invoke_exception_factory()
+    public void Ok_ValueOrThrow_should_not_invoke_toException()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -33,44 +34,46 @@ public class ResultValueOrThrowTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(value, Is.EqualTo(5));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 3. Fail.ValueOrThrow は factory が生成した例外を投げる
+    /// 3. ResultがFailの場合はtoExceptionが生成した例外をスローする。
     /// </summary>
     [Test]
-    public void Result_Fail_ValueOrThrow_should_throw_factory_exception()
+    public void Fail_ValueOrThrow_should_throw_exception_created_by_toException()
     {
         var fail = Result<string, int>.Fail("error");
-        Assert.Throws<InvalidOperationException>(() => fail.ValueOrThrow(error => new InvalidOperationException(error)));
+
+        Assert.Throws<InvalidOperationException>(() =>
+            fail.ValueOrThrow(error => new InvalidOperationException(error)));
     }
 
     /// <summary>
-    /// 4. Fail.ValueOrThrow は Error を例外 factory に渡す
+    /// 4. ResultがFailの場合はErrorをtoExceptionに渡す。
     /// </summary>
     [Test]
-    public void Result_Fail_ValueOrThrow_should_pass_error_to_exception_factory()
+    public void Fail_ValueOrThrow_should_pass_error_to_toException()
     {
         var fail = Result<string, int>.Fail("error");
-        string? received = null;
+        string? receivedError = null;
 
         Assert.Throws<InvalidOperationException>(() => fail.ValueOrThrow(error =>
         {
-            received = error;
+            receivedError = error;
             return new InvalidOperationException(error);
         }));
 
-        Assert.That(received, Is.EqualTo("error"));
+        Assert.That(receivedError, Is.EqualTo("error"));
     }
 
     /// <summary>
-    /// 5. Fail.ValueOrThrow は例外 factory を1回だけ実行する
+    /// 5. ResultがFailの場合はtoExceptionを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Fail_ValueOrThrow_should_invoke_exception_factory_once()
+    public void Fail_ValueOrThrow_should_invoke_toException_once()
     {
         var fail = Result<string, int>.Fail("error");
         int count = 0;
@@ -85,59 +88,112 @@ public class ResultValueOrThrowTests
     }
 
     /// <summary>
-    /// 6. Fail.ValueOrThrow は factory が生成した例外インスタンスをそのまま投げる
+    /// 6. ResultがFailの場合はtoExceptionが生成した例外インスタンスをそのままスローする。
     /// </summary>
     [Test]
-    public void Result_Fail_ValueOrThrow_should_throw_same_exception_instance()
+    public void Fail_ValueOrThrow_should_throw_same_exception_instance_created_by_toException()
     {
         var fail = Result<string, int>.Fail("error");
-        var expected = new InvalidOperationException("expected");
+        var expectedException = new InvalidOperationException("expected");
 
-        var actual = Assert.Throws<InvalidOperationException>(() => fail.ValueOrThrow(_ => expected));
+        var actualException = Assert.Throws<InvalidOperationException>(() =>
+            fail.ValueOrThrow(_ => expectedException));
 
-        Assert.That(actual, Is.SameAs(expected));
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 
     /// <summary>
-    /// 7. exception factory が null の場合は ArgumentNullException が発生する
+    /// 7. ResultがOkの場合でもtoExceptionがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_ValueOrThrow_null_exception_factory_should_throw()
+    public void Ok_ValueOrThrow_should_throw_argument_null_exception_when_toException_is_null()
+    {
+        var ok = Result<string, int>.Ok(5);
+
+        Assert.Throws<ArgumentNullException>(() => ok.ValueOrThrow(null!));
+    }
+
+    /// <summary>
+    /// 8. ResultがFailの場合でもtoExceptionがnullの場合はArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Fail_ValueOrThrow_should_throw_argument_null_exception_when_toException_is_null()
     {
         var fail = Result<string, int>.Fail("error");
+
         Assert.Throws<ArgumentNullException>(() => fail.ValueOrThrow(null!));
     }
 
     /// <summary>
-    /// 8. Fail.ValueOrThrow で exception factory が null を返した場合は InvalidOperationException が発生する
+    /// 9. ResultがdefaultでtoExceptionもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Fail_ValueOrThrow_exception_factory_returning_null_should_throw()
+    public void Default_ValueOrThrow_should_throw_invalid_operation_exception_before_toException_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.ValueOrThrow(null!));
+    }
+
+    /// <summary>
+    /// 10. ResultがFailでtoExceptionがnullを返した場合はInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Fail_ValueOrThrow_should_throw_invalid_operation_exception_when_toException_returns_null()
     {
         var fail = Result<string, int>.Fail("error");
+
         Assert.Throws<InvalidOperationException>(() => fail.ValueOrThrow(_ => null!));
     }
 
     /// <summary>
-    /// 9. Ok.ValueOrThrow では null を返す exception factory でも実行されない
+    /// 11. ResultがOkの場合はnullを返すtoExceptionでも実行せず、成功値を返す。
     /// </summary>
     [Test]
-    public void Result_Ok_ValueOrThrow_should_not_evaluate_null_returning_exception_factory()
+    public void Ok_ValueOrThrow_should_return_value_without_invoking_null_returning_toException()
     {
         var ok = Result<string, int>.Ok(5);
-        var value = ok.ValueOrThrow(_ => null!);
+        int count = 0;
 
-        Assert.That(value, Is.EqualTo(5));
+        var value = ok.ValueOrThrow(_ =>
+        {
+            count++;
+            return null!;
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(value, Is.EqualTo(5));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 10. 未初期化 Result で ValueOrThrow を呼び出すと InvalidOperationException が発生する
+    /// 12. Resultがdefaultの場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Default_ValueOrThrow_should_throw()
+    public void Default_ValueOrThrow_should_throw_invalid_operation_exception()
     {
-        var result = default(Result<string, int>);
+        var uninitialized = default(Result<string, int>);
 
-        Assert.Throws<InvalidOperationException>(() => result.ValueOrThrow(error => new Exception(error)));
+        Assert.Throws<InvalidOperationException>(() =>
+            uninitialized.ValueOrThrow(error => new Exception(error)));
+    }
+
+    /// <summary>
+    /// 13. ResultがFailでtoExceptionが例外を発生させた場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Fail_ValueOrThrow_should_propagate_exception_when_toException_throws()
+    {
+        var fail = Result<string, int>.Fail("error");
+        var expectedException = new NotSupportedException("factory error");
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            fail.ValueOrThrow(_ => throw expectedException));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

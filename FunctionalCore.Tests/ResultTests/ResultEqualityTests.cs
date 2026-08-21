@@ -3,29 +3,29 @@
 public class ResultEqualityTests
 {
     /// <summary>
-    /// 1. Result.Equals(object) に null を渡した場合は false を返す
+    /// 1. Equals(object)にnullを渡した場合はfalseを返す。
     /// </summary>
     [Test]
-    public void Result_Equals_null_should_return_false()
+    public void Equals_object_should_return_false_when_other_is_null()
     {
-        var result = Result<string, int>.Ok(5);
+        var ok = Result<string, int>.Ok(5);
 
-        Assert.That(result.Equals(null), Is.False);
+        Assert.That(ok.Equals(null), Is.False);
     }
 
     /// <summary>
-    /// 2. Result.Equals(object) に異なる型を渡した場合は false を返す
+    /// 2. Equals(object)に異なる型を渡した場合はfalseを返す。
     /// </summary>
     [Test]
-    public void Result_Equals_different_type_should_return_false()
+    public void Equals_object_should_return_false_when_other_is_different_type()
     {
-        var result = Result<string, int>.Ok(5);
+        var ok = Result<string, int>.Ok(5);
 
-        Assert.That(result.Equals("not result"), Is.False);
+        Assert.That(ok.Equals("not result"), Is.False);
     }
 
     /// <summary>
-    /// 3. 未初期化 Result と Ok は等しくない
+    /// 3. 未初期化ResultとOkは等しくない。
     /// </summary>
     [Test]
     public void Default_Result_and_Ok_should_not_be_equal()
@@ -42,7 +42,7 @@ public class ResultEqualityTests
     }
 
     /// <summary>
-    /// 4. 未初期化 Result と Fail は等しくない
+    /// 4. 未初期化ResultとFailは等しくない。
     /// </summary>
     [Test]
     public void Default_Result_and_Fail_should_not_be_equal()
@@ -59,26 +59,26 @@ public class ResultEqualityTests
     }
 
     /// <summary>
-    /// 5. object として比較した同一内容の Ok は等しい
+    /// 5. objectとして比較した同一内容のOkは等しい。
     /// </summary>
     [Test]
-    public void Result_Ok_Equals_object_with_same_value_should_return_true()
+    public void Ok_Equals_object_should_return_true_when_value_is_same()
     {
-        var result = Result<string, int>.Ok(5);
+        var ok = Result<string, int>.Ok(5);
         object other = Result<string, int>.Ok(5);
 
-        Assert.That(result.Equals(other), Is.True);
+        Assert.That(ok.Equals(other), Is.True);
     }
 
     /// <summary>
-    /// 6. object として比較した同一内容の Fail は等しい
+    /// 6. objectとして比較した同一内容のFailは等しい。
     /// </summary>
     [Test]
-    public void Result_Fail_Equals_object_with_same_error_should_return_true()
+    public void Fail_Equals_object_should_return_true_when_error_is_same()
     {
-        var result = Result<string, int>.Fail("error");
+        var fail = Result<string, int>.Fail("error");
         object other = Result<string, int>.Fail("error");
 
-        Assert.That(result.Equals(other), Is.True);
+        Assert.That(fail.Equals(other), Is.True);
     }
 }

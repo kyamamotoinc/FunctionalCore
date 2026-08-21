@@ -3,66 +3,75 @@
 public class DefaultResultTests
 {
     /// <summary>
-    /// 1. Default Result は成功でも失敗でもない
+    /// 1. 未初期化Resultは成功でも失敗でもない。
     /// </summary>
     [Test]
     public void Default_Result_should_be_neither_success_nor_failure()
     {
+        var uninitialized = default(Result<string, string>);
+
         Assert.Multiple(() =>
         {
-            Assert.That(default(Result<string, string>).IsSuccess, Is.False);
-            Assert.That(default(Result<string, string>).IsFailure, Is.False);
+            Assert.That(uninitialized.IsSuccess, Is.False);
+            Assert.That(uninitialized.IsFailure, Is.False);
         });
     }
 
     /// <summary>
-    /// 2. Default Result では Value にアクセスできない
+    /// 2. 未初期化ResultのValueにアクセスした場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Default_Result_accessing_Value_should_throw()
+    public void Default_Result_accessing_Value_should_throw_invalid_operation_exception()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = default(Result<string, string>).Value);
+        var uninitialized = default(Result<string, string>);
+
+        Assert.Throws<InvalidOperationException>(() => _ = uninitialized.Value);
     }
 
     /// <summary>
-    /// 3. Default Result では Error にアクセスできない
+    /// 3. 未初期化ResultのErrorにアクセスした場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Default_Result_accessing_Error_should_throw()
+    public void Default_Result_accessing_Error_should_throw_invalid_operation_exception()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = default(Result<string, string>).Error);
+        var uninitialized = default(Result<string, string>);
+
+        Assert.Throws<InvalidOperationException>(() => _ = uninitialized.Error);
     }
 
     /// <summary>
-    /// 4. Default Result の ToString は未初期化を示す
+    /// 4. 未初期化ResultのToStringは未初期化状態を示す。
     /// </summary>
     [Test]
     public void Default_Result_ToString_should_indicate_uninitialized()
     {
-        Assert.That(default(Result<string, string>).ToString(), Does.Contain("uninitialized"));
+        var uninitialized = default(Result<string, string>);
+
+        Assert.That(uninitialized.ToString(), Does.Contain("uninitialized"));
     }
 
     /// <summary>
-    /// 5. Default Result 同士は等しい
+    /// 5. 未初期化Result同士は等しい。
     /// </summary>
     [Test]
     public void Two_default_Results_should_be_equal()
     {
+        var uninitialized = default(Result<string, string>);
         var other = default(Result<string, string>);
 
         Assert.Multiple(() =>
         {
-            Assert.That(default(Result<string, string>) == other, Is.True);
-            Assert.That(default(Result<string, string>).Equals(other), Is.True);
-            Assert.That(default(Result<string, string>).GetHashCode(), Is.EqualTo(other.GetHashCode()));
+            Assert.That(uninitialized == other, Is.True);
+            Assert.That(uninitialized.Equals(other), Is.True);
+            Assert.That(uninitialized.GetHashCode(), Is.EqualTo(other.GetHashCode()));
         });
     }
 
     /// <summary>
-    /// 6. 配列で生成された Result の初期値では Value にアクセスできない
+    /// 6. 配列生成によってdefault値になったResultのValueにアクセスした場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Array_initialized_Result_should_throw_on_Value()
+    public void Result_array_default_element_accessing_Value_should_throw_invalid_operation_exception()
     {
         var results = new Result<string, string>[1];
 
@@ -70,10 +79,10 @@ public class DefaultResultTests
     }
 
     /// <summary>
-    /// 7. 配列で生成された Result の初期値では Error にアクセスできない
+    /// 7. 配列生成によってdefault値になったResultのErrorにアクセスした場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Array_initialized_Result_should_throw_on_Error()
+    public void Result_array_default_element_accessing_Error_should_throw_invalid_operation_exception()
     {
         var results = new Result<string, string>[1];
 
@@ -81,65 +90,79 @@ public class DefaultResultTests
     }
 
     /// <summary>
-    /// 8. Default Result で Map を呼び出すと例外が発生する
+    /// 8. 未初期化ResultでMapを呼び出した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Default_Result_Map_should_throw()
+    public void Default_Result_Map_should_throw_invalid_operation_exception()
     {
-        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).Map(x => x));
+        var uninitialized = default(Result<string, string>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Map(x => x));
     }
 
     /// <summary>
-    /// 9. Default Result で MapError を呼び出すと例外が発生する
+    /// 9. 未初期化ResultでMapErrorを呼び出した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Default_Result_MapError_should_throw()
+    public void Default_Result_MapError_should_throw_invalid_operation_exception()
     {
-        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).MapError(e => e));
+        var uninitialized = default(Result<string, string>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.MapError(error => error));
     }
 
     /// <summary>
-    /// 10. Default Result で Bind を呼び出すと例外が発生する
+    /// 10. 未初期化ResultでBindを呼び出した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Default_Result_Bind_should_throw()
+    public void Default_Result_Bind_should_throw_invalid_operation_exception()
     {
-        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).Bind(x => Result<string, string>.Ok(x)));
+        var uninitialized = default(Result<string, string>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Bind(value => Result<string, string>.Ok(value)));
     }
 
     /// <summary>
-    /// 11. Default Result で Match を呼び出すと例外が発生する
+    /// 11. 未初期化ResultでMatchを呼び出した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Default_Result_Match_should_throw()
+    public void Default_Result_Match_should_throw_invalid_operation_exception()
     {
-        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).Match(x => x, e => e));
+        var uninitialized = default(Result<string, string>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Match(value => value, error => error));
     }
 
     /// <summary>
-    /// 12. Default Result で Ensure を呼び出すと例外が発生する
+    /// 12. 未初期化ResultでEnsureを呼び出した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Default_Result_Ensure_should_throw()
+    public void Default_Result_Ensure_should_throw_invalid_operation_exception()
     {
-        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).Ensure(x => true, x => x));
+        var uninitialized = default(Result<string, string>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Ensure(_ => true, value => value));
     }
 
     /// <summary>
-    /// 13. Default Result で Tap を呼び出すと例外が発生する
+    /// 13. 未初期化ResultでTapを呼び出した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Default_Result_Tap_should_throw()
+    public void Default_Result_Tap_should_throw_invalid_operation_exception()
     {
-        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).Tap(_ => { }));
+        var uninitialized = default(Result<string, string>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Tap(_ => { }));
     }
 
     /// <summary>
-    /// 14. Default Result で TapError を呼び出すと例外が発生する
+    /// 14. 未初期化ResultでTapErrorを呼び出した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Default_Result_TapError_should_throw()
+    public void Default_Result_TapError_should_throw_invalid_operation_exception()
     {
-        Assert.Throws<InvalidOperationException>(() => default(Result<string, string>).TapError(_ => { }));
+        var uninitialized = default(Result<string, string>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.TapError(_ => { }));
     }
 }

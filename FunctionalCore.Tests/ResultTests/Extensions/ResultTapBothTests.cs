@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 public class ResultTapBothTests
 {
     /// <summary>
-    /// 1. Ok.TapBoth は成功側の action だけを実行する
+    /// 1. ResultがOkの場合はonSuccessだけを実行する。
     /// </summary>
     [Test]
-    public void Result_Ok_TapBoth_should_invoke_only_success_action()
+    public void Ok_TapBoth_should_invoke_only_onSuccess()
     {
         var ok = Result<string, int>.Ok(5);
         int successCount = 0;
@@ -24,10 +24,10 @@ public class ResultTapBothTests
     }
 
     /// <summary>
-    /// 2. Fail.TapBoth は失敗側の action だけを実行する
+    /// 2. ResultがFailの場合はonFailureだけを実行する。
     /// </summary>
     [Test]
-    public void Result_Fail_TapBoth_should_invoke_only_failure_action()
+    public void Fail_TapBoth_should_invoke_only_onFailure()
     {
         var fail = Result<string, int>.Fail("error");
         int successCount = 0;
@@ -43,41 +43,42 @@ public class ResultTapBothTests
     }
 
     /// <summary>
-    /// 3. Ok.TapBoth は成功値を成功側の action に渡す
+    /// 3. ResultがOkの場合は成功値をonSuccessに渡す。
     /// </summary>
     [Test]
-    public void Result_Ok_TapBoth_should_pass_value_to_success_action()
+    public void Ok_TapBoth_should_pass_value_to_onSuccess()
     {
         var ok = Result<string, int>.Ok(5);
-        int received = 0;
+        int receivedValue = 0;
 
-        ok.TapBoth(value => received = value, _ => { });
+        ok.TapBoth(value => receivedValue = value, _ => { });
 
-        Assert.That(received, Is.EqualTo(5));
+        Assert.That(receivedValue, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 4. Fail.TapBoth は Error を失敗側の action に渡す
+    /// 4. ResultがFailの場合はErrorをonFailureに渡す。
     /// </summary>
     [Test]
-    public void Result_Fail_TapBoth_should_pass_error_to_failure_action()
+    public void Fail_TapBoth_should_pass_error_to_onFailure()
     {
         var fail = Result<string, int>.Fail("error");
-        string? received = null;
+        string? receivedError = null;
 
-        fail.TapBoth(_ => { }, error => received = error);
+        fail.TapBoth(_ => { }, error => receivedError = error);
 
-        Assert.That(received, Is.EqualTo("error"));
+        Assert.That(receivedError, Is.EqualTo("error"));
     }
 
     /// <summary>
-    /// 5. TapBoth は元の Result を変更せずに返す
+    /// 5. TapBothを実行しても元のResultをそのまま返す。
     /// </summary>
     [Test]
-    public void Result_TapBoth_should_return_original_result()
+    public void TapBoth_should_return_original_result()
     {
         var ok = Result<string, int>.Ok(5);
         var fail = Result<string, int>.Fail("error");
+
         var okResult = ok.TapBoth(_ => { }, _ => { });
         var failResult = fail.TapBoth(_ => { }, _ => { });
 
@@ -89,34 +90,81 @@ public class ResultTapBothTests
     }
 
     /// <summary>
-    /// 6. TapBoth の成功側 action が null の場合は ArgumentNullException が発生する
+    /// 6. ResultがOkの場合でもonSuccessがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_TapBoth_null_success_action_should_throw()
+    public void Ok_TapBoth_should_throw_argument_null_exception_when_onSuccess_is_null()
     {
         var ok = Result<string, int>.Ok(5);
+
         Assert.Throws<ArgumentNullException>(() => ok.TapBoth(null!, _ => { }));
     }
 
     /// <summary>
-    /// 7. TapBoth の失敗側 action が null の場合は ArgumentNullException が発生する
+    /// 7. ResultがFailの場合でもonFailureがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_TapBoth_null_failure_action_should_throw()
+    public void Fail_TapBoth_should_throw_argument_null_exception_when_onFailure_is_null()
     {
         var fail = Result<string, int>.Fail("error");
+
         Assert.Throws<ArgumentNullException>(() => fail.TapBoth(_ => { }, null!));
     }
 
     /// <summary>
-    /// 8. 未初期化 Result で TapBoth を呼び出すと InvalidOperationException が発生する
+    /// 8. ResultがOkの場合でも未使用のonFailureがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Default_TapBoth_should_throw()
+    public void Ok_TapBoth_should_throw_argument_null_exception_when_unused_onFailure_is_null()
     {
-        var result = default(Result<string, int>);
+        var ok = Result<string, int>.Ok(5);
 
-        Assert.Throws<InvalidOperationException>(() =>
-            result.TapBoth(_ => { }, _ => { }));
+        Assert.Throws<ArgumentNullException>(() => ok.TapBoth(_ => { }, null!));
+    }
+
+    /// <summary>
+    /// 9. ResultがFailの場合でも未使用のonSuccessがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Fail_TapBoth_should_throw_argument_null_exception_when_unused_onSuccess_is_null()
+    {
+        var fail = Result<string, int>.Fail("error");
+
+        Assert.Throws<ArgumentNullException>(() => fail.TapBoth(null!, _ => { }));
+    }
+
+    /// <summary>
+    /// 10. Resultがdefaultの場合はInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_TapBoth_should_throw_invalid_operation_exception()
+    {
+        var uninitialized = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.TapBoth(_ => { }, _ => { }));
+    }
+
+    /// <summary>
+    /// 11. ResultがdefaultでonSuccessもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_TapBoth_should_throw_invalid_operation_exception_before_onSuccess_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.TapBoth(null!, _ => { }));
+    }
+
+    /// <summary>
+    /// 12. ResultがdefaultでonFailureもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_TapBoth_should_throw_invalid_operation_exception_before_onFailure_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.TapBoth(_ => { }, null!));
     }
 }

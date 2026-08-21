@@ -3,12 +3,12 @@
 public class ResultTapErrorTests
 {
     /// <summary>
-    /// 1. Fail.TapError は action を1回だけ実行する
+    /// 1. ResultがFailの場合はactionを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Fail_TapError_should_invoke_action_once()
+    public void Fail_TapError_should_invoke_action_once()
     {
-        var fail = Result<string, int>.Fail("error"); ;
+        var fail = Result<string, int>.Fail("error");
         int count = 0;
 
         fail.TapError(_ => count++);
@@ -17,24 +17,24 @@ public class ResultTapErrorTests
     }
 
     /// <summary>
-    /// 2. Fail.TapError は Error を action に渡す
+    /// 2. ResultがFailの場合はErrorをactionに渡す。
     /// </summary>
     [Test]
-    public void Result_Fail_TapError_should_pass_error_to_action()
+    public void Fail_TapError_should_pass_error_to_action()
     {
         var fail = Result<string, int>.Fail("error");
-        string? received = null;
+        string? receivedError = null;
 
-        fail.TapError(error => received = error);
+        fail.TapError(error => receivedError = error);
 
-        Assert.That(received, Is.EqualTo("error"));
+        Assert.That(receivedError, Is.EqualTo("error"));
     }
 
     /// <summary>
-    /// 3. Ok.TapError は action を実行しない
+    /// 3. ResultがOkの場合はactionを実行しない。
     /// </summary>
     [Test]
-    public void Result_Ok_TapError_should_not_invoke_action()
+    public void Ok_TapError_should_not_invoke_action()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -45,10 +45,10 @@ public class ResultTapErrorTests
     }
 
     /// <summary>
-    /// 4. Fail.TapError は元の Result を変更せずに返す
+    /// 4. ResultがFailの場合は元のResultをそのまま返す。
     /// </summary>
     [Test]
-    public void Result_Fail_TapError_should_return_original_result()
+    public void Fail_TapError_should_return_original_result()
     {
         var fail = Result<string, int>.Fail("error");
         var result = fail.TapError(_ => { });
@@ -57,10 +57,10 @@ public class ResultTapErrorTests
     }
 
     /// <summary>
-    /// 5. Ok.TapError は元の Result を変更せずに返す
+    /// 5. ResultがOkの場合は元のResultをそのまま返す。
     /// </summary>
     [Test]
-    public void Result_Ok_TapError_should_return_original_result()
+    public void Ok_TapError_should_return_original_result()
     {
         var ok = Result<string, int>.Ok(5);
         var result = ok.TapError(_ => { });
@@ -69,12 +69,36 @@ public class ResultTapErrorTests
     }
 
     /// <summary>
-    /// 6. TapError の action が null の場合は ArgumentNullException が発生する
+    /// 6. ResultがFailの場合でもactionがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_TapError_null_action_should_throw()
+    public void Fail_TapError_should_throw_argument_null_exception_when_action_is_null()
     {
         var fail = Result<string, int>.Fail("error");
+
         Assert.Throws<ArgumentNullException>(() => fail.TapError(null!));
+    }
+
+    /// <summary>
+    /// 7. ResultがOkの場合でもactionがnullの場合はArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Ok_TapError_should_throw_argument_null_exception_when_action_is_null()
+    {
+        var ok = Result<string, int>.Ok(5);
+
+        Assert.Throws<ArgumentNullException>(() => ok.TapError(null!));
+    }
+
+    /// <summary>
+    /// 8. Resultがdefaultでactionもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_TapError_should_throw_invalid_operation_exception_before_action_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.TapError(null!));
     }
 }

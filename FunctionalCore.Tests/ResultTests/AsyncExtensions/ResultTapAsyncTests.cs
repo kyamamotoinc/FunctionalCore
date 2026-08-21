@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.ResultTests.AsyncExtensions;
 public class ResultTapAsyncTests
 {
     /// <summary>
-    /// 1. Ok.TapAsync は onSuccess を1回だけ実行する
+    /// 1. ResultがOkの場合はonSuccessを1回だけ実行する。
     /// </summary>
     [Test]
-    public async Task Result_Ok_TapAsync_should_invoke_action_once()
+    public async Task Ok_TapAsync_should_invoke_onSuccess_once()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -23,28 +23,28 @@ public class ResultTapAsyncTests
     }
 
     /// <summary>
-    /// 2. Ok.TapAsync は成功値を onSuccess に渡す
+    /// 2. ResultがOkの場合は成功値をonSuccessに渡す。
     /// </summary>
     [Test]
-    public async Task Result_Ok_TapAsync_should_pass_value_to_action()
+    public async Task Ok_TapAsync_should_pass_value_to_onSuccess()
     {
         var ok = Result<string, int>.Ok(5);
-        int received = 0;
+        int receivedValue = 0;
 
         await ok.AsTask().TapAsync(value =>
         {
-            received = value;
+            receivedValue = value;
             return Task.CompletedTask;
         });
 
-        Assert.That(received, Is.EqualTo(5));
+        Assert.That(receivedValue, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 3. Fail.TapAsync は onSuccess を実行しない
+    /// 3. ResultがFailの場合はonSuccessを実行しない。
     /// </summary>
     [Test]
-    public async Task Result_Fail_TapAsync_should_not_invoke_action()
+    public async Task Fail_TapAsync_should_not_invoke_onSuccess()
     {
         var fail = Result<string, int>.Fail("error");
         int count = 0;
@@ -57,41 +57,43 @@ public class ResultTapAsyncTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 4. Ok.TapAsync は元の Result を変更せずに返す
+    /// 4. ResultがOkの場合は元のResultをそのまま返す。
     /// </summary>
     [Test]
-    public async Task Result_Ok_TapAsync_should_return_original_result()
+    public async Task Ok_TapAsync_should_return_original_result()
     {
         var ok = Result<string, int>.Ok(5);
+
         var result = await ok.AsTask().TapAsync(_ => Task.CompletedTask);
 
         Assert.That(result, Is.EqualTo(ok));
     }
 
     /// <summary>
-    /// 5. Fail.TapAsync は元の Result を変更せずに返す
+    /// 5. ResultがFailの場合は元のResultをそのまま返す。
     /// </summary>
     [Test]
-    public async Task Result_Fail_TapAsync_should_return_original_result()
+    public async Task Fail_TapAsync_should_return_original_result()
     {
         var fail = Result<string, int>.Fail("error");
+
         var result = await fail.AsTask().TapAsync(_ => Task.CompletedTask);
 
         Assert.That(result, Is.EqualTo(fail));
     }
 
     /// <summary>
-    /// 6. onSuccess が null の場合は ArgumentNullException が発生する
+    /// 6. ResultがOkの場合でもonSuccessがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_TapAsync_null_action_should_throw()
+    public void Ok_TapAsync_should_throw_argument_null_exception_when_onSuccess_is_null()
     {
         var ok = Result<string, int>.Ok(5);
         Func<int, Task>? onSuccess = null;
@@ -101,10 +103,23 @@ public class ResultTapAsyncTests
     }
 
     /// <summary>
-    /// 7. resultTask が null の場合は ArgumentNullException が発生する
+    /// 7. ResultがFailの場合でもonSuccessがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_TapAsync_null_result_task_should_throw()
+    public void Fail_TapAsync_should_throw_argument_null_exception_when_onSuccess_is_null()
+    {
+        var fail = Result<string, int>.Fail("error");
+        Func<int, Task>? onSuccess = null;
+
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await fail.AsTask().TapAsync(onSuccess!));
+    }
+
+    /// <summary>
+    /// 8. resultTaskがnullの場合はArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void TapAsync_should_throw_argument_null_exception_when_resultTask_is_null()
     {
         Task<Result<string, int>>? resultTask = null;
 
@@ -113,10 +128,10 @@ public class ResultTapAsyncTests
     }
 
     /// <summary>
-    /// 8. Ok.TapAsync で onSuccess が null Task を返した場合は InvalidOperationException が発生する
+    /// 9. ResultがOkでonSuccessがnullのTaskを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ok_TapAsync_action_returning_null_task_should_throw()
+    public void Ok_TapAsync_should_throw_invalid_operation_exception_when_onSuccess_returns_null_task()
     {
         var ok = Result<string, int>.Ok(5);
         Func<int, Task> onSuccess = _ => null!;
@@ -126,13 +141,19 @@ public class ResultTapAsyncTests
     }
 
     /// <summary>
-    /// 9. Fail.TapAsync では null Task を返す onSuccess でも実行されない
+    /// 10. ResultがFailの場合はnullのTaskを返すonSuccessでも実行せず、元のFailを返す。
     /// </summary>
     [Test]
-    public async Task Result_Fail_TapAsync_should_not_evaluate_null_task_action()
+    public async Task Fail_TapAsync_should_return_original_fail_without_invoking_null_task_onSuccess()
     {
         var fail = Result<string, int>.Fail("error");
-        Func<int, Task> onSuccess = _ => null!;
+        int count = 0;
+
+        Func<int, Task> onSuccess = _ =>
+        {
+            count++;
+            return null!;
+        };
 
         var result = await fail.AsTask().TapAsync(onSuccess);
 
@@ -140,18 +161,86 @@ public class ResultTapAsyncTests
         {
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 10. 元の Task が未初期化 Result を返した場合は InvalidOperationException が発生する
+    /// 11. resultTaskが未初期化Resultを返した場合はInvalidOperationExceptionを発生させる。
+    /// onSuccessは実行しない。
     /// </summary>
     [Test]
-    public void Result_TapAsync_uninitialized_source_result_should_throw()
+    public void TapAsync_should_throw_invalid_operation_exception_when_resultTask_returns_uninitialized_result()
     {
         var resultTask = Task.FromResult(default(Result<string, int>));
+        int count = 0;
 
         Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await resultTask.TapAsync(_ => Task.CompletedTask));
+            await resultTask.TapAsync(_ =>
+            {
+                count++;
+                return Task.CompletedTask;
+            }));
+
+        Assert.That(count, Is.EqualTo(0));
+    }
+
+    /// <summary>
+    /// 12. ResultがOkでonSuccessが同期的に例外を発生させた場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Ok_TapAsync_should_propagate_exception_when_onSuccess_throws()
+    {
+        var ok = Result<string, int>.Ok(5);
+        var expectedException = new NotSupportedException("onSuccess error");
+
+        Func<int, Task> onSuccess = _ => throw expectedException;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await ok.AsTask().TapAsync(onSuccess));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 13. ResultがOkでonSuccessが返したTaskが例外で完了した場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Ok_TapAsync_should_propagate_exception_when_onSuccess_task_faults()
+    {
+        var ok = Result<string, int>.Ok(5);
+        var expectedException = new NotSupportedException("onSuccess task error");
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await ok.AsTask().TapAsync(_ => Task.FromException(expectedException)));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 14. resultTaskが例外で完了した場合は、その例外をそのまま伝播させる。
+    /// onSuccessは実行しない。
+    /// </summary>
+    [Test]
+    public void TapAsync_should_propagate_exception_when_resultTask_faults()
+    {
+        var expectedException = new NotSupportedException("source task error");
+        Task<Result<string, int>> resultTask = Task.FromException<Result<string, int>>(expectedException);
+        int count = 0;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await resultTask.TapAsync(_ =>
+            {
+                count++;
+                return Task.CompletedTask;
+            }));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualException, Is.SameAs(expectedException));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 }

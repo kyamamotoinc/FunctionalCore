@@ -5,14 +5,14 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 public class ResultToResultFromOptionFactoryTests
 {
     /// <summary>
-    /// 1. Some.ToResult(errorFactory) は Value を持つ Ok を返す
+    /// 1. OptionがSomeの場合はValueを保持するOkを返す。
     /// </summary>
     [Test]
-    public void Option_Some_ToResult_factory_should_return_ok()
+    public void Some_ToResult_factory_should_return_ok()
     {
-        var option = Option<int>.Some(5);
+        var some = Option<int>.Some(5);
 
-        var result = option.ToResult<string, int>(() => "error");
+        var result = some.ToResult<string, int>(() => "error");
 
         Assert.Multiple(() =>
         {
@@ -23,15 +23,15 @@ public class ResultToResultFromOptionFactoryTests
     }
 
     /// <summary>
-    /// 2. Some.ToResult(errorFactory) は errorFactory を実行しない
+    /// 2. OptionがSomeの場合はerrorFactoryを実行しない。
     /// </summary>
     [Test]
-    public void Option_Some_ToResult_should_not_invoke_error_factory()
+    public void Some_ToResult_factory_should_not_invoke_errorFactory()
     {
-        var option = Option<int>.Some(5);
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        var result = option.ToResult<string, int>(() =>
+        var result = some.ToResult<string, int>(() =>
         {
             count++;
             return "error";
@@ -39,22 +39,23 @@ public class ResultToResultFromOptionFactoryTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value, Is.EqualTo(5));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 3. None.ToResult(errorFactory) は errorFactory を1回だけ実行する
+    /// 3. OptionがNoneの場合はerrorFactoryを1回だけ実行し、
+    /// 生成されたErrorを保持するFailを返す。
     /// </summary>
     [Test]
-    public void Option_None_ToResult_should_invoke_error_factory_once()
+    public void None_ToResult_factory_should_invoke_errorFactory_once_and_return_fail()
     {
-        var option = Option<int>.None;
+        var none = Option<int>.None;
         int count = 0;
 
-        var result = option.ToResult<string, int>(() =>
+        var result = none.ToResult<string, int>(() =>
         {
             count++;
             return "generated error";
@@ -62,49 +63,68 @@ public class ResultToResultFromOptionFactoryTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(1));
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("generated error"));
+            Assert.That(count, Is.EqualTo(1));
         });
     }
 
     /// <summary>
-    /// 4. errorFactory が null の場合は ArgumentNullException が発生する
+    /// 4. OptionがSomeの場合でもerrorFactoryがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_ToResult_null_error_factory_should_throw()
+    public void Some_ToResult_factory_should_throw_argument_null_exception_when_errorFactory_is_null()
     {
-        var option = Option<int>.None;
+        var some = Option<int>.Some(5);
         Func<string>? errorFactory = null;
 
-        Assert.Throws<ArgumentNullException>(() => option.ToResult<string, int>(errorFactory!));
+        Assert.Throws<ArgumentNullException>(() => some.ToResult<string, int>(errorFactory!));
     }
 
     /// <summary>
-    /// 5. None.ToResult で errorFactory が null を返した場合は InvalidOperationException が発生する
+    /// 5. OptionがNoneの場合でもerrorFactoryがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_ToResult_error_factory_returning_null_should_throw()
+    public void None_ToResult_factory_should_throw_argument_null_exception_when_errorFactory_is_null()
     {
-        var option = Option<int>.None;
+        var none = Option<int>.None;
+        Func<string>? errorFactory = null;
 
-        Assert.Throws<InvalidOperationException>(() => option.ToResult<string, int>(() => null!));
+        Assert.Throws<ArgumentNullException>(() => none.ToResult<string, int>(errorFactory!));
     }
 
     /// <summary>
-    /// 6. Some.ToResult では null を返す errorFactory でも実行されない
+    /// 6. OptionがNoneでerrorFactoryがnullを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_ToResult_should_not_evaluate_null_returning_error_factory()
+    public void None_ToResult_factory_should_throw_invalid_operation_exception_when_errorFactory_returns_null()
     {
-        var option = Option<int>.Some(5);
+        var none = Option<int>.None;
 
-        var result = option.ToResult<string, int>(() => null!);
+        Assert.Throws<InvalidOperationException>(() => none.ToResult<string, int>(() => null!));
+    }
+
+    /// <summary>
+    /// 7. OptionがSomeの場合はnullを返すerrorFactoryでも実行せず、
+    /// Valueを保持するOkを返す。
+    /// </summary>
+    [Test]
+    public void Some_ToResult_factory_should_return_ok_without_invoking_null_returning_errorFactory()
+    {
+        var some = Option<int>.Some(5);
+        int count = 0;
+
+        var result = some.ToResult<string, int>(() =>
+        {
+            count++;
+            return null!;
+        });
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value, Is.EqualTo(5));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 }

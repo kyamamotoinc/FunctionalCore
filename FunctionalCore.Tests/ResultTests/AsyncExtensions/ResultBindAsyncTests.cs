@@ -5,12 +5,13 @@ namespace FunctionalCore.Tests.ResultTests.AsyncExtensions;
 public class ResultBindAsyncTests
 {
     /// <summary>
-    /// 1. Ok.BindAsync は binder を実行し、その Result を返す
+    /// 1. ResultがOkの場合はbinderを実行し、そのResultを返す。
     /// </summary>
     [Test]
-    public async Task Result_Ok_BindAsync_should_return_binder_result()
+    public async Task Ok_BindAsync_should_return_binder_result()
     {
         var ok = Result<string, int>.Ok(5);
+
         var result = await ok.AsTask().BindAsync(x => Task.FromResult(Result<string, int>.Ok(x + 1)));
 
         Assert.Multiple(() =>
@@ -22,12 +23,13 @@ public class ResultBindAsyncTests
     }
 
     /// <summary>
-    /// 2. Ok.BindAsync は成功値の型を変更できる
+    /// 2. ResultがOkの場合はbinderによって成功値の型を変更できる。
     /// </summary>
     [Test]
-    public async Task Result_Ok_BindAsync_should_change_value_type()
+    public async Task Ok_BindAsync_should_change_value_type()
     {
         var ok = Result<string, int>.Ok(5);
+
         var result = await ok.AsTask().BindAsync(x => Task.FromResult(Result<string, string>.Ok($"value:{x}")));
 
         Assert.Multiple(() =>
@@ -38,12 +40,13 @@ public class ResultBindAsyncTests
     }
 
     /// <summary>
-    /// 3. Ok.BindAsync の binder が Fail を返した場合は Fail を返す
+    /// 3. ResultがOkでbinderがFailを返した場合は、そのFailを返す。
     /// </summary>
     [Test]
-    public async Task Result_Ok_BindAsync_should_return_failure_when_binder_fails()
+    public async Task Ok_BindAsync_should_return_fail_when_binder_returns_fail()
     {
         var ok = Result<string, int>.Ok(5);
+
         var result = await ok.AsTask().BindAsync(_ => Task.FromResult(Result<string, int>.Fail("bind error")));
 
         Assert.Multiple(() =>
@@ -54,10 +57,10 @@ public class ResultBindAsyncTests
     }
 
     /// <summary>
-    /// 4. Ok.BindAsync は binder を1回だけ実行する
+    /// 4. ResultがOkの場合はbinderを1回だけ実行する。
     /// </summary>
     [Test]
-    public async Task Result_Ok_BindAsync_should_invoke_binder_once()
+    public async Task Ok_BindAsync_should_invoke_binder_once()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -72,10 +75,10 @@ public class ResultBindAsyncTests
     }
 
     /// <summary>
-    /// 5. Fail.BindAsync は binder を実行しない
+    /// 5. ResultがFailの場合はbinderを実行しない。
     /// </summary>
     [Test]
-    public async Task Result_Fail_BindAsync_should_not_invoke_binder()
+    public async Task Fail_BindAsync_should_not_invoke_binder()
     {
         var fail = Result<string, int>.Fail("error");
         int count = 0;
@@ -88,34 +91,35 @@ public class ResultBindAsyncTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 6. Fail.BindAsync は元の Error を保持する
+    /// 6. ResultがFailの場合は元のErrorを保持する。
     /// </summary>
     [Test]
-    public async Task Result_Fail_BindAsync_should_keep_original_error()
+    public async Task Fail_BindAsync_should_keep_original_error()
     {
         var fail = Result<string, int>.Fail("error");
+
         var result = await fail.AsTask().BindAsync(x => Task.FromResult(Result<string, int>.Ok(x + 1)));
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Error, Is.EqualTo("error"));
         });
     }
 
     /// <summary>
-    /// 7. binder が null の場合は ArgumentNullException が発生する
+    /// 7. ResultがOkの場合でもbinderがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_BindAsync_null_binder_should_throw()
+    public void Ok_BindAsync_should_throw_argument_null_exception_when_binder_is_null()
     {
         var ok = Result<string, int>.Ok(5);
         Func<int, Task<Result<string, string>>>? binder = null;
@@ -124,10 +128,22 @@ public class ResultBindAsyncTests
     }
 
     /// <summary>
-    /// 8. resultTask が null の場合は ArgumentNullException が発生する
+    /// 8. ResultがFailの場合でもbinderがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_BindAsync_null_result_task_should_throw()
+    public void Fail_BindAsync_should_throw_argument_null_exception_when_binder_is_null()
+    {
+        var fail = Result<string, int>.Fail("error");
+        Func<int, Task<Result<string, string>>>? binder = null;
+
+        Assert.ThrowsAsync<ArgumentNullException>(async () => await fail.AsTask().BindAsync(binder!));
+    }
+
+    /// <summary>
+    /// 9. resultTaskがnullの場合はArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void BindAsync_should_throw_argument_null_exception_when_resultTask_is_null()
     {
         Task<Result<string, int>>? resultTask = null;
 
@@ -136,49 +152,63 @@ public class ResultBindAsyncTests
     }
 
     /// <summary>
-    /// 9. binder が null Task を返した場合は InvalidOperationException が発生する
+    /// 10. resultTaskが未初期化Resultを返した場合はInvalidOperationExceptionを発生させる。
+    /// binderは実行しない。
     /// </summary>
     [Test]
-    public void Result_Ok_BindAsync_binder_returning_null_task_should_throw()
+    public void BindAsync_should_throw_invalid_operation_exception_when_resultTask_returns_uninitialized_result()
+    {
+        var resultTask = Task.FromResult(default(Result<string, int>));
+        int count = 0;
+
+        Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await resultTask.BindAsync(x =>
+            {
+                count++;
+                return Task.FromResult(Result<string, int>.Ok(x + 1));
+            }));
+
+        Assert.That(count, Is.EqualTo(0));
+    }
+
+    /// <summary>
+    /// 11. ResultがOkでbinderがnullのTaskを返した場合はInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Ok_BindAsync_should_throw_invalid_operation_exception_when_binder_returns_null_task()
     {
         var ok = Result<string, int>.Ok(5);
         Func<int, Task<Result<string, int>>> binder = _ => null!;
 
-        Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await ok.AsTask().BindAsync(binder));
+        Assert.ThrowsAsync<InvalidOperationException>(async () => await ok.AsTask().BindAsync(binder));
     }
 
     /// <summary>
-    /// 10. binder の Task が未初期化 Result を返した場合は InvalidOperationException が発生する
+    /// 12. ResultがOkでbinderのTaskが未初期化Resultを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ok_BindAsync_binder_returning_uninitialized_result_should_throw()
+    public void Ok_BindAsync_should_throw_invalid_operation_exception_when_binder_task_returns_uninitialized_result()
     {
         var ok = Result<string, int>.Ok(5);
+
         Assert.ThrowsAsync<InvalidOperationException>(async () =>
             await ok.AsTask().BindAsync(_ => Task.FromResult(default(Result<string, string>))));
     }
 
     /// <summary>
-    /// 11. 元の Task が未初期化 Result を返した場合は InvalidOperationException が発生する
+    /// 13. ResultがFailの場合はnullのTaskを返すbinderでも実行せず、元のFailを返す。
     /// </summary>
     [Test]
-    public void Result_BindAsync_uninitialized_source_result_should_throw()
-    {
-        var resultTask = Task.FromResult(default(Result<string, int>));
-
-        Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await resultTask.BindAsync(x => Task.FromResult(Result<string, int>.Ok(x + 1))));
-    }
-
-    /// <summary>
-    /// 12. Fail.BindAsync では null Task を返す binder でも実行されない
-    /// </summary>
-    [Test]
-    public async Task Result_Fail_BindAsync_should_not_evaluate_null_task_binder()
+    public async Task Fail_BindAsync_should_return_original_fail_without_invoking_null_task_binder()
     {
         var fail = Result<string, int>.Fail("error");
-        Func<int, Task<Result<string, int>>> binder = _ => null!;
+        int count = 0;
+
+        Func<int, Task<Result<string, int>>> binder = _ =>
+        {
+            count++;
+            return null!;
+        };
 
         var result = await fail.AsTask().BindAsync(binder);
 
@@ -186,22 +216,88 @@ public class ResultBindAsyncTests
         {
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 13. Fail.BindAsync では未初期化 Result を返す binder でも実行されない
+    /// 14. ResultがFailの場合は未初期化Resultを返すbinderでも実行せず、元のFailを返す。
     /// </summary>
     [Test]
-    public async Task Result_Fail_BindAsync_should_not_evaluate_uninitialized_binder_result()
+    public async Task Fail_BindAsync_should_return_original_fail_without_invoking_uninitialized_result_binder()
     {
         var fail = Result<string, int>.Fail("error");
-        var result = await fail.AsTask().BindAsync(_ => Task.FromResult(default(Result<string, string>)));
+        int count = 0;
+
+        var result = await fail.AsTask().BindAsync(_ =>
+        {
+            count++;
+            return Task.FromResult(default(Result<string, string>));
+        });
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
+            Assert.That(count, Is.EqualTo(0));
+        });
+    }
+
+    /// <summary>
+    /// 15. ResultがOkでbinderが同期的に例外を発生させた場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Ok_BindAsync_should_propagate_exception_when_binder_throws()
+    {
+        var ok = Result<string, int>.Ok(5);
+        var expectedException = new NotSupportedException("binder error");
+        Func<int, Task<Result<string, int>>> binder = _ => throw expectedException;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await ok.AsTask().BindAsync(binder));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 16. ResultがOkでbinderが返したTaskが例外で完了した場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Ok_BindAsync_should_propagate_exception_when_binder_task_faults()
+    {
+        var ok = Result<string, int>.Ok(5);
+        var expectedException = new NotSupportedException("binder task error");
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await ok.AsTask().BindAsync(_ => Task.FromException<Result<string, int>>(expectedException)));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 17. resultTaskが例外で完了した場合は、その例外をそのまま伝播させる。
+    /// binderは実行しない。
+    /// </summary>
+    [Test]
+    public void BindAsync_should_propagate_exception_when_resultTask_faults()
+    {
+        var expectedException = new NotSupportedException("source task error");
+        var resultTask = Task.FromException<Result<string, int>>(expectedException);
+        int count = 0;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await resultTask.BindAsync(x =>
+            {
+                count++;
+                return Task.FromResult(Result<string, int>.Ok(x + 1));
+            }));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualException, Is.SameAs(expectedException));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 }

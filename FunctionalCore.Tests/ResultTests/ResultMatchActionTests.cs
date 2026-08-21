@@ -3,10 +3,10 @@
 public class ResultMatchActionTests
 {
     /// <summary>
-    /// 1. Ok.Match は成功側の action を1回だけ実行する
+    /// 1. ResultがOkの場合はonSuccessを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Ok_MatchAction_should_invoke_success_action_once()
+    public void Ok_MatchAction_should_invoke_onSuccess_once()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -19,10 +19,10 @@ public class ResultMatchActionTests
     }
 
     /// <summary>
-    /// 2. Ok.Match は成功値を成功側の action に渡す
+    /// 2. ResultがOkの場合は成功値をonSuccessに渡す。
     /// </summary>
     [Test]
-    public void Result_Ok_MatchAction_should_pass_value_to_success_action()
+    public void Ok_MatchAction_should_pass_value_to_onSuccess()
     {
         var ok = Result<string, int>.Ok(5);
         int received = 0;
@@ -35,10 +35,10 @@ public class ResultMatchActionTests
     }
 
     /// <summary>
-    /// 3. Ok.Match は失敗側の action を実行しない
+    /// 3. ResultがOkの場合はonFailureを実行しない。
     /// </summary>
     [Test]
-    public void Result_Ok_MatchAction_should_not_invoke_failure_action()
+    public void Ok_MatchAction_should_not_invoke_onFailure()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -51,10 +51,10 @@ public class ResultMatchActionTests
     }
 
     /// <summary>
-    /// 4. Fail.Match は失敗側の action を1回だけ実行する
+    /// 4. ResultがFailの場合はonFailureを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Fail_MatchAction_should_invoke_failure_action_once()
+    public void Fail_MatchAction_should_invoke_onFailure_once()
     {
         var fail = Result<string, int>.Fail("error");
         int count = 0;
@@ -67,26 +67,26 @@ public class ResultMatchActionTests
     }
 
     /// <summary>
-    /// 5. Fail.Match は Error を失敗側の action に渡す
+    /// 5. ResultがFailの場合はErrorをonFailureに渡す。
     /// </summary>
     [Test]
-    public void Result_Fail_MatchAction_should_pass_error_to_failure_action()
+    public void Fail_MatchAction_should_pass_error_to_onFailure()
     {
         var fail = Result<string, int>.Fail("error");
-        string? received = null;
+        string? receivedError = null;
 
         fail.Match(
             _ => { },
-            error => received = error);
+            error => receivedError = error);
 
-        Assert.That(received, Is.EqualTo("error"));
+        Assert.That(receivedError, Is.EqualTo("error"));
     }
 
     /// <summary>
-    /// 6. Fail.Match は成功側の action を実行しない
+    /// 6. ResultがFailの場合はonSuccessを実行しない。
     /// </summary>
     [Test]
-    public void Result_Fail_MatchAction_should_not_invoke_success_action()
+    public void Fail_MatchAction_should_not_invoke_onSuccess()
     {
         var fail = Result<string, int>.Fail("error");
         int count = 0;
@@ -99,66 +99,87 @@ public class ResultMatchActionTests
     }
 
     /// <summary>
-    /// 7. 成功側の action が null の場合は ArgumentNullException が発生する
+    /// 7. ResultがOkの場合でもonSuccessがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_MatchAction_null_success_action_should_throw()
+    public void Ok_MatchAction_should_throw_argument_null_exception_when_onSuccess_is_null()
     {
         var ok = Result<string, int>.Ok(5);
         Action<int>? onSuccess = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            ok.Match(onSuccess!, _ => { }));
+        Assert.Throws<ArgumentNullException>(() => ok.Match(onSuccess!, _ => { }));
     }
 
     /// <summary>
-    /// 8. 失敗側の action が null の場合は ArgumentNullException が発生する
+    /// 8. ResultがFailの場合でもonFailureがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_MatchAction_null_failure_action_should_throw()
+    public void Fail_MatchAction_should_throw_argument_null_exception_when_onFailure_is_null()
     {
         var fail = Result<string, int>.Fail("error");
         Action<string>? onFailure = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            fail.Match(_ => { }, onFailure!));
+        Assert.Throws<ArgumentNullException>(() => fail.Match(_ => { }, onFailure!));
     }
 
     /// <summary>
-    /// 9. Ok でも失敗側の action が null の場合は ArgumentNullException が発生する
+    /// 9. ResultがOkの場合でも未使用のonFailureがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Ok_MatchAction_null_unused_failure_action_should_throw()
+    public void Ok_MatchAction_should_throw_argument_null_exception_when_unused_onFailure_is_null()
     {
         var ok = Result<string, int>.Ok(5);
         Action<string>? onFailure = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            ok.Match(_ => { }, onFailure!));
+        Assert.Throws<ArgumentNullException>(() => ok.Match(_ => { }, onFailure!));
     }
 
     /// <summary>
-    /// 10. Fail でも成功側の action が null の場合は ArgumentNullException が発生する
+    /// 10. ResultがFailの場合でも未使用のonSuccessがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Fail_MatchAction_null_unused_success_action_should_throw()
+    public void Fail_MatchAction_should_throw_argument_null_exception_when_unused_onSuccess_is_null()
     {
         var fail = Result<string, int>.Fail("error");
         Action<int>? onSuccess = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            fail.Match(onSuccess!, _ => { }));
+        Assert.Throws<ArgumentNullException>(() => fail.Match(onSuccess!, _ => { }));
     }
 
     /// <summary>
-    /// 11. 未初期化 Result で Match(Action, Action) を呼び出すと InvalidOperationException が発生する
+    /// 11. Resultがdefaultの場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Default_MatchAction_should_throw()
+    public void Default_MatchAction_should_throw_invalid_operation_exception()
     {
-        var result = default(Result<string, int>);
+        var uninitialized = default(Result<string, int>);
 
-        Assert.Throws<InvalidOperationException>(() =>
-            result.Match(_ => { }, _ => { }));
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Match(_ => { }, _ => { }));
+    }
+
+    /// <summary>
+    /// 12. ResultがdefaultでonSuccessもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_MatchAction_should_throw_invalid_operation_exception_before_onSuccess_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+        Action<int>? onSuccess = null;
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Match(onSuccess!, _ => { }));
+    }
+
+    /// <summary>
+    /// 13. ResultがdefaultでonFailureもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_MatchAction_should_throw_invalid_operation_exception_before_onFailure_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+        Action<string>? onFailure = null;
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.Match(_ => { }, onFailure!));
     }
 }

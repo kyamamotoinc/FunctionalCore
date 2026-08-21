@@ -3,27 +3,27 @@
 public class ResultMapErrorTests
 {
     /// <summary>
-    /// 1. Fail.MapError は errorMapper を実行し、変換後の Error を持つ Fail を返す
+    /// 1. ResultがFailの場合はerrorMapperを実行し、変換後のErrorを保持するFailを返す。
     /// </summary>
     [Test]
-    public void Result_Fail_MapError_should_return_mapped_error()
+    public void Fail_MapError_should_return_mapped_error()
     {
         var fail = Result<string, int>.Fail("error");
         var result = fail.MapError(error => $"mapped:{error}");
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Error, Is.EqualTo("mapped:error"));
         });
     }
 
     /// <summary>
-    /// 2. Fail.MapError はエラー型を変更できる
+    /// 2. ResultがFailの場合はerrorMapperによってエラー型を変更できる。
     /// </summary>
     [Test]
-    public void Result_Fail_MapError_should_change_error_type()
+    public void Fail_MapError_should_change_error_type()
     {
         var fail = Result<string, int>.Fail("error");
         var result = fail.MapError(error => error.Length);
@@ -36,10 +36,10 @@ public class ResultMapErrorTests
     }
 
     /// <summary>
-    /// 3. Fail.MapError は errorMapper を1回だけ実行する
+    /// 3. ResultがFailの場合はerrorMapperを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Result_Fail_MapError_should_invoke_error_mapper_once()
+    public void Fail_MapError_should_invoke_errorMapper_once()
     {
         var fail = Result<string, int>.Fail("error");
         int count = 0;
@@ -54,10 +54,10 @@ public class ResultMapErrorTests
     }
 
     /// <summary>
-    /// 4. Ok.MapError は errorMapper を実行しない
+    /// 4. ResultがOkの場合はerrorMapperを実行しない。
     /// </summary>
     [Test]
-    public void Result_Ok_MapError_should_not_invoke_error_mapper()
+    public void Ok_MapError_should_not_invoke_errorMapper()
     {
         var ok = Result<string, int>.Ok(5);
         int count = 0;
@@ -72,10 +72,10 @@ public class ResultMapErrorTests
     }
 
     /// <summary>
-    /// 5. Ok.MapError は元の Value を保持する
+    /// 5. ResultがOkの場合は元のValueを保持する。
     /// </summary>
     [Test]
-    public void Result_Ok_MapError_should_keep_original_value()
+    public void Ok_MapError_should_keep_original_value()
     {
         var ok = Result<string, int>.Ok(5);
         var result = ok.MapError(error => $"mapped:{error}");
@@ -89,10 +89,10 @@ public class ResultMapErrorTests
     }
 
     /// <summary>
-    /// 6. MapError は元の Result を変更しない
+    /// 6. MapErrorを実行しても元のResultは変更されない。
     /// </summary>
     [Test]
-    public void Result_MapError_should_not_modify_original_result()
+    public void MapError_should_not_modify_original_result()
     {
         var ok = Result<string, int>.Ok(5);
         var fail = Result<string, int>.Fail("error");
@@ -108,38 +108,72 @@ public class ResultMapErrorTests
     }
 
     /// <summary>
-    /// 7. errorMapper が null の場合は ArgumentNullException が発生する
+    /// 7. ResultがFailの場合でもerrorMapperがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_MapError_null_error_mapper_should_throw()
+    public void Fail_MapError_should_throw_argument_null_exception_when_errorMapper_is_null()
     {
         var fail = Result<string, int>.Fail("error");
+
         Assert.Throws<ArgumentNullException>(() => fail.MapError<int>(null!));
     }
 
     /// <summary>
-    /// 8. Fail.MapError で errorMapper が null を返した場合は InvalidOperationException が発生する
+    /// 8. ResultがOkの場合でもerrorMapperがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Fail_MapError_error_mapper_returning_null_should_throw()
+    public void Ok_MapError_should_throw_argument_null_exception_when_errorMapper_is_null()
+    {
+        var ok = Result<string, int>.Ok(5);
+
+        Assert.Throws<ArgumentNullException>(() => ok.MapError<int>(null!));
+    }
+
+    /// <summary>
+    /// 9. ResultがdefaultでerrorMapperもnullの場合は、
+    /// Resultの未初期化を優先してInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_MapError_should_throw_invalid_operation_exception_before_errorMapper_null_check()
+    {
+        var uninitialized = default(Result<string, int>);
+
+        Assert.Throws<InvalidOperationException>(() => uninitialized.MapError<int>(null!));
+    }
+
+    /// <summary>
+    /// 10. ResultがFailでerrorMapperがnullを返した場合はInvalidOperationExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Fail_MapError_should_throw_invalid_operation_exception_when_errorMapper_returns_null()
     {
         var fail = Result<string, int>.Fail("error");
+
         Assert.Throws<InvalidOperationException>(() => fail.MapError(_ => (string)null!));
     }
 
     /// <summary>
-    /// 9. Ok.MapError では null を返す errorMapper でも実行されない
+    /// 11. ResultがOkの場合はerrorMapperを実行せず、元のOkを返す。
+    /// errorMapperがnullを返す関数でも実行されない。
     /// </summary>
     [Test]
-    public void Result_Ok_MapError_should_not_evaluate_null_returning_error_mapper()
+    public void Ok_MapError_should_return_original_ok_without_invoking_errorMapper()
     {
         var ok = Result<string, int>.Ok(5);
-        var result = ok.MapError(_ => (string)null!);
+        int count = 0;
+
+        var result = ok.MapError(_ =>
+        {
+            count++;
+            return (string)null!;
+        });
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value, Is.EqualTo(5));
+            Assert.That(result, Is.EqualTo(ok));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 }

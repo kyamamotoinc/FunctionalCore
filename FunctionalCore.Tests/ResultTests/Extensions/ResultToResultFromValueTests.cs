@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 public class ResultToResultFromValueTests
 {
     /// <summary>
-    /// 1. null ではない値を ToResult すると Value を持つ Ok を返す
+    /// 1. 値がnullでない場合は、その値を保持するOkを返す。
     /// </summary>
     [Test]
-    public void Value_ToResult_non_null_should_return_ok()
+    public void ToResult_should_return_ok_when_value_is_not_null()
     {
         var value = "value";
 
@@ -23,10 +23,10 @@ public class ResultToResultFromValueTests
     }
 
     /// <summary>
-    /// 2. null の値を ToResult すると指定した Error を持つ Fail を返す
+    /// 2. 値がnullの場合は、指定されたErrorを保持するFailを返す。
     /// </summary>
     [Test]
-    public void Value_ToResult_null_should_return_failure()
+    public void ToResult_should_return_fail_when_value_is_null()
     {
         string? value = null;
 
@@ -34,17 +34,17 @@ public class ResultToResultFromValueTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Error, Is.EqualTo("error"));
         });
     }
 
     /// <summary>
-    /// 3. 参照型の値を ToResult した場合は同じインスタンスを保持する
+    /// 3. 参照型の値がnullでない場合は、同じインスタンスを保持するOkを返す。
     /// </summary>
     [Test]
-    public void Value_ToResult_reference_type_should_keep_same_instance()
+    public void ToResult_should_keep_same_instance_for_reference_type()
     {
         var value = new object();
 
@@ -54,10 +54,10 @@ public class ResultToResultFromValueTests
     }
 
     /// <summary>
-    /// 4. 値が null で errorIfNull も null の場合は ArgumentNullException が発生する
+    /// 4. 値がnullでerrorIfNullもnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Value_ToResult_null_value_and_null_error_should_throw()
+    public void ToResult_should_throw_argument_null_exception_when_value_and_errorIfNull_are_null()
     {
         string? value = null;
 
@@ -66,10 +66,10 @@ public class ResultToResultFromValueTests
     }
 
     /// <summary>
-    /// 5. 値が null でなくても errorIfNull が null の場合は ArgumentNullException が発生する
+    /// 5. 値がnullでない場合でもerrorIfNullがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Value_ToResult_non_null_value_and_null_error_should_throw()
+    public void ToResult_should_throw_argument_null_exception_when_errorIfNull_is_null()
     {
         var value = "value";
 
