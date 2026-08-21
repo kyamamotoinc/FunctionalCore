@@ -248,4 +248,36 @@ public class ResultMatchTests
 
         Assert.Throws<InvalidOperationException>(() => uninitialized.Match(value => value + 1, null!));
     }
+
+    /// <summary>
+    /// 18. ResultがOkでonSuccessが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Ok_Match_should_propagate_exception_when_onSuccess_throws()
+    {
+        var ok = Result<string, int>.Ok(5);
+        var expectedException = new NotSupportedException("onSuccess error");
+        Func<int, int> onSuccess = _ => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            ok.Match(onSuccess, _ => -1));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 19. ResultがFailでonFailureが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Fail_Match_should_propagate_exception_when_onFailure_throws()
+    {
+        var fail = Result<string, int>.Fail("error");
+        var expectedException = new NotSupportedException("onFailure error");
+        Func<string, int> onFailure = _ => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            fail.Match(value => value + 1, onFailure));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
 }

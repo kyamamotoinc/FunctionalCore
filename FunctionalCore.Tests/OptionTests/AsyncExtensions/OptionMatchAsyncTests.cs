@@ -236,7 +236,33 @@ public class OptionMatchAsyncTests
     }
 
     /// <summary>
-    /// 16. 選択された関数が同期的に例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// 16. default Optionの場合でもonSomeがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_MatchAsync_should_throw_argument_null_exception_when_onSome_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<int, Task<int>>? onSome = null;
+
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await defaultOption.AsTask().MatchAsync(onSome!, () => Task.FromResult(-1)));
+    }
+
+    /// <summary>
+    /// 17. default Optionの場合でもonNoneがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_MatchAsync_should_throw_argument_null_exception_when_onNone_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<Task<int>>? onNone = null;
+
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await defaultOption.AsTask().MatchAsync(value => Task.FromResult(value + 1), onNone!));
+    }
+
+    /// <summary>
+    /// 18. 選択された関数が同期的に例外を発生させた場合は、その例外をそのまま伝播させる。
     /// </summary>
     [Test]
     public void MatchAsync_should_propagate_exception_when_selected_function_throws()
@@ -252,7 +278,7 @@ public class OptionMatchAsyncTests
     }
 
     /// <summary>
-    /// 17. 選択された関数が返したTaskが例外で完了した場合は、その例外をそのまま伝播させる。
+    /// 19. 選択された関数が返したTaskが例外で完了した場合は、その例外をそのまま伝播させる。
     /// </summary>
     [Test]
     public void MatchAsync_should_propagate_exception_when_selected_task_faults()
@@ -269,7 +295,7 @@ public class OptionMatchAsyncTests
     }
 
     /// <summary>
-    /// 18. optionTaskが例外で完了した場合は、その例外をそのまま伝播させる。
+    /// 20. optionTaskが例外で完了した場合は、その例外をそのまま伝播させる。
     /// onSomeとonNoneは実行しない。
     /// </summary>
     [Test]

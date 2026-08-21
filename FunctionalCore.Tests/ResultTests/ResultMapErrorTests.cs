@@ -176,4 +176,19 @@ public class ResultMapErrorTests
             Assert.That(count, Is.EqualTo(0));
         });
     }
+
+    /// <summary>
+    /// 12. ResultがFailでerrorMapperが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Fail_MapError_should_propagate_exception_when_errorMapper_throws()
+    {
+        var fail = Result<string, int>.Fail("error");
+        var expectedException = new NotSupportedException("errorMapper error");
+        Func<string, string> errorMapper = _ => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() => fail.MapError(errorMapper));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
 }

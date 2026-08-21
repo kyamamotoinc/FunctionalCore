@@ -101,4 +101,19 @@ public class ResultTapErrorTests
 
         Assert.Throws<InvalidOperationException>(() => uninitialized.TapError(null!));
     }
+
+    /// <summary>
+    /// 9. ResultがFailでactionが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Fail_TapError_should_propagate_exception_when_action_throws()
+    {
+        var fail = Result<string, int>.Fail("error");
+        var expectedException = new NotSupportedException("action error");
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            fail.TapError(_ => throw expectedException));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
 }

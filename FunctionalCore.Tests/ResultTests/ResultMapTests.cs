@@ -175,4 +175,19 @@ public class ResultMapTests
             Assert.That(count, Is.EqualTo(0));
         });
     }
+
+    /// <summary>
+    /// 12. ResultがOkでselectorが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Ok_Map_should_propagate_exception_when_selector_throws()
+    {
+        var ok = Result<string, int>.Ok(5);
+        var expectedException = new NotSupportedException("selector error");
+        Func<int, int> selector = _ => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() => ok.Map(selector));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
 }

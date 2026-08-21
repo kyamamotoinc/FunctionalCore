@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 public class ResultSequenceTests
 {
     /// <summary>
-    /// 1. すべてのResultがOkの場合は、すべての成功値を保持するOkを返す。
+    /// 1. すべてOkの場合は、すべての値を持つOkを返す。
     /// </summary>
     [Test]
-    public void Sequence_should_return_ok_collection_when_all_results_are_ok()
+    public void Result_Sequence_all_ok_should_return_ok_collection()
     {
         var ok1 = Result<string, int>.Ok(1);
         var ok2 = Result<string, int>.Ok(2);
@@ -32,14 +32,14 @@ public class ResultSequenceTests
     }
 
     /// <summary>
-    /// 2. Failを含む場合は、そのFailを返す。
+    /// 2. Failを含む場合はFailを返す。
     /// </summary>
     [Test]
-    public void Sequence_should_return_fail_when_results_contain_fail()
+    public void Result_Sequence_containing_failure_should_return_failure()
     {
         var ok1 = Result<string, int>.Ok(1);
-        var fail = Result<string, int>.Fail("error");
         var ok3 = Result<string, int>.Ok(3);
+        var fail = Result<string, int>.Fail("error");
 
         var results = new[]
         {
@@ -52,27 +52,25 @@ public class ResultSequenceTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsFailure, Is.True);
             Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
         });
     }
 
     /// <summary>
-    /// 3. 複数のFailを含む場合は、最初のFailのErrorを返す。
+    /// 3. 複数のFailがある場合は最初のErrorを返す。
     /// </summary>
     [Test]
-    public void Sequence_should_return_first_error_when_results_contain_multiple_fails()
+    public void Result_Sequence_multiple_failures_should_return_first_error()
     {
-        var ok = Result<string, int>.Ok(1);
-        var firstFail = Result<string, int>.Fail("first error");
-        var secondFail = Result<string, int>.Fail("second error");
+        var ok1 = Result<string, int>.Ok(1);
 
         var results = new[]
         {
-            ok,
-            firstFail,
-            secondFail
+            ok1,
+            Result<string, int>.Fail("first error"),
+            Result<string, int>.Fail("second error")
         };
 
         var result = results.Sequence();
@@ -85,10 +83,10 @@ public class ResultSequenceTests
     }
 
     /// <summary>
-    /// 4. 空のシーケンスの場合は、空のコレクションを保持するOkを返す。
+    /// 4. 空のシーケンスの場合は、空のコレクションを持つOkを返す。
     /// </summary>
     [Test]
-    public void Sequence_should_return_ok_empty_collection_when_results_are_empty()
+    public void Result_Sequence_empty_collection_should_return_ok_empty_collection()
     {
         var results = Array.Empty<Result<string, int>>();
 
@@ -102,10 +100,10 @@ public class ResultSequenceTests
     }
 
     /// <summary>
-    /// 5. resultsがnullの場合はArgumentNullExceptionを発生させる。
+    /// 5. nullのシーケンスを渡した場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Sequence_should_throw_argument_null_exception_when_results_is_null()
+    public void Result_Sequence_null_results_should_throw()
     {
         IEnumerable<Result<string, int>> results = null!;
 
@@ -113,10 +111,10 @@ public class ResultSequenceTests
     }
 
     /// <summary>
-    /// 6. すべてのResultがOkの場合は、成功値の順序を保持する。
+    /// 6. 成功値の順序は保持される。
     /// </summary>
     [Test]
-    public void Sequence_should_preserve_value_order()
+    public void Result_Sequence_should_preserve_order()
     {
         var ok1 = Result<string, int>.Ok(1);
         var ok2 = Result<string, int>.Ok(2);
@@ -142,16 +140,15 @@ public class ResultSequenceTests
     /// 7. 未初期化Resultを含む場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Sequence_should_throw_invalid_operation_exception_when_results_contain_uninitialized_result()
+    public void Result_Sequence_containing_uninitialized_result_should_throw()
     {
         var ok1 = Result<string, int>.Ok(1);
-        var uninitialized = default(Result<string, int>);
         var ok3 = Result<string, int>.Ok(3);
 
         var results = new[]
         {
             ok1,
-            uninitialized,
+            default(Result<string, int>),
             ok3
         };
 
@@ -159,20 +156,19 @@ public class ResultSequenceTests
     }
 
     /// <summary>
-    /// 8. Failより後ろのResultは列挙せず、最初のFailを返す。
+    /// 8. Failより後ろに未初期化Resultがあっても評価されない。
     /// </summary>
     [Test]
-    public void Sequence_should_return_first_fail_without_evaluating_results_after_fail()
+    public void Result_Sequence_should_not_evaluate_items_after_failure()
     {
-        var ok = Result<string, int>.Ok(1);
+        var ok1 = Result<string, int>.Ok(1);
         var fail = Result<string, int>.Fail("error");
-        var uninitialized = default(Result<string, int>);
 
         var results = new[]
         {
-            ok,
+            ok1,
             fail,
-            uninitialized
+            default(Result<string, int>)
         };
 
         var result = results.Sequence();
@@ -182,5 +178,24 @@ public class ResultSequenceTests
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
         });
+    }
+
+    /// <summary>
+    /// 9. resultsの列挙中に例外が発生した場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Result_Sequence_should_propagate_exception_when_enumeration_throws()
+    {
+        var expectedException = new NotSupportedException("enumeration error");
+
+        IEnumerable<Result<string, int>> Results()
+        {
+            yield return Result<string, int>.Ok(1);
+            throw expectedException;
+        }
+
+        var actualException = Assert.Throws<NotSupportedException>(() => Results().Sequence());
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

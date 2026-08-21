@@ -297,4 +297,21 @@ public class ResultCombineTests
             Assert.That(count, Is.EqualTo(0));
         });
     }
+
+    /// <summary>
+    /// 19. 両方のResultがOkでselectorが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Ok_Ok_Combine_should_propagate_exception_when_selector_throws()
+    {
+        var first = Result<string, int>.Ok(3);
+        var second = Result<string, int>.Ok(5);
+        var expectedException = new NotSupportedException("selector error");
+        Func<int, int, int> selector = (_, _) => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            first.Combine(second, selector));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
 }

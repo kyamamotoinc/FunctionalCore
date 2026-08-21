@@ -167,4 +167,34 @@ public class ResultTapBothTests
 
         Assert.Throws<InvalidOperationException>(() => uninitialized.TapBoth(_ => { }, null!));
     }
+
+    /// <summary>
+    /// 13. ResultがOkでonSuccessが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Ok_TapBoth_should_propagate_exception_when_onSuccess_throws()
+    {
+        var ok = Result<string, int>.Ok(5);
+        var expectedException = new NotSupportedException("onSuccess error");
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            ok.TapBoth(_ => throw expectedException, _ => { }));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 14. ResultがFailでonFailureが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Fail_TapBoth_should_propagate_exception_when_onFailure_throws()
+    {
+        var fail = Result<string, int>.Fail("error");
+        var expectedException = new NotSupportedException("onFailure error");
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            fail.TapBoth(_ => { }, _ => throw expectedException));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
 }

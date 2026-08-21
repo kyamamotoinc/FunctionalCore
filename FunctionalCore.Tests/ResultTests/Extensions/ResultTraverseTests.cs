@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.ResultTests.Extensions;
 public class ResultTraverseTests
 {
     /// <summary>
-    /// 1. すべてのselectorがOkを返す場合は、変換後のすべての値を保持するOkを返す。
+    /// 1. すべてのselectorがOkを返す場合は、変換後の値を持つOkを返す。
     /// </summary>
     [Test]
-    public void Traverse_should_return_ok_collection_when_all_results_are_ok()
+    public void Result_Traverse_all_ok_should_return_ok_collection()
     {
         var items = new[] { 1, 2, 3 };
 
@@ -23,10 +23,10 @@ public class ResultTraverseTests
     }
 
     /// <summary>
-    /// 2. selectorがFailを返した場合は、そのFailを返す。
+    /// 2. selectorがFailを返した場合はFailを返す。
     /// </summary>
     [Test]
-    public void Traverse_should_return_fail_when_selector_returns_fail()
+    public void Result_Traverse_containing_failure_should_return_failure()
     {
         var items = new[] { 1, 2, 3 };
 
@@ -37,17 +37,17 @@ public class ResultTraverseTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsFailure, Is.True);
             Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo(100));
         });
     }
 
     /// <summary>
-    /// 3. selectorが複数のFailを返し得る場合は、最初のFailのErrorを返す。
+    /// 3. 複数のFailが発生し得る場合は最初のErrorを返す。
     /// </summary>
     [Test]
-    public void Traverse_should_return_first_error_when_selector_can_return_multiple_fails()
+    public void Result_Traverse_multiple_failures_should_return_first_error()
     {
         var items = new[] { 1, 2, 3 };
 
@@ -67,32 +67,32 @@ public class ResultTraverseTests
     }
 
     /// <summary>
-    /// 4. selectorは各要素に元の順序で実行される。
+    /// 4. selectorは各要素に順番に実行される。
     /// </summary>
     [Test]
-    public void Traverse_should_invoke_selector_for_each_item_in_order()
+    public void Result_Traverse_should_invoke_selector_for_each_item()
     {
         var items = new[] { 1, 2, 3 };
-        var receivedItems = new List<int>();
+        var received = new List<int>();
 
         var result = items.Traverse<int, int, int>(x =>
         {
-            receivedItems.Add(x);
+            received.Add(x);
             return Result<int, int>.Ok(x);
         });
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(receivedItems, Is.EqualTo(new[] { 1, 2, 3 }));
+            Assert.That(received, Is.EqualTo(new[] { 1, 2, 3 }));
         });
     }
 
     /// <summary>
-    /// 5. selectorがFailを返した場合は、それ以降の要素にselectorを実行しない。
+    /// 5. Failが発生した後の要素にはselectorを実行しない。
     /// </summary>
     [Test]
-    public void Traverse_should_not_invoke_selector_after_fail()
+    public void Result_Traverse_should_not_invoke_selector_after_failure()
     {
         var items = new[] { 1, 2, 3 };
         int count = 0;
@@ -108,17 +108,17 @@ public class ResultTraverseTests
 
         Assert.Multiple(() =>
         {
+            Assert.That(count, Is.EqualTo(2));
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo(100));
-            Assert.That(count, Is.EqualTo(2));
         });
     }
 
     /// <summary>
-    /// 6. すべてのselectorがOkを返す場合は、成功値の順序を元の要素の順序に保持する。
+    /// 6. 成功値の順序は元の要素の順序を保持する。
     /// </summary>
     [Test]
-    public void Traverse_should_preserve_value_order()
+    public void Result_Traverse_should_preserve_order()
     {
         var items = new[] { 3, 1, 2 };
 
@@ -132,10 +132,10 @@ public class ResultTraverseTests
     }
 
     /// <summary>
-    /// 7. Traverseはselectorによって成功値の型を変更できる。
+    /// 7. Traverseは成功値の型を変更できる。
     /// </summary>
     [Test]
-    public void Traverse_should_change_value_type()
+    public void Result_Traverse_should_change_value_type()
     {
         var items = new[] { 1, 2, 3 };
 
@@ -149,10 +149,10 @@ public class ResultTraverseTests
     }
 
     /// <summary>
-    /// 8. itemsが空の場合は、空のコレクションを保持するOkを返す。
+    /// 8. 空のシーケンスの場合は、空のコレクションを持つOkを返す。
     /// </summary>
     [Test]
-    public void Traverse_should_return_ok_empty_collection_when_items_are_empty()
+    public void Result_Traverse_empty_collection_should_return_ok_empty_collection()
     {
         var items = Array.Empty<int>();
 
@@ -166,10 +166,10 @@ public class ResultTraverseTests
     }
 
     /// <summary>
-    /// 9. itemsがnullの場合はArgumentNullExceptionを発生させる。
+    /// 9. nullのシーケンスを渡した場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Traverse_should_throw_argument_null_exception_when_items_is_null()
+    public void Result_Traverse_null_items_should_throw()
     {
         IEnumerable<int> items = null!;
 
@@ -181,7 +181,7 @@ public class ResultTraverseTests
     /// 10. selectorがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Traverse_should_throw_argument_null_exception_when_selector_is_null()
+    public void Result_Traverse_null_selector_should_throw()
     {
         var items = new[] { 1, 2, 3 };
         Func<int, Result<string, int>>? selector = null;
@@ -193,7 +193,7 @@ public class ResultTraverseTests
     /// 11. selectorが未初期化Resultを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Traverse_should_throw_invalid_operation_exception_when_selector_returns_uninitialized_result()
+    public void Result_Traverse_selector_returning_uninitialized_result_should_throw()
     {
         var items = new[] { 1, 2, 3 };
 
@@ -202,18 +202,15 @@ public class ResultTraverseTests
     }
 
     /// <summary>
-    /// 12. selectorがFailを返した場合は、それ以降に未初期化Resultを返す予定でもselectorを実行しない。
+    /// 12. Failより後ろで未初期化Resultを返す予定でも評価されない。
     /// </summary>
     [Test]
-    public void Traverse_should_return_fail_without_invoking_selector_after_fail()
+    public void Result_Traverse_should_not_evaluate_uninitialized_result_after_failure()
     {
         var items = new[] { 1, 2, 3 };
-        int count = 0;
 
         var result = items.Traverse<string, int, int>(x =>
         {
-            count++;
-
             if (x == 2)
                 return Result<string, int>.Fail("error");
 
@@ -227,7 +224,6 @@ public class ResultTraverseTests
         {
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error, Is.EqualTo("error"));
-            Assert.That(count, Is.EqualTo(2));
         });
     }
 
@@ -235,13 +231,34 @@ public class ResultTraverseTests
     /// 13. selectorが例外を発生させた場合は、その例外をそのまま伝播させる。
     /// </summary>
     [Test]
-    public void Traverse_should_propagate_exception_when_selector_throws()
+    public void Result_Traverse_should_propagate_exception_when_selector_throws()
     {
         var items = new[] { 1, 2, 3 };
         var expectedException = new NotSupportedException("selector error");
 
+        Func<int, Result<string, int>> selector = _ => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() => items.Traverse(selector));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 14. itemsの列挙中に例外が発生した場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Result_Traverse_should_propagate_exception_when_enumeration_throws()
+    {
+        var expectedException = new NotSupportedException("enumeration error");
+
+        IEnumerable<int> Items()
+        {
+            yield return 1;
+            throw expectedException;
+        }
+
         var actualException = Assert.Throws<NotSupportedException>(() =>
-            items.Traverse<string, int, int>(_ => throw expectedException));
+            Items().Traverse<string, int, int>(x => Result<string, int>.Ok(x)));
 
         Assert.That(actualException, Is.SameAs(expectedException));
     }

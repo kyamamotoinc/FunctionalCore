@@ -173,4 +173,19 @@ public class ResultBindTests
             Assert.That(count, Is.EqualTo(0));
         });
     }
+
+    /// <summary>
+    /// 12. ResultがOkでbinderが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Ok_Bind_should_propagate_exception_when_binder_throws()
+    {
+        var ok = Result<string, int>.Ok(5);
+        var expectedException = new NotSupportedException("binder error");
+        Func<int, Result<string, int>> binder = _ => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() => ok.Bind(binder));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
 }

@@ -277,4 +277,48 @@ public class ResultEnsureTests
             Assert.That(count, Is.EqualTo(0));
         });
     }
+
+    /// <summary>
+    /// 18. ResultがOkでpredicateが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// errorFactoryは実行しない。
+    /// </summary>
+    [Test]
+    public void Ok_Ensure_should_propagate_exception_when_predicate_throws()
+    {
+        var ok = Result<string, int>.Ok(5);
+        var expectedException = new NotSupportedException("predicate error");
+        int errorFactoryCount = 0;
+
+        Func<int, bool> predicate = _ => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            ok.Ensure(predicate, _ =>
+            {
+                errorFactoryCount++;
+                return "invalid";
+            }));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualException, Is.SameAs(expectedException));
+            Assert.That(errorFactoryCount, Is.EqualTo(0));
+        });
+    }
+
+    /// <summary>
+    /// 19. ResultがOkでpredicateがfalseを返した後にerrorFactoryが例外を発生させた場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Ok_Ensure_should_propagate_exception_when_errorFactory_throws()
+    {
+        var ok = Result<string, int>.Ok(5);
+        var expectedException = new NotSupportedException("errorFactory error");
+        Func<int, string> errorFactory = _ => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            ok.Ensure(_ => false, errorFactory));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
 }

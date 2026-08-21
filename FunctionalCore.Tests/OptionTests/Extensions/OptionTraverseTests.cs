@@ -219,4 +219,24 @@ public class OptionTraverseTests
 
         Assert.That(actualException, Is.SameAs(expectedException));
     }
+
+    /// <summary>
+    /// 13. itemsの列挙中に例外が発生した場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Traverse_should_propagate_exception_when_enumeration_throws()
+    {
+        var expectedException = new NotSupportedException("enumeration error");
+
+        IEnumerable<int> Items()
+        {
+            yield return 1;
+            throw expectedException;
+        }
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            Items().Traverse(x => Option<int>.Some(x)));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
 }
