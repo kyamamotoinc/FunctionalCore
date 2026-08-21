@@ -3,22 +3,23 @@
 public class OptionMatchTests
 {
     /// <summary>
-    /// 1. Some.Match は Some 側の関数を実行し、その結果を返す
+    /// 1. OptionがSomeの場合はonSomeを実行し、その戻り値を返す。
     /// </summary>
     [Test]
-    public void Option_Some_Match_should_return_some_func_result()
+    public void Some_Match_should_return_onSome_result()
     {
         var some = Option<int>.Some(5);
+
         var result = some.Match(value => value + 1, () => -1);
 
         Assert.That(result, Is.EqualTo(6));
     }
 
     /// <summary>
-    /// 2. Some.Match は Some 側の関数を1回だけ実行する
+    /// 2. OptionがSomeの場合はonSomeを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Option_Some_Match_should_invoke_some_func_once()
+    public void Some_Match_should_invoke_onSome_once()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -33,10 +34,10 @@ public class OptionMatchTests
     }
 
     /// <summary>
-    /// 3. Some.Match は None 側の関数を実行しない
+    /// 3. OptionがSomeの場合はonNoneを実行しない。
     /// </summary>
     [Test]
-    public void Option_Some_Match_should_not_invoke_none_func()
+    public void Some_Match_should_not_invoke_onNone()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -53,22 +54,23 @@ public class OptionMatchTests
     }
 
     /// <summary>
-    /// 4. None.Match は None 側の関数を実行し、その結果を返す
+    /// 4. OptionがNoneの場合はonNoneを実行し、その戻り値を返す。
     /// </summary>
     [Test]
-    public void Option_None_Match_should_return_none_func_result()
+    public void None_Match_should_return_onNone_result()
     {
         var none = Option<int>.None;
+
         var result = none.Match(value => value + 1, () => -1);
 
         Assert.That(result, Is.EqualTo(-1));
     }
 
     /// <summary>
-    /// 5. None.Match は None 側の関数を1回だけ実行する
+    /// 5. OptionがNoneの場合はonNoneを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Option_None_Match_should_invoke_none_func_once()
+    public void None_Match_should_invoke_onNone_once()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -85,10 +87,10 @@ public class OptionMatchTests
     }
 
     /// <summary>
-    /// 6. None.Match は Some 側の関数を実行しない
+    /// 6. OptionがNoneの場合はonSomeを実行しない。
     /// </summary>
     [Test]
-    public void Option_None_Match_should_not_invoke_some_func()
+    public void None_Match_should_not_invoke_onSome()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -103,113 +105,189 @@ public class OptionMatchTests
     }
 
     /// <summary>
-    /// 7. Some 側の関数が null の場合は ArgumentNullException が発生する
+    /// 7. OptionがSomeの場合でもonSomeがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Match_null_some_func_should_throw()
+    public void Some_Match_should_throw_argument_null_exception_when_onSome_is_null()
     {
         var some = Option<int>.Some(5);
         Func<int, int>? onSome = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            some.Match(onSome!, () => -1));
+        Assert.Throws<ArgumentNullException>(() => some.Match(onSome!, () => -1));
     }
 
     /// <summary>
-    /// 8. None 側の関数が null の場合は ArgumentNullException が発生する
+    /// 8. OptionがNoneの場合でもonNoneがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Match_null_none_func_should_throw()
+    public void None_Match_should_throw_argument_null_exception_when_onNone_is_null()
     {
         var none = Option<int>.None;
         Func<int>? onNone = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            none.Match(value => value + 1, onNone!));
+        Assert.Throws<ArgumentNullException>(() => none.Match(value => value + 1, onNone!));
     }
 
     /// <summary>
-    /// 9. Some でも未使用の None 側関数が null の場合は ArgumentNullException が発生する
+    /// 9. OptionがSomeの場合でも未使用のonNoneがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_Match_null_unused_none_func_should_throw()
+    public void Some_Match_should_throw_argument_null_exception_when_unused_onNone_is_null()
     {
         var some = Option<int>.Some(5);
         Func<int>? onNone = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            some.Match(value => value + 1, onNone!));
+        Assert.Throws<ArgumentNullException>(() => some.Match(value => value + 1, onNone!));
     }
 
     /// <summary>
-    /// 10. None でも未使用の Some 側関数が null の場合は ArgumentNullException が発生する
+    /// 10. OptionがNoneの場合でも未使用のonSomeがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_Match_null_unused_some_func_should_throw()
+    public void None_Match_should_throw_argument_null_exception_when_unused_onSome_is_null()
     {
         var none = Option<int>.None;
         Func<int, int>? onSome = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            none.Match(onSome!, () => -1));
+        Assert.Throws<ArgumentNullException>(() => none.Match(onSome!, () => -1));
     }
 
     /// <summary>
-    /// 11. Some.Match で Some 側の関数が null を返した場合は InvalidOperationException が発生する
+    /// 11. OptionがSomeでonSomeがnullを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_Match_some_func_returning_null_should_throw()
+    public void Some_Match_should_throw_invalid_operation_exception_when_onSome_returns_null()
     {
         var some = Option<int>.Some(5);
+
         Assert.Throws<InvalidOperationException>(() =>
             some.Match(_ => (string)null!, () => "fallback"));
     }
 
     /// <summary>
-    /// 12. None.Match で None 側の関数が null を返した場合は InvalidOperationException が発生する
+    /// 12. OptionがNoneでonNoneがnullを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_Match_none_func_returning_null_should_throw()
+    public void None_Match_should_throw_invalid_operation_exception_when_onNone_returns_null()
     {
         var none = Option<int>.None;
+
         Assert.Throws<InvalidOperationException>(() =>
             none.Match(_ => "value", () => (string)null!));
     }
 
     /// <summary>
-    /// 13. Some.Match では null を返す None 側の関数でも実行されない
+    /// 13. OptionがSomeの場合はnullを返すonNoneでも実行せず、onSomeの戻り値を返す。
     /// </summary>
     [Test]
-    public void Option_Some_Match_should_not_evaluate_null_returning_none_func()
+    public void Some_Match_should_return_onSome_result_without_invoking_null_returning_onNone()
     {
         var some = Option<int>.Some(5);
-        var result = some.Match(value => $"value:{value}", () => (string)null!);
+        int count = 0;
 
-        Assert.That(result, Is.EqualTo("value:5"));
+        var result = some.Match(
+            value => $"value:{value}",
+            () =>
+            {
+                count++;
+                return (string)null!;
+            });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo("value:5"));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 14. None.Match では null を返す Some 側の関数でも実行されない
+    /// 14. OptionがNoneの場合はnullを返すonSomeでも実行せず、onNoneの戻り値を返す。
     /// </summary>
     [Test]
-    public void Option_None_Match_should_not_evaluate_null_returning_some_func()
+    public void None_Match_should_return_onNone_result_without_invoking_null_returning_onSome()
     {
         var none = Option<int>.None;
-        var result = none.Match(_ => (string)null!, () => "none");
+        int count = 0;
 
-        Assert.That(result, Is.EqualTo("none"));
+        var result = none.Match(
+            _ =>
+            {
+                count++;
+                return (string)null!;
+            },
+            () => "none");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo("none"));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 15. Default Option は None と同様に None 側の関数を実行する
+    /// 15. default OptionはNoneと同様にonNoneを実行し、その戻り値を返す。
     /// </summary>
     [Test]
-    public void Option_Default_Match_should_behave_as_none()
+    public void Default_Match_should_behave_as_none()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
 
-        var result = option.Match(value => value + 1, () => -1);
+        var result = defaultOption.Match(value => value + 1, () => -1);
 
         Assert.That(result, Is.EqualTo(-1));
+    }
+
+    /// <summary>
+    /// 16. default Optionの場合でもonSomeがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_Match_should_throw_argument_null_exception_when_onSome_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<int, int>? onSome = null;
+
+        Assert.Throws<ArgumentNullException>(() => defaultOption.Match(onSome!, () => -1));
+    }
+
+    /// <summary>
+    /// 17. default Optionの場合でもonNoneがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_Match_should_throw_argument_null_exception_when_onNone_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<int>? onNone = null;
+
+        Assert.Throws<ArgumentNullException>(() => defaultOption.Match(value => value + 1, onNone!));
+    }
+
+    /// <summary>
+    /// 18. OptionがSomeでonSomeが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_Match_should_propagate_exception_when_onSome_throws()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("onSome error");
+        Func<int, int> onSome = _ => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() => some.Match(onSome, () => -1));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 19. OptionがNoneでonNoneが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void None_Match_should_propagate_exception_when_onNone_throws()
+    {
+        var none = Option<int>.None;
+        var expectedException = new NotSupportedException("onNone error");
+        Func<int> onNone = () => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() => none.Match(value => value + 1, onNone));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

@@ -3,10 +3,10 @@
 public class OptionTapTests
 {
     /// <summary>
-    /// 1. Some.Tap は action を1回だけ実行する
+    /// 1. OptionがSomeの場合はactionを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Option_Some_Tap_should_invoke_action_once()
+    public void Some_Tap_should_invoke_action_once()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -17,24 +17,24 @@ public class OptionTapTests
     }
 
     /// <summary>
-    /// 2. Some.Tap は Value を action に渡す
+    /// 2. OptionがSomeの場合はValueをactionに渡す。
     /// </summary>
     [Test]
-    public void Option_Some_Tap_should_pass_value_to_action()
+    public void Some_Tap_should_pass_value_to_action()
     {
         var some = Option<int>.Some(5);
-        int received = 0;
+        int receivedValue = 0;
 
-        some.Tap(value => received = value);
+        some.Tap(value => receivedValue = value);
 
-        Assert.That(received, Is.EqualTo(5));
+        Assert.That(receivedValue, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 3. None.Tap は action を実行しない
+    /// 3. OptionがNoneの場合はactionを実行しない。
     /// </summary>
     [Test]
-    public void Option_None_Tap_should_not_invoke_action()
+    public void None_Tap_should_not_invoke_action()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -45,34 +45,36 @@ public class OptionTapTests
     }
 
     /// <summary>
-    /// 4. Some.Tap は元の Option を変更せずに返す
+    /// 4. OptionがSomeの場合は元のOptionをそのまま返す。
     /// </summary>
     [Test]
-    public void Option_Some_Tap_should_return_original_option()
+    public void Some_Tap_should_return_original_option()
     {
         var some = Option<int>.Some(5);
+
         var result = some.Tap(_ => { });
 
         Assert.That(result, Is.EqualTo(some));
     }
 
     /// <summary>
-    /// 5. None.Tap は元の Option を変更せずに返す
+    /// 5. OptionがNoneの場合は元のOptionをそのまま返す。
     /// </summary>
     [Test]
-    public void Option_None_Tap_should_return_original_option()
+    public void None_Tap_should_return_original_option()
     {
         var none = Option<int>.None;
+
         var result = none.Tap(_ => { });
 
         Assert.That(result, Is.EqualTo(none));
     }
 
     /// <summary>
-    /// 6. action が null の場合は ArgumentNullException が発生する
+    /// 6. OptionがSomeの場合でもactionがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Tap_null_action_should_throw()
+    public void Some_Tap_should_throw_argument_null_exception_when_action_is_null()
     {
         var some = Option<int>.Some(5);
         Action<int>? action = null;
@@ -81,10 +83,10 @@ public class OptionTapTests
     }
 
     /// <summary>
-    /// 7. None でも action が null の場合は ArgumentNullException が発生する
+    /// 7. OptionがNoneの場合でもactionがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_Tap_null_action_should_throw()
+    public void None_Tap_should_throw_argument_null_exception_when_action_is_null()
     {
         var none = Option<int>.None;
         Action<int>? action = null;
@@ -93,20 +95,47 @@ public class OptionTapTests
     }
 
     /// <summary>
-    /// 8. Default Option は None と同様に action を実行せず None を返す
+    /// 8. default OptionはNoneと同様にactionを実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public void Option_Default_Tap_should_not_invoke_action()
+    public void Default_Tap_should_return_none_without_invoking_action()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
         int count = 0;
 
-        var result = option.Tap(_ => count++);
+        var result = defaultOption.Tap(_ => count++);
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(0));
         });
+    }
+
+    /// <summary>
+    /// 9. default Optionの場合でもactionがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_Tap_should_throw_argument_null_exception_when_action_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Action<int>? action = null;
+
+        Assert.Throws<ArgumentNullException>(() => defaultOption.Tap(action!));
+    }
+
+    /// <summary>
+    /// 10. OptionがSomeでactionが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_Tap_should_propagate_exception_when_action_throws()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("action error");
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            some.Tap(_ => throw expectedException));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

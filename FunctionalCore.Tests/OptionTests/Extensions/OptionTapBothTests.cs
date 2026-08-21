@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 public class OptionTapBothTests
 {
     /// <summary>
-    /// 1. Some.TapBoth は Some 側の action だけを実行する
+    /// 1. OptionがSomeの場合はonSomeだけを実行する。
     /// </summary>
     [Test]
-    public void Option_Some_TapBoth_should_invoke_only_some_action()
+    public void Some_TapBoth_should_invoke_only_onSome()
     {
         var some = Option<int>.Some(5);
         int someCount = 0;
@@ -24,10 +24,10 @@ public class OptionTapBothTests
     }
 
     /// <summary>
-    /// 2. None.TapBoth は None 側の action だけを実行する
+    /// 2. OptionがNoneの場合はonNoneだけを実行する。
     /// </summary>
     [Test]
-    public void Option_None_TapBoth_should_invoke_only_none_action()
+    public void None_TapBoth_should_invoke_only_onNone()
     {
         var none = Option<int>.None;
         int someCount = 0;
@@ -43,48 +43,50 @@ public class OptionTapBothTests
     }
 
     /// <summary>
-    /// 3. Some.TapBoth は Value を Some 側の action に渡す
+    /// 3. OptionがSomeの場合はValueをonSomeに渡す。
     /// </summary>
     [Test]
-    public void Option_Some_TapBoth_should_pass_value_to_some_action()
+    public void Some_TapBoth_should_pass_value_to_onSome()
     {
         var some = Option<int>.Some(5);
-        int received = 0;
+        int receivedValue = 0;
 
-        some.TapBoth(value => received = value, () => { });
+        some.TapBoth(value => receivedValue = value, () => { });
 
-        Assert.That(received, Is.EqualTo(5));
+        Assert.That(receivedValue, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 4. Some.TapBoth は元の Option を変更せずに返す
+    /// 4. OptionがSomeの場合は元のOptionをそのまま返す。
     /// </summary>
     [Test]
-    public void Option_Some_TapBoth_should_return_original_option()
+    public void Some_TapBoth_should_return_original_option()
     {
         var some = Option<int>.Some(5);
+
         var result = some.TapBoth(_ => { }, () => { });
 
         Assert.That(result, Is.EqualTo(some));
     }
 
     /// <summary>
-    /// 5. None.TapBoth は元の Option を変更せずに返す
+    /// 5. OptionがNoneの場合は元のOptionをそのまま返す。
     /// </summary>
     [Test]
-    public void Option_None_TapBoth_should_return_original_option()
+    public void None_TapBoth_should_return_original_option()
     {
         var none = Option<int>.None;
+
         var result = none.TapBoth(_ => { }, () => { });
 
         Assert.That(result, Is.EqualTo(none));
     }
 
     /// <summary>
-    /// 6. Some 側の action が null の場合は ArgumentNullException が発生する
+    /// 6. OptionがSomeの場合でもonSomeがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_TapBoth_null_some_action_should_throw()
+    public void Some_TapBoth_should_throw_argument_null_exception_when_onSome_is_null()
     {
         var some = Option<int>.Some(5);
         Action<int>? onSome = null;
@@ -94,10 +96,10 @@ public class OptionTapBothTests
     }
 
     /// <summary>
-    /// 7. None 側の action が null の場合は ArgumentNullException が発生する
+    /// 7. OptionがNoneの場合でもonNoneがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_TapBoth_null_none_action_should_throw()
+    public void None_TapBoth_should_throw_argument_null_exception_when_onNone_is_null()
     {
         var none = Option<int>.None;
         Action? onNone = null;
@@ -107,10 +109,10 @@ public class OptionTapBothTests
     }
 
     /// <summary>
-    /// 8. Some でも未使用の None 側 action が null の場合は ArgumentNullException が発生する
+    /// 8. OptionがSomeの場合でも未使用のonNoneがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_TapBoth_null_unused_none_action_should_throw()
+    public void Some_TapBoth_should_throw_argument_null_exception_when_unused_onNone_is_null()
     {
         var some = Option<int>.Some(5);
         Action? onNone = null;
@@ -120,10 +122,10 @@ public class OptionTapBothTests
     }
 
     /// <summary>
-    /// 9. None でも未使用の Some 側 action が null の場合は ArgumentNullException が発生する
+    /// 9. OptionがNoneの場合でも未使用のonSomeがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_TapBoth_null_unused_some_action_should_throw()
+    public void None_TapBoth_should_throw_argument_null_exception_when_unused_onSome_is_null()
     {
         var none = Option<int>.None;
         Action<int>? onSome = null;
@@ -133,24 +135,80 @@ public class OptionTapBothTests
     }
 
     /// <summary>
-    /// 10. Default Option は None と同様に None 側の action を実行する
+    /// 10. default OptionはNoneと同様にonNoneだけを実行し、Noneを返す。
     /// </summary>
     [Test]
-    public void Option_Default_TapBoth_should_behave_as_none()
+    public void Default_TapBoth_should_behave_as_none()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
         int someCount = 0;
         int noneCount = 0;
 
-        var result = option.TapBoth(
+        var result = defaultOption.TapBoth(
             _ => someCount++,
             () => noneCount++);
 
         Assert.Multiple(() =>
         {
+            Assert.That(result, Is.EqualTo(Option<int>.None));
             Assert.That(someCount, Is.EqualTo(0));
             Assert.That(noneCount, Is.EqualTo(1));
-            Assert.That(result, Is.EqualTo(Option<int>.None));
         });
+    }
+
+    /// <summary>
+    /// 11. default Optionの場合でもonSomeがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_TapBoth_should_throw_argument_null_exception_when_onSome_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Action<int>? onSome = null;
+
+        Assert.Throws<ArgumentNullException>(() =>
+            defaultOption.TapBoth(onSome!, () => { }));
+    }
+
+    /// <summary>
+    /// 12. default Optionの場合でもonNoneがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_TapBoth_should_throw_argument_null_exception_when_onNone_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Action? onNone = null;
+
+        Assert.Throws<ArgumentNullException>(() =>
+            defaultOption.TapBoth(_ => { }, onNone!));
+    }
+
+    /// <summary>
+    /// 13. OptionがSomeでonSomeが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_TapBoth_should_propagate_exception_when_onSome_throws()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("onSome error");
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            some.TapBoth(_ => throw expectedException, () => { }));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 14. OptionがNoneでonNoneが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void None_TapBoth_should_propagate_exception_when_onNone_throws()
+    {
+        var none = Option<int>.None;
+        var expectedException = new NotSupportedException("onNone error");
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            none.TapBoth(_ => { }, () => throw expectedException));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

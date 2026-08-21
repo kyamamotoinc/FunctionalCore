@@ -5,12 +5,13 @@ namespace FunctionalCore.Tests.OptionTests.Linq;
 public class OptionSelectTests
 {
     /// <summary>
-    /// 1. Some.Select は selector を実行し、変換後の値を持つ Some を返す
+    /// 1. OptionがSomeの場合はselectorを実行し、変換後の値を保持するSomeを返す。
     /// </summary>
     [Test]
-    public void Option_Some_Select_should_return_selector_result()
+    public void Some_Select_should_return_mapped_option()
     {
         var some = Option<int>.Some(5);
+
         var result = some.Select(x => x + 1);
 
         Assert.Multiple(() =>
@@ -21,12 +22,13 @@ public class OptionSelectTests
     }
 
     /// <summary>
-    /// 2. Some.Select は値の型を変更できる
+    /// 2. OptionがSomeの場合はselectorによって値の型を変更できる。
     /// </summary>
     [Test]
-    public void Option_Some_Select_should_change_value_type()
+    public void Some_Select_should_change_value_type()
     {
         var some = Option<int>.Some(5);
+
         var result = some.Select(x => $"value:{x}");
 
         Assert.Multiple(() =>
@@ -37,10 +39,10 @@ public class OptionSelectTests
     }
 
     /// <summary>
-    /// 3. Some.Select は selector を1回だけ実行する
+    /// 3. OptionがSomeの場合はselectorを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Option_Some_Select_should_invoke_selector_once()
+    public void Some_Select_should_invoke_selector_once()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -55,10 +57,10 @@ public class OptionSelectTests
     }
 
     /// <summary>
-    /// 4. None.Select は selector を実行しない
+    /// 4. OptionがNoneの場合はselectorを実行しない。
     /// </summary>
     [Test]
-    public void Option_None_Select_should_not_invoke_selector()
+    public void None_Select_should_not_invoke_selector()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -71,28 +73,29 @@ public class OptionSelectTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 5. None.Select は None を返す
+    /// 5. OptionがNoneの場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Option_None_Select_should_return_none()
+    public void None_Select_should_return_none()
     {
         var none = Option<int>.None;
+
         var result = none.Select(x => x + 1);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
-    /// 6. selector が null の場合は ArgumentNullException が発生する
+    /// 6. OptionがSomeの場合でもselectorがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Select_null_selector_should_throw()
+    public void Some_Select_should_throw_argument_null_exception_when_selector_is_null()
     {
         var some = Option<int>.Some(5);
         Func<int, string>? selector = null;
@@ -101,10 +104,10 @@ public class OptionSelectTests
     }
 
     /// <summary>
-    /// 7. None でも selector が null の場合は ArgumentNullException が発生する
+    /// 7. OptionがNoneの場合でもselectorがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_Select_null_selector_should_throw()
+    public void None_Select_should_throw_argument_null_exception_when_selector_is_null()
     {
         var none = Option<int>.None;
         Func<int, string>? selector = null;
@@ -113,36 +116,48 @@ public class OptionSelectTests
     }
 
     /// <summary>
-    /// 8. Some.Select で selector が null を返した場合は None を返す
+    /// 8. OptionがSomeでselectorがnullを返した場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Option_Some_Select_selector_returning_null_should_return_none()
+    public void Some_Select_should_return_none_when_selector_returns_null()
     {
         var some = Option<int>.Some(5);
+
         var result = some.Select(_ => (string)null!);
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
 
     /// <summary>
-    /// 9. None.Select では null を返す selector でも実行されない
+    /// 9. OptionがNoneの場合はnullを返すselectorでも実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public void Option_None_Select_should_not_evaluate_null_returning_selector()
+    public void None_Select_should_return_none_without_invoking_null_returning_selector()
     {
         var none = Option<int>.None;
-        var result = none.Select(_ => (string)null!);
+        int count = 0;
 
-        Assert.That(result, Is.EqualTo(Option<string>.None));
+        var result = none.Select(_ =>
+        {
+            count++;
+            return (string)null!;
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(Option<string>.None));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 10. LINQ クエリ構文の select で Select が利用できる
+    /// 10. LINQクエリ構文のselectでSelectを利用できる。
     /// </summary>
     [Test]
-    public void Option_Select_should_support_query_syntax()
+    public void Select_should_support_query_syntax()
     {
         var some = Option<int>.Some(5);
+
         var result =
             from x in some
             select x + 1;
@@ -155,12 +170,13 @@ public class OptionSelectTests
     }
 
     /// <summary>
-    /// 11. None に対する LINQ クエリ構文の select は None を返す
+    /// 11. OptionがNoneの場合はLINQクエリ構文のselectでもNoneを返す。
     /// </summary>
     [Test]
-    public void Option_None_Select_query_syntax_should_return_none()
+    public void None_Select_query_syntax_should_return_none()
     {
         var none = Option<int>.None;
+
         var result =
             from x in none
             select x + 1;
@@ -169,15 +185,42 @@ public class OptionSelectTests
     }
 
     /// <summary>
-    /// 12. Default Option は None と同様に扱われる
+    /// 12. default OptionはNoneと同様にSelectでNoneを返す。
     /// </summary>
     [Test]
-    public void Option_Default_Select_should_return_none()
+    public void Default_Select_should_return_none()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
 
-        var result = option.Select(x => x + 1);
+        var result = defaultOption.Select(x => x + 1);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
+    }
+
+    /// <summary>
+    /// 13. default Optionの場合でもselectorがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_Select_should_throw_argument_null_exception_when_selector_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<int, string>? selector = null;
+
+        Assert.Throws<ArgumentNullException>(() => defaultOption.Select(selector!));
+    }
+
+    /// <summary>
+    /// 14. OptionがSomeでselectorが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_Select_should_propagate_exception_when_selector_throws()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("selector error");
+        Func<int, int> selector = _ => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() => some.Select(selector));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

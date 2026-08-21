@@ -3,10 +3,10 @@
 public class OptionEqualityTests
 {
     /// <summary>
-    /// 1. Equals(object) に null を渡した場合は false を返す
+    /// 1. Equals(object)にnullを渡した場合はfalseを返す。
     /// </summary>
     [Test]
-    public void Option_Equals_null_should_return_false()
+    public void Equals_object_should_return_false_when_other_is_null()
     {
         var some = Option<int>.Some(5);
 
@@ -14,10 +14,10 @@ public class OptionEqualityTests
     }
 
     /// <summary>
-    /// 2. Equals(object) に異なる型を渡した場合は false を返す
+    /// 2. Equals(object)に異なる型を渡した場合はfalseを返す。
     /// </summary>
     [Test]
-    public void Option_Equals_different_type_should_return_false()
+    public void Equals_object_should_return_false_when_other_is_different_type()
     {
         var some = Option<int>.Some(5);
 
@@ -25,10 +25,10 @@ public class OptionEqualityTests
     }
 
     /// <summary>
-    /// 3. object として比較した同じ値の Some は等しい
+    /// 3. objectとして比較した同じ値のSomeは等しい。
     /// </summary>
     [Test]
-    public void Option_Some_Equals_object_with_same_value_should_return_true()
+    public void Some_Equals_object_should_return_true_when_value_is_same()
     {
         var some = Option<int>.Some(5);
         object other = Option<int>.Some(5);
@@ -37,10 +37,10 @@ public class OptionEqualityTests
     }
 
     /// <summary>
-    /// 4. object として比較した異なる値の Some は等しくない
+    /// 4. objectとして比較した異なる値のSomeは等しくない。
     /// </summary>
     [Test]
-    public void Option_Some_Equals_object_with_different_value_should_return_false()
+    public void Some_Equals_object_should_return_false_when_value_is_different()
     {
         var some = Option<int>.Some(5);
         object other = Option<int>.Some(10);
@@ -49,10 +49,10 @@ public class OptionEqualityTests
     }
 
     /// <summary>
-    /// 5. object として比較した None 同士は等しい
+    /// 5. objectとして比較したNone同士は等しい。
     /// </summary>
     [Test]
-    public void Option_None_Equals_object_none_should_return_true()
+    public void None_Equals_object_should_return_true_when_other_is_none()
     {
         var none = Option<int>.None;
         object other = Option<int>.None;
@@ -61,22 +61,22 @@ public class OptionEqualityTests
     }
 
     /// <summary>
-    /// 6. object として比較した Default Option と None は等しい
+    /// 6. objectとして比較したdefault OptionとNoneは等しい。
     /// </summary>
     [Test]
-    public void Option_Default_Equals_object_none_should_return_true()
+    public void Default_Equals_object_should_return_true_when_other_is_none()
     {
-        var def = default(Option<int>);
+        var defaultOption = default(Option<int>);
         object other = Option<int>.None;
 
-        Assert.That(def.Equals(other), Is.True);
+        Assert.That(defaultOption.Equals(other), Is.True);
     }
 
     /// <summary>
-    /// 7. Some と None は object 経由でも等しくない
+    /// 7. SomeとNoneはobjectとして比較しても等しくない。
     /// </summary>
     [Test]
-    public void Option_Some_Equals_object_none_should_return_false()
+    public void Some_Equals_object_should_return_false_when_other_is_none()
     {
         var some = Option<int>.Some(5);
         object other = Option<int>.None;
@@ -85,10 +85,10 @@ public class OptionEqualityTests
     }
 
     /// <summary>
-    /// 8. 等しい Some は同じハッシュコードを返す
+    /// 8. 同じ値を保持するSomeは同じハッシュコードを返す。
     /// </summary>
     [Test]
-    public void Equal_Some_options_should_have_same_hash_code()
+    public void Some_with_same_value_should_have_same_hash_code()
     {
         var first = Option<int>.Some(5);
         var second = Option<int>.Some(5);
@@ -97,14 +97,14 @@ public class OptionEqualityTests
     }
 
     /// <summary>
-    /// 9. None と Default Option は同じハッシュコードを返す
+    /// 9. Noneとdefault Optionは同じハッシュコードを返す。
     /// </summary>
     [Test]
-    public void None_and_Default_option_should_have_same_hash_code()
+    public void None_and_Default_Option_should_have_same_hash_code()
     {
         var none = Option<int>.None;
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
 
-        Assert.That(none.GetHashCode(), Is.EqualTo(option.GetHashCode()));
+        Assert.That(none.GetHashCode(), Is.EqualTo(defaultOption.GetHashCode()));
     }
 }

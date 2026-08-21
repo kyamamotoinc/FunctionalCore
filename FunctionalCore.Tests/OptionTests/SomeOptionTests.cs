@@ -3,39 +3,41 @@
 public class SomeOptionTests
 {
     /// <summary>
-    /// 1. Some は内部の Value をそのまま返す
+    /// 1. Someは内部のValueをそのまま返す。
     /// </summary>
     [Test]
-    public void Option_Some_should_return_inner_value()
+    public void Some_should_return_inner_value()
     {
         var some = Option<int>.Some(5);
+
         Assert.That(some.Value, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 2. Some は値を保持している状態である
+    /// 2. Someは値を保持している状態である。
     /// </summary>
     [Test]
-    public void Option_Some_should_have_value()
+    public void Some_should_have_value()
     {
         var some = Option<int>.Some(5);
+
         Assert.That(some.HasValue, Is.True);
     }
 
     /// <summary>
-    /// 3. Some(null) は許されない
+    /// 3. Someにnullを渡した場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_null_should_throw()
+    public void Some_should_throw_argument_null_exception_when_value_is_null()
     {
         Assert.Throws<ArgumentNullException>(() => Option<string>.Some(null!));
     }
 
     /// <summary>
-    /// 4. Some は default 値を正常な値として保持できる
+    /// 4. Someは値型のdefault値を正常な値として保持できる。
     /// </summary>
     [Test]
-    public void Option_Some_default_value_should_have_value()
+    public void Some_should_allow_default_value_for_value_type()
     {
         var some = Option<int>.Some(default);
 
@@ -47,10 +49,10 @@ public class SomeOptionTests
     }
 
     /// <summary>
-    /// 5. 参照型の Some は渡されたインスタンスをそのまま保持する
+    /// 5. 参照型のSomeは渡されたインスタンスをそのまま保持する。
     /// </summary>
     [Test]
-    public void Option_Some_reference_type_should_keep_same_instance()
+    public void Some_should_keep_same_instance_for_reference_type()
     {
         var value = new object();
 
@@ -60,7 +62,7 @@ public class SomeOptionTests
     }
 
     /// <summary>
-    /// 6. Some 同士で Value が同じなら等しい
+    /// 6. Some同士でValueが同じ場合は等しい。
     /// </summary>
     [Test]
     public void Some_with_same_value_should_be_equal()
@@ -77,7 +79,7 @@ public class SomeOptionTests
     }
 
     /// <summary>
-    /// 7. Some 同士で Value が異なれば等しくない
+    /// 7. Some同士でValueが異なる場合は等しくない。
     /// </summary>
     [Test]
     public void Some_with_different_value_should_not_be_equal()
@@ -93,7 +95,7 @@ public class SomeOptionTests
     }
 
     /// <summary>
-    /// 8. Some と None は等しくない
+    /// 8. SomeとNoneは等しくない。
     /// </summary>
     [Test]
     public void Some_and_None_should_not_be_equal()
@@ -110,12 +112,13 @@ public class SomeOptionTests
     }
 
     /// <summary>
-    /// 9. Some の ToString は "Some(value)" を返す
+    /// 9. SomeのToStringは"Some(value)"を返す。
     /// </summary>
     [Test]
     public void Some_ToString_should_return_formatted_value()
     {
         var some = Option<int>.Some(5);
+
         Assert.That(some.ToString(), Is.EqualTo("Some(5)"));
     }
 }

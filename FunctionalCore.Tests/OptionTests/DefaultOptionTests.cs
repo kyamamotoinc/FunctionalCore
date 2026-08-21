@@ -3,72 +3,76 @@
 public class DefaultOptionTests
 {
     /// <summary>
-    /// 1. Default Option は値を保持していない
+    /// 1. defaultのOptionは値を保持していない。
     /// </summary>
     [Test]
     public void Default_Option_should_not_have_value()
     {
-        var def = default(Option<int>);
-        Assert.That(def.HasValue, Is.False);
+        var defaultOption = default(Option<int>);
+
+        Assert.That(defaultOption.HasValue, Is.False);
     }
 
     /// <summary>
-    /// 2. Default Option は None と等しい
+    /// 2. defaultのOptionはNoneと等しい。
     /// </summary>
     [Test]
     public void Default_Option_should_equal_none()
     {
-        var def = default(Option<int>);
+        var defaultOption = default(Option<int>);
+
         Assert.Multiple(() =>
         {
-            Assert.That(def, Is.EqualTo(Option<int>.None));
-            Assert.That(def == Option<int>.None, Is.True);
-            Assert.That(def.Equals(Option<int>.None), Is.True);
+            Assert.That(defaultOption, Is.EqualTo(Option<int>.None));
+            Assert.That(defaultOption == Option<int>.None, Is.True);
+            Assert.That(defaultOption.Equals(Option<int>.None), Is.True);
         });
     }
 
     /// <summary>
-    /// 3. Default Option では Value にアクセスできない
+    /// 3. defaultのOptionでValueにアクセスした場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Default_Option_accessing_value_should_throw()
+    public void Default_Option_should_throw_invalid_operation_exception_when_accessing_value()
     {
-        var def = default(Option<int>);
-        Assert.Throws<InvalidOperationException>(() => _ = def.Value);
+        var defaultOption = default(Option<int>);
+
+        Assert.Throws<InvalidOperationException>(() => _ = defaultOption.Value);
     }
 
     /// <summary>
-    /// 4. Default Option の ToString は "None" を返す
+    /// 4. defaultのOptionのToStringは"None"を返す。
     /// </summary>
     [Test]
     public void Default_Option_ToString_should_return_none()
     {
-        var def = default(Option<int>);
-        Assert.That(def.ToString(), Is.EqualTo("None"));
+        var defaultOption = default(Option<int>);
+
+        Assert.That(defaultOption.ToString(), Is.EqualTo("None"));
     }
 
     /// <summary>
-    /// 5. Default Option 同士は等しい
+    /// 5. 2つのdefault Optionは等しい。
     /// </summary>
     [Test]
-    public void Two_default_Options_should_be_equal()
+    public void Default_Option_should_equal_another_default_option()
     {
-        var def = default(Option<int>);
+        var defaultOption = default(Option<int>);
         var other = default(Option<int>);
 
         Assert.Multiple(() =>
         {
-            Assert.That(def == other, Is.True);
-            Assert.That(def.Equals(other), Is.True);
-            Assert.That(def.GetHashCode(), Is.EqualTo(other.GetHashCode()));
+            Assert.That(defaultOption == other, Is.True);
+            Assert.That(defaultOption.Equals(other), Is.True);
+            Assert.That(defaultOption.GetHashCode(), Is.EqualTo(other.GetHashCode()));
         });
     }
 
     /// <summary>
-    /// 6. 配列で生成された Option の初期値は None と等しい
+    /// 6. Option配列の初期値はNoneと等しい。
     /// </summary>
     [Test]
-    public void Array_initialized_Option_should_be_none()
+    public void Default_Option_in_array_should_equal_none()
     {
         var options = new Option<int>[1];
 

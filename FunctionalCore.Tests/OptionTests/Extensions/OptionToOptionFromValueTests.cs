@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 public class OptionToOptionFromValueTests
 {
     /// <summary>
-    /// 1. null ではない値を ToOption すると Value を持つ Some を返す
+    /// 1. 値がnullでない場合は、そのValueを保持するSomeを返す。
     /// </summary>
     [Test]
-    public void Value_ToOption_non_null_should_return_some()
+    public void Value_ToOption_should_return_some_when_value_is_not_null()
     {
         var value = "value";
 
@@ -22,10 +22,10 @@ public class OptionToOptionFromValueTests
     }
 
     /// <summary>
-    /// 2. null の値を ToOption すると None を返す
+    /// 2. 値がnullの場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Value_ToOption_null_should_return_none()
+    public void Value_ToOption_should_return_none_when_value_is_null()
     {
         string? value = null;
 
@@ -35,10 +35,10 @@ public class OptionToOptionFromValueTests
     }
 
     /// <summary>
-    /// 3. 値型の default 値は正常な Some として扱われる
+    /// 3. 値型のdefault値は正常な値として扱い、そのValueを保持するSomeを返す。
     /// </summary>
     [Test]
-    public void Value_ToOption_default_value_type_should_return_some()
+    public void Value_ToOption_should_return_some_for_default_value_type()
     {
         int value = default;
 
@@ -52,10 +52,10 @@ public class OptionToOptionFromValueTests
     }
 
     /// <summary>
-    /// 4. 参照型の値を ToOption した場合は同じインスタンスを保持する
+    /// 4. 参照型の値がnullでない場合は、同じインスタンスを保持するSomeを返す。
     /// </summary>
     [Test]
-    public void Value_ToOption_reference_type_should_keep_same_instance()
+    public void Value_ToOption_should_keep_same_instance_for_reference_type()
     {
         var value = new object();
 
@@ -65,10 +65,10 @@ public class OptionToOptionFromValueTests
     }
 
     /// <summary>
-    /// 5. null ではない空文字列は Some として扱われる
+    /// 5. 空文字列はnullではないため、正常な値としてSomeに保持する。
     /// </summary>
     [Test]
-    public void Value_ToOption_empty_string_should_return_some()
+    public void Value_ToOption_should_return_some_for_empty_string()
     {
         var value = string.Empty;
 

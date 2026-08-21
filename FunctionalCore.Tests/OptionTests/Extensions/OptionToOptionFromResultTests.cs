@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 public class OptionToOptionFromResultTests
 {
     /// <summary>
-    /// 1. Ok.ToOption は Value を持つ Some を返す
+    /// 1. ResultがOkの場合はValueを保持するSomeを返す。
     /// </summary>
     [Test]
-    public void Result_Ok_ToOption_should_return_some()
+    public void Ok_ToOption_should_return_some()
     {
         var result = Result<string, int>.Ok(5);
 
@@ -22,10 +22,10 @@ public class OptionToOptionFromResultTests
     }
 
     /// <summary>
-    /// 2. Fail.ToOption は None を返す
+    /// 2. ResultがFailの場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Result_Fail_ToOption_should_return_none()
+    public void Fail_ToOption_should_return_none()
     {
         var result = Result<string, int>.Fail("error");
 
@@ -35,10 +35,10 @@ public class OptionToOptionFromResultTests
     }
 
     /// <summary>
-    /// 3. ToOption は Ok の Value を変更しない
+    /// 3. ResultがOkの場合は元のValueをそのまま保持する。
     /// </summary>
     [Test]
-    public void Result_Ok_ToOption_should_keep_original_value()
+    public void Ok_ToOption_should_keep_original_value()
     {
         var result = Result<string, int>.Ok(5);
 
@@ -48,10 +48,10 @@ public class OptionToOptionFromResultTests
     }
 
     /// <summary>
-    /// 4. 参照型の Ok.ToOption は同じインスタンスを保持する
+    /// 4. 参照型のResultがOkの場合は同じインスタンスを保持するSomeを返す。
     /// </summary>
     [Test]
-    public void Result_Ok_ToOption_reference_type_should_keep_same_instance()
+    public void Ok_ToOption_should_keep_same_instance_for_reference_type()
     {
         var value = new object();
         var result = Result<string, object>.Ok(value);
@@ -62,13 +62,13 @@ public class OptionToOptionFromResultTests
     }
 
     /// <summary>
-    /// 5. 未初期化 Result を ToOption すると InvalidOperationException が発生する
+    /// 5. Resultがdefaultの場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Result_Default_ToOption_should_throw()
+    public void Default_ToOption_should_throw_invalid_operation_exception()
     {
-        var result = default(Result<string, int>);
+        var uninitialized = default(Result<string, int>);
 
-        Assert.Throws<InvalidOperationException>(() => result.ToOption());
+        Assert.Throws<InvalidOperationException>(() => uninitialized.ToOption());
     }
 }

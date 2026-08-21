@@ -5,12 +5,13 @@ namespace FunctionalCore.Tests.OptionTests.AsyncExtensions;
 public class OptionBindAsyncTests
 {
     /// <summary>
-    /// 1. Some.BindAsync は binder を実行し、その Option を返す
+    /// 1. OptionがSomeの場合はbinderを実行し、そのOptionを返す。
     /// </summary>
     [Test]
-    public async Task Option_Some_BindAsync_should_return_binder_result()
+    public async Task Some_BindAsync_should_return_binder_result()
     {
         var some = Option<int>.Some(5);
+
         var result = await some.AsTask().BindAsync(x => Task.FromResult(Option<int>.Some(x + 1)));
 
         Assert.Multiple(() =>
@@ -21,12 +22,13 @@ public class OptionBindAsyncTests
     }
 
     /// <summary>
-    /// 2. Some.BindAsync は値の型を変更できる
+    /// 2. OptionがSomeの場合はbinderによって値の型を変更できる。
     /// </summary>
     [Test]
-    public async Task Option_Some_BindAsync_should_change_value_type()
+    public async Task Some_BindAsync_should_change_value_type()
     {
         var some = Option<int>.Some(5);
+
         var result = await some.AsTask().BindAsync(x => Task.FromResult(Option<string>.Some($"value:{x}")));
 
         Assert.Multiple(() =>
@@ -37,22 +39,23 @@ public class OptionBindAsyncTests
     }
 
     /// <summary>
-    /// 3. binder が None を返した場合は None を返す
+    /// 3. OptionがSomeでbinderがNoneを返した場合はNoneを返す。
     /// </summary>
     [Test]
-    public async Task Option_Some_BindAsync_binder_returning_none_should_return_none()
+    public async Task Some_BindAsync_should_return_none_when_binder_returns_none()
     {
         var some = Option<int>.Some(5);
+
         var result = await some.AsTask().BindAsync(_ => Task.FromResult(Option<int>.None));
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
-    /// 4. Some.BindAsync は binder を1回だけ実行する
+    /// 4. OptionがSomeの場合はbinderを1回だけ実行する。
     /// </summary>
     [Test]
-    public async Task Option_Some_BindAsync_should_invoke_binder_once()
+    public async Task Some_BindAsync_should_invoke_binder_once()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -67,10 +70,10 @@ public class OptionBindAsyncTests
     }
 
     /// <summary>
-    /// 5. None.BindAsync は binder を実行しない
+    /// 5. OptionがNoneの場合はbinderを実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public async Task Option_None_BindAsync_should_not_invoke_binder()
+    public async Task None_BindAsync_should_return_none_without_invoking_binder()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -83,16 +86,16 @@ public class OptionBindAsyncTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 6. binder が null の場合は ArgumentNullException が発生する
+    /// 6. OptionがSomeの場合でもbinderがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_BindAsync_null_binder_should_throw()
+    public void Some_BindAsync_should_throw_argument_null_exception_when_binder_is_null()
     {
         var some = Option<int>.Some(5);
         Func<int, Task<Option<string>>>? binder = null;
@@ -102,10 +105,10 @@ public class OptionBindAsyncTests
     }
 
     /// <summary>
-    /// 7. None でも binder が null の場合は ArgumentNullException が発生する
+    /// 7. OptionがNoneの場合でもbinderがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_BindAsync_null_binder_should_throw()
+    public void None_BindAsync_should_throw_argument_null_exception_when_binder_is_null()
     {
         var none = Option<int>.None;
         Func<int, Task<Option<string>>>? binder = null;
@@ -115,10 +118,10 @@ public class OptionBindAsyncTests
     }
 
     /// <summary>
-    /// 8. optionTask が null の場合は ArgumentNullException が発生する
+    /// 8. optionTaskがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_BindAsync_null_option_task_should_throw()
+    public void BindAsync_should_throw_argument_null_exception_when_optionTask_is_null()
     {
         Task<Option<int>>? optionTask = null;
 
@@ -127,10 +130,10 @@ public class OptionBindAsyncTests
     }
 
     /// <summary>
-    /// 9. binder が null Task を返した場合は InvalidOperationException が発生する
+    /// 9. OptionがSomeでbinderがnullのTaskを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_BindAsync_binder_returning_null_task_should_throw()
+    public void Some_BindAsync_should_throw_invalid_operation_exception_when_binder_returns_null_task()
     {
         var some = Option<int>.Some(5);
         Func<int, Task<Option<int>>> binder = _ => null!;
@@ -140,41 +143,52 @@ public class OptionBindAsyncTests
     }
 
     /// <summary>
-    /// 10. None.BindAsync では null Task を返す binder でも実行されない
+    /// 10. OptionがNoneの場合はnullのTaskを返すbinderでも実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public async Task Option_None_BindAsync_should_not_evaluate_null_task_binder()
+    public async Task None_BindAsync_should_return_none_without_invoking_null_task_binder()
     {
         var none = Option<int>.None;
-        Func<int, Task<Option<int>>> binder = _ => null!;
+        int count = 0;
+
+        Func<int, Task<Option<int>>> binder = _ =>
+        {
+            count++;
+            return null!;
+        };
 
         var result = await none.AsTask().BindAsync(binder);
 
-        Assert.That(result, Is.EqualTo(Option<int>.None));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 11. binder が Default Option を返した場合は None として扱われる
+    /// 11. OptionがSomeでbinderがdefault Optionを返した場合はNoneとして扱う。
     /// </summary>
     [Test]
-    public async Task Option_Some_BindAsync_binder_returning_default_option_should_return_none()
+    public async Task Some_BindAsync_should_return_none_when_binder_returns_default_option()
     {
         var some = Option<int>.Some(5);
+
         var result = await some.AsTask().BindAsync(_ => Task.FromResult(default(Option<string>)));
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
 
     /// <summary>
-    /// 12. Default Option は None と同様に binder を実行しない
+    /// 12. default OptionはNoneと同様にbinderを実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public async Task Option_Default_BindAsync_should_not_invoke_binder()
+    public async Task Default_BindAsync_should_return_none_without_invoking_binder()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
         int count = 0;
 
-        var result = await option.AsTask().BindAsync(x =>
+        var result = await defaultOption.AsTask().BindAsync(x =>
         {
             count++;
             return Task.FromResult(Option<int>.Some(x + 1));
@@ -182,8 +196,78 @@ public class OptionBindAsyncTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(0));
+        });
+    }
+
+    /// <summary>
+    /// 13. default Optionの場合でもbinderがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_BindAsync_should_throw_argument_null_exception_when_binder_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<int, Task<Option<string>>>? binder = null;
+
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await defaultOption.AsTask().BindAsync(binder!));
+    }
+
+    /// <summary>
+    /// 14. OptionがSomeでbinderが同期的に例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_BindAsync_should_propagate_exception_when_binder_throws()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("binder error");
+        Func<int, Task<Option<int>>> binder = _ => throw expectedException;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await some.AsTask().BindAsync(binder));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 15. OptionがSomeでbinderが返したTaskが例外で完了した場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_BindAsync_should_propagate_exception_when_binder_task_faults()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("binder task error");
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await some.AsTask().BindAsync(_ => Task.FromException<Option<int>>(expectedException)));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 16. optionTaskが例外で完了した場合は、その例外をそのまま伝播させる。
+    /// binderは実行しない。
+    /// </summary>
+    [Test]
+    public void BindAsync_should_propagate_exception_when_optionTask_faults()
+    {
+        var expectedException = new NotSupportedException("source task error");
+        Task<Option<int>> optionTask = Task.FromException<Option<int>>(expectedException);
+        int count = 0;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await optionTask.BindAsync(x =>
+            {
+                count++;
+                return Task.FromResult(Option<int>.Some(x + 1));
+            }));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualException, Is.SameAs(expectedException));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 }

@@ -5,12 +5,13 @@ namespace FunctionalCore.Tests.OptionTests.Linq;
 public class OptionWhereTests
 {
     /// <summary>
-    /// 1. Some.Where で predicate が true の場合は元の Some を返す
+    /// 1. OptionがSomeでpredicateがtrueを返す場合は元のSomeをそのまま返す。
     /// </summary>
     [Test]
-    public void Option_Some_Where_true_should_keep_original_some()
+    public void Some_Where_should_return_original_some_when_predicate_returns_true()
     {
         var some = Option<int>.Some(5);
+
         var result = some.Where(x => x > 0);
 
         Assert.Multiple(() =>
@@ -22,22 +23,23 @@ public class OptionWhereTests
     }
 
     /// <summary>
-    /// 2. Some.Where で predicate が false の場合は None を返す
+    /// 2. OptionがSomeでpredicateがfalseを返す場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Option_Some_Where_false_should_return_none()
+    public void Some_Where_should_return_none_when_predicate_returns_false()
     {
         var some = Option<int>.Some(5);
+
         var result = some.Where(x => x < 0);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
-    /// 3. Some.Where は predicate を1回だけ実行する
+    /// 3. OptionがSomeの場合はpredicateを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Option_Some_Where_should_invoke_predicate_once()
+    public void Some_Where_should_invoke_predicate_once()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -52,28 +54,28 @@ public class OptionWhereTests
     }
 
     /// <summary>
-    /// 4. Some.Where は Value を predicate に渡す
+    /// 4. OptionがSomeの場合はValueをpredicateに渡す。
     /// </summary>
     [Test]
-    public void Option_Some_Where_should_pass_value_to_predicate()
+    public void Some_Where_should_pass_value_to_predicate()
     {
         var some = Option<int>.Some(5);
-        int received = 0;
+        int receivedValue = 0;
 
         some.Where(value =>
         {
-            received = value;
+            receivedValue = value;
             return true;
         });
 
-        Assert.That(received, Is.EqualTo(5));
+        Assert.That(receivedValue, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 5. None.Where は predicate を実行しない
+    /// 5. OptionがNoneの場合はpredicateを実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public void Option_None_Where_should_not_invoke_predicate()
+    public void None_Where_should_return_none_without_invoking_predicate()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -86,16 +88,16 @@ public class OptionWhereTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 6. predicate が null の場合は ArgumentNullException が発生する
+    /// 6. OptionがSomeの場合でもpredicateがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Where_null_predicate_should_throw()
+    public void Some_Where_should_throw_argument_null_exception_when_predicate_is_null()
     {
         var some = Option<int>.Some(5);
         Func<int, bool>? predicate = null;
@@ -104,10 +106,10 @@ public class OptionWhereTests
     }
 
     /// <summary>
-    /// 7. None でも predicate が null の場合は ArgumentNullException が発生する
+    /// 7. OptionがNoneの場合でもpredicateがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_Where_null_predicate_should_throw()
+    public void None_Where_should_throw_argument_null_exception_when_predicate_is_null()
     {
         var none = Option<int>.None;
         Func<int, bool>? predicate = null;
@@ -116,12 +118,13 @@ public class OptionWhereTests
     }
 
     /// <summary>
-    /// 8. LINQ クエリ構文の where で Where が利用できる
+    /// 8. LINQクエリ構文のwhereでWhereを利用できる。
     /// </summary>
     [Test]
-    public void Option_Where_should_support_query_syntax()
+    public void Where_should_support_query_syntax()
     {
         var some = Option<int>.Some(5);
+
         var result =
             from x in some
             where x > 0
@@ -135,12 +138,13 @@ public class OptionWhereTests
     }
 
     /// <summary>
-    /// 9. LINQ クエリ構文の where で条件を満たさない場合は None を返す
+    /// 9. LINQクエリ構文のwhereでpredicateがfalseの場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Option_Where_query_syntax_false_should_return_none()
+    public void Where_query_syntax_should_return_none_when_predicate_returns_false()
     {
         var some = Option<int>.Some(5);
+
         var result =
             from x in some
             where x < 0
@@ -150,12 +154,13 @@ public class OptionWhereTests
     }
 
     /// <summary>
-    /// 10. None に対する LINQ クエリ構文の where は None を返す
+    /// 10. OptionがNoneの場合はLINQクエリ構文のwhereでもNoneを返す。
     /// </summary>
     [Test]
-    public void Option_None_Where_query_syntax_should_return_none()
+    public void None_Where_query_syntax_should_return_none()
     {
         var none = Option<int>.None;
+
         var result =
             from x in none
             where x > 0
@@ -165,15 +170,42 @@ public class OptionWhereTests
     }
 
     /// <summary>
-    /// 11. Default Option は None と同様に扱われる
+    /// 11. default OptionはNoneと同様にWhereでNoneを返す。
     /// </summary>
     [Test]
-    public void Option_Default_Where_should_return_none()
+    public void Default_Where_should_return_none()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
 
-        var result = option.Where(x => x > 0);
+        var result = defaultOption.Where(x => x > 0);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
+    }
+
+    /// <summary>
+    /// 12. default Optionの場合でもpredicateがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_Where_should_throw_argument_null_exception_when_predicate_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<int, bool>? predicate = null;
+
+        Assert.Throws<ArgumentNullException>(() => defaultOption.Where(predicate!));
+    }
+
+    /// <summary>
+    /// 13. OptionがSomeでpredicateが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_Where_should_propagate_exception_when_predicate_throws()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("predicate error");
+        Func<int, bool> predicate = _ => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() => some.Where(predicate));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

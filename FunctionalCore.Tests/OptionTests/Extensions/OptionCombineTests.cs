@@ -5,15 +5,15 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 public class OptionCombineTests
 {
     /// <summary>
-    /// 1. 両方が Some の場合は selector を実行し、組み合わせた値を持つ Some を返す
+    /// 1. 両方のOptionがSomeの場合はselectorを実行し、組み合わせた値を保持するSomeを返す。
     /// </summary>
     [Test]
-    public void Option_Some_Some_Combine_should_return_combined_value()
+    public void Some_Some_Combine_should_return_combined_option()
     {
-        var some3 = Option<int>.Some(3);
-        var some5 = Option<int>.Some(5);
+        var first = Option<int>.Some(3);
+        var second = Option<int>.Some(5);
 
-        var result = some3.Combine(some5, (x, y) => x + y);
+        var result = first.Combine(second, (x, y) => x + y);
 
         Assert.Multiple(() =>
         {
@@ -23,15 +23,15 @@ public class OptionCombineTests
     }
 
     /// <summary>
-    /// 2. Combine は値の型を変更できる
+    /// 2. 両方のOptionがSomeの場合はselectorによって値の型を変更できる。
     /// </summary>
     [Test]
-    public void Option_Some_Some_Combine_should_change_value_type()
+    public void Some_Some_Combine_should_change_value_type()
     {
-        var some3 = Option<int>.Some(3);
-        var some5 = Option<int>.Some(5);
+        var first = Option<int>.Some(3);
+        var second = Option<int>.Some(5);
 
-        var result = some3.Combine(some5, (x, y) => $"{x}:{y}");
+        var result = first.Combine(second, (x, y) => $"{x}:{y}");
 
         Assert.Multiple(() =>
         {
@@ -41,17 +41,16 @@ public class OptionCombineTests
     }
 
     /// <summary>
-    /// 3. 両方が Some の場合は selector を1回だけ実行する
+    /// 3. 両方のOptionがSomeの場合はselectorを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Option_Some_Some_Combine_should_invoke_selector_once()
+    public void Some_Some_Combine_should_invoke_selector_once()
     {
-        var some3 = Option<int>.Some(3);
-        var some5 = Option<int>.Some(5);
-
+        var first = Option<int>.Some(3);
+        var second = Option<int>.Some(5);
         int count = 0;
 
-        some3.Combine(some5, (x, y) =>
+        first.Combine(second, (x, y) =>
         {
             count++;
             return x + y;
@@ -61,56 +60,58 @@ public class OptionCombineTests
     }
 
     /// <summary>
-    /// 4. 1つ目が None の場合は None を返す
+    /// 4. 1つ目のOptionがNoneの場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Option_None_Some_Combine_should_return_none()
+    public void None_Some_Combine_should_return_none()
     {
-        var none = Option<int>.None;
-        var some5 = Option<int>.Some(5);
+        var first = Option<int>.None;
+        var second = Option<int>.Some(5);
 
-        var result = none.Combine(some5, (x, y) => x + y);
+        var result = first.Combine(second, (x, y) => x + y);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
-    /// 5. 2つ目が None の場合は None を返す
+    /// 5. 2つ目のOptionがNoneの場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Option_Some_None_Combine_should_return_none()
+    public void Some_None_Combine_should_return_none()
     {
-        var some3 = Option<int>.Some(3);
-        var none = Option<int>.None;
+        var first = Option<int>.Some(3);
+        var second = Option<int>.None;
 
-        var result = some3.Combine(none, (x, y) => x + y);
+        var result = first.Combine(second, (x, y) => x + y);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
-    /// 6. 両方が None の場合は None を返す
+    /// 6. 両方のOptionがNoneの場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Option_None_None_Combine_should_return_none()
+    public void None_None_Combine_should_return_none()
     {
-        var none = Option<int>.None;
-        var result = none.Combine(none, (x, y) => x + y);
+        var first = Option<int>.None;
+        var second = Option<int>.None;
+
+        var result = first.Combine(second, (x, y) => x + y);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
-    /// 7. 1つ目が None の場合は selector を実行しない
+    /// 7. 1つ目のOptionがNoneの場合はselectorを実行しない。
     /// </summary>
     [Test]
-    public void Option_None_Some_Combine_should_not_invoke_selector()
+    public void None_Some_Combine_should_not_invoke_selector()
     {
-        var none = Option<int>.None;
-        var some5 = Option<int>.Some(5);
+        var first = Option<int>.None;
+        var second = Option<int>.Some(5);
         int count = 0;
 
-        none.Combine(some5, (x, y) =>
+        first.Combine(second, (x, y) =>
         {
             count++;
             return x + y;
@@ -120,16 +121,16 @@ public class OptionCombineTests
     }
 
     /// <summary>
-    /// 8. 2つ目が None の場合は selector を実行しない
+    /// 8. 2つ目のOptionがNoneの場合はselectorを実行しない。
     /// </summary>
     [Test]
-    public void Option_Some_None_Combine_should_not_invoke_selector()
+    public void Some_None_Combine_should_not_invoke_selector()
     {
-        var some3 = Option<int>.Some(3);
-        var none = Option<int>.None;
+        var first = Option<int>.Some(3);
+        var second = Option<int>.None;
         int count = 0;
 
-        some3.Combine(none, (x, y) =>
+        first.Combine(second, (x, y) =>
         {
             count++;
             return x + y;
@@ -139,103 +140,159 @@ public class OptionCombineTests
     }
 
     /// <summary>
-    /// 9. selector が null の場合は ArgumentNullException が発生する
+    /// 9. 両方のOptionがSomeの場合でもselectorがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Combine_null_selector_should_throw()
+    public void Some_Some_Combine_should_throw_argument_null_exception_when_selector_is_null()
     {
-        var some3 = Option<int>.Some(3);
-        var some5 = Option<int>.Some(5);
-
+        var first = Option<int>.Some(3);
+        var second = Option<int>.Some(5);
         Func<int, int, int>? selector = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            some3.Combine(some5, selector!));
+        Assert.Throws<ArgumentNullException>(() => first.Combine(second, selector!));
     }
 
     /// <summary>
-    /// 10. 両方が Some で selector が null を返した場合は None を返す
+    /// 10. 1つ目のOptionがNoneの場合でもselectorがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_Some_Combine_selector_returning_null_should_return_none()
+    public void None_Some_Combine_should_throw_argument_null_exception_when_selector_is_null()
     {
-        var some3 = Option<int>.Some(3);
-        var some5 = Option<int>.Some(5);
+        var first = Option<int>.None;
+        var second = Option<int>.Some(5);
+        Func<int, int, int>? selector = null;
 
-        var result = some3.Combine(some5, (_, _) => (string)null!);
+        Assert.Throws<ArgumentNullException>(() => first.Combine(second, selector!));
+    }
+
+    /// <summary>
+    /// 11. 2つ目のOptionがNoneの場合でもselectorがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Some_None_Combine_should_throw_argument_null_exception_when_selector_is_null()
+    {
+        var first = Option<int>.Some(3);
+        var second = Option<int>.None;
+        Func<int, int, int>? selector = null;
+
+        Assert.Throws<ArgumentNullException>(() => first.Combine(second, selector!));
+    }
+
+    /// <summary>
+    /// 12. 両方のOptionがSomeでselectorがnullを返した場合はNoneを返す。
+    /// </summary>
+    [Test]
+    public void Some_Some_Combine_should_return_none_when_selector_returns_null()
+    {
+        var first = Option<int>.Some(3);
+        var second = Option<int>.Some(5);
+
+        var result = first.Combine(second, (_, _) => (string)null!);
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
 
     /// <summary>
-    /// 11. 1つ目が None の場合は null を返す selector でも実行されない
+    /// 13. 1つ目のOptionがNoneの場合はnullを返すselectorでも実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public void Option_None_Some_Combine_should_not_evaluate_null_returning_selector()
+    public void None_Some_Combine_should_return_none_without_invoking_null_returning_selector()
     {
+        var first = Option<int>.None;
+        var second = Option<int>.Some(5);
+        int count = 0;
 
-        var none = Option<int>.None;
-        var some5 = Option<int>.Some(5);
+        var result = first.Combine(second, (_, _) =>
+        {
+            count++;
+            return (string)null!;
+        });
 
-        var result = none.Combine(some5, (_, _) => (string)null!);
-
-        Assert.That(result, Is.EqualTo(Option<string>.None));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(Option<string>.None));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 12. 2つ目が None の場合は null を返す selector でも実行されない
+    /// 14. 2つ目のOptionがNoneの場合はnullを返すselectorでも実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public void Option_Some_None_Combine_should_not_evaluate_null_returning_selector()
+    public void Some_None_Combine_should_return_none_without_invoking_null_returning_selector()
     {
-        var some3 = Option<int>.Some(3);
-        var none = Option<int>.None;
+        var first = Option<int>.Some(3);
+        var second = Option<int>.None;
+        int count = 0;
 
-        var result = some3.Combine(none, (_, _) => (string)null!);
+        var result = first.Combine(second, (_, _) =>
+        {
+            count++;
+            return (string)null!;
+        });
 
-        Assert.That(result, Is.EqualTo(Option<string>.None));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(Option<string>.None));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 13. Default Option は None と同様に扱われる
+    /// 15. 1つ目がdefault Optionの場合はNoneとして扱う。
     /// </summary>
     [Test]
-    public void Option_Default_Some_Combine_should_return_none()
+    public void Default_Some_Combine_should_return_none()
     {
-        var def = default(Option<int>);
-        var some5 = Option<int>.Some(5);
+        var first = default(Option<int>);
+        var second = Option<int>.Some(5);
 
-        var result = def.Combine(some5, (x, y) => x + y);
+        var result = first.Combine(second, (x, y) => x + y);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
-    /// 14. 2つ目が Default Option の場合も None と同様に扱われる
+    /// 16. 2つ目がdefault Optionの場合はNoneとして扱う。
     /// </summary>
     [Test]
-    public void Option_Some_Default_Combine_should_return_none()
+    public void Some_Default_Combine_should_return_none()
     {
-        var some3 = Option<int>.Some(3);
-        var def = default(Option<int>);
+        var first = Option<int>.Some(3);
+        var second = default(Option<int>);
 
-        var result = some3.Combine(def, (x, y) => x + y);
+        var result = first.Combine(second, (x, y) => x + y);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
-    /// 15. 1つ目が None でも selector が null の場合は ArgumentNullException が発生する
+    /// 17. default Optionの場合でもselectorがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_Combine_null_selector_should_throw()
+    public void Default_Some_Combine_should_throw_argument_null_exception_when_selector_is_null()
     {
-        var none = Option<int>.None;
-        var some5 = Option<int>.Some(5);
-
+        var first = default(Option<int>);
+        var second = Option<int>.Some(5);
         Func<int, int, int>? selector = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            none.Combine(some5, selector!));
+        Assert.Throws<ArgumentNullException>(() => first.Combine(second, selector!));
+    }
+
+    /// <summary>
+    /// 18. 両方のOptionがSomeでselectorが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_Some_Combine_should_propagate_exception_when_selector_throws()
+    {
+        var first = Option<int>.Some(3);
+        var second = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("selector error");
+
+        Func<int, int, int> selector = (_, _) => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() => first.Combine(second, selector));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

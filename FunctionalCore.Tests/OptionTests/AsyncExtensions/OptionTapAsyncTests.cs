@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.OptionTests.AsyncExtensions;
 public class OptionTapAsyncTests
 {
     /// <summary>
-    /// 1. Some.TapAsync は onSome を1回だけ実行する
+    /// 1. OptionがSomeの場合はonSomeを1回だけ実行する。
     /// </summary>
     [Test]
-    public async Task Option_Some_TapAsync_should_invoke_action_once()
+    public async Task Some_TapAsync_should_invoke_onSome_once()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -23,28 +23,28 @@ public class OptionTapAsyncTests
     }
 
     /// <summary>
-    /// 2. Some.TapAsync は Value を onSome に渡す
+    /// 2. OptionがSomeの場合はValueをonSomeに渡す。
     /// </summary>
     [Test]
-    public async Task Option_Some_TapAsync_should_pass_value_to_action()
+    public async Task Some_TapAsync_should_pass_value_to_onSome()
     {
         var some = Option<int>.Some(5);
-        int received = 0;
+        int receivedValue = 0;
 
         await some.AsTask().TapAsync(value =>
         {
-            received = value;
+            receivedValue = value;
             return Task.CompletedTask;
         });
 
-        Assert.That(received, Is.EqualTo(5));
+        Assert.That(receivedValue, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 3. None.TapAsync は onSome を実行しない
+    /// 3. OptionがNoneの場合はonSomeを実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public async Task Option_None_TapAsync_should_not_invoke_action()
+    public async Task None_TapAsync_should_return_none_without_invoking_onSome()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -57,40 +57,42 @@ public class OptionTapAsyncTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 4. Some.TapAsync は元の Option を変更せずに返す
+    /// 4. OptionがSomeの場合は元のOptionをそのまま返す。
     /// </summary>
     [Test]
-    public async Task Option_Some_TapAsync_should_return_original_option()
+    public async Task Some_TapAsync_should_return_original_option()
     {
         var some = Option<int>.Some(5);
+
         var result = await some.AsTask().TapAsync(_ => Task.CompletedTask);
 
         Assert.That(result, Is.EqualTo(some));
     }
 
     /// <summary>
-    /// 5. None.TapAsync は元の Option を変更せずに返す
+    /// 5. OptionがNoneの場合は元のOptionをそのまま返す。
     /// </summary>
     [Test]
-    public async Task Option_None_TapAsync_should_return_original_option()
+    public async Task None_TapAsync_should_return_original_option()
     {
         var none = Option<int>.None;
+
         var result = await none.AsTask().TapAsync(_ => Task.CompletedTask);
 
         Assert.That(result, Is.EqualTo(none));
     }
 
     /// <summary>
-    /// 6. onSome が null の場合は ArgumentNullException が発生する
+    /// 6. OptionがSomeの場合でもonSomeがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_TapAsync_null_action_should_throw()
+    public void Some_TapAsync_should_throw_argument_null_exception_when_onSome_is_null()
     {
         var some = Option<int>.Some(5);
         Func<int, Task>? onSome = null;
@@ -100,10 +102,10 @@ public class OptionTapAsyncTests
     }
 
     /// <summary>
-    /// 7. None でも onSome が null の場合は ArgumentNullException が発生する
+    /// 7. OptionがNoneの場合でもonSomeがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_TapAsync_null_action_should_throw()
+    public void None_TapAsync_should_throw_argument_null_exception_when_onSome_is_null()
     {
         var none = Option<int>.None;
         Func<int, Task>? onSome = null;
@@ -113,10 +115,10 @@ public class OptionTapAsyncTests
     }
 
     /// <summary>
-    /// 8. optionTask が null の場合は ArgumentNullException が発生する
+    /// 8. optionTaskがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_TapAsync_null_option_task_should_throw()
+    public void TapAsync_should_throw_argument_null_exception_when_optionTask_is_null()
     {
         Task<Option<int>>? optionTask = null;
 
@@ -125,10 +127,10 @@ public class OptionTapAsyncTests
     }
 
     /// <summary>
-    /// 9. Some.TapAsync で onSome が null Task を返した場合は InvalidOperationException が発生する
+    /// 9. OptionがSomeでonSomeがnullのTaskを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_TapAsync_action_returning_null_task_should_throw()
+    public void Some_TapAsync_should_throw_invalid_operation_exception_when_onSome_returns_null_task()
     {
         var some = Option<int>.Some(5);
         Func<int, Task> onSome = _ => null!;
@@ -138,29 +140,39 @@ public class OptionTapAsyncTests
     }
 
     /// <summary>
-    /// 10. None.TapAsync では null Task を返す onSome でも実行されない
+    /// 10. OptionがNoneの場合はnullのTaskを返すonSomeでも実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public async Task Option_None_TapAsync_should_not_evaluate_null_task_action()
+    public async Task None_TapAsync_should_return_none_without_invoking_null_task_onSome()
     {
         var none = Option<int>.None;
-        Func<int, Task> onSome = _ => null!;
+        int count = 0;
+
+        Func<int, Task> onSome = _ =>
+        {
+            count++;
+            return null!;
+        };
 
         var result = await none.AsTask().TapAsync(onSome);
 
-        Assert.That(result, Is.EqualTo(Option<int>.None));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 11. Default Option は None と同様に onSome を実行しない
+    /// 11. default OptionはNoneと同様にonSomeを実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public async Task Option_Default_TapAsync_should_not_invoke_action()
+    public async Task Default_TapAsync_should_return_none_without_invoking_onSome()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
         int count = 0;
 
-        var result = await option.AsTask().TapAsync(_ =>
+        var result = await defaultOption.AsTask().TapAsync(_ =>
         {
             count++;
             return Task.CompletedTask;
@@ -168,8 +180,79 @@ public class OptionTapAsyncTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(0));
+        });
+    }
+
+    /// <summary>
+    /// 12. default Optionの場合でもonSomeがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_TapAsync_should_throw_argument_null_exception_when_onSome_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<int, Task>? onSome = null;
+
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await defaultOption.AsTask().TapAsync(onSome!));
+    }
+
+    /// <summary>
+    /// 13. OptionがSomeでonSomeが同期的に例外を発生させた場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_TapAsync_should_propagate_exception_when_onSome_throws()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("onSome error");
+        Func<int, Task> onSome = _ => throw expectedException;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await some.AsTask().TapAsync(onSome));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 14. OptionがSomeでonSomeが返したTaskが例外で完了した場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_TapAsync_should_propagate_exception_when_onSome_task_faults()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("onSome task error");
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await some.AsTask().TapAsync(_ => Task.FromException(expectedException)));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 15. optionTaskが例外で完了した場合は、その例外をそのまま伝播させる。
+    /// onSomeは実行しない。
+    /// </summary>
+    [Test]
+    public void TapAsync_should_propagate_exception_when_optionTask_faults()
+    {
+        var expectedException = new NotSupportedException("source task error");
+        Task<Option<int>> optionTask = Task.FromException<Option<int>>(expectedException);
+        int count = 0;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await optionTask.TapAsync(_ =>
+            {
+                count++;
+                return Task.CompletedTask;
+            }));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualException, Is.SameAs(expectedException));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 }

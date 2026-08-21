@@ -5,22 +5,23 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 public class OptionValueOrThrowTests
 {
     /// <summary>
-    /// 1. Some.ValueOrThrow は内部の Value を返す
+    /// 1. OptionがSomeの場合は保持しているValueを返す。
     /// </summary>
     [Test]
-    public void Option_Some_ValueOrThrow_should_return_inner_value()
+    public void Some_ValueOrThrow_should_return_value()
     {
         var some = Option<int>.Some(5);
+
         var value = some.ValueOrThrow(() => new InvalidOperationException());
 
         Assert.That(value, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 2. Some.ValueOrThrow は例外 factory を実行しない
+    /// 2. OptionがSomeの場合はexceptionFactoryを実行しない。
     /// </summary>
     [Test]
-    public void Option_Some_ValueOrThrow_should_not_invoke_exception_factory()
+    public void Some_ValueOrThrow_should_not_invoke_exceptionFactory()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -33,27 +34,28 @@ public class OptionValueOrThrowTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(value, Is.EqualTo(5));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 3. None.ValueOrThrow は factory が生成した例外を投げる
+    /// 3. OptionがNoneの場合はexceptionFactoryが生成した例外をスローする。
     /// </summary>
     [Test]
-    public void Option_None_ValueOrThrow_should_throw_factory_exception()
+    public void None_ValueOrThrow_should_throw_exception_created_by_exceptionFactory()
     {
         var none = Option<int>.None;
+
         Assert.Throws<InvalidOperationException>(() =>
             none.ValueOrThrow(() => new InvalidOperationException("error")));
     }
 
     /// <summary>
-    /// 4. None.ValueOrThrow は例外 factory を1回だけ実行する
+    /// 4. OptionがNoneの場合はexceptionFactoryを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Option_None_ValueOrThrow_should_invoke_exception_factory_once()
+    public void None_ValueOrThrow_should_invoke_exceptionFactory_once()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -69,90 +71,130 @@ public class OptionValueOrThrowTests
     }
 
     /// <summary>
-    /// 5. None.ValueOrThrow は factory が生成した例外インスタンスをそのまま投げる
+    /// 5. OptionがNoneの場合はexceptionFactoryが生成した例外インスタンスをそのままスローする。
     /// </summary>
     [Test]
-    public void Option_None_ValueOrThrow_should_throw_same_exception_instance()
+    public void None_ValueOrThrow_should_throw_same_exception_instance_created_by_exceptionFactory()
     {
         var none = Option<int>.None;
-        var expected = new InvalidOperationException("expected");
+        var expectedException = new InvalidOperationException("expected");
 
-        var actual = Assert.Throws<InvalidOperationException>(() =>
-            none.ValueOrThrow(() => expected));
+        var actualException = Assert.Throws<InvalidOperationException>(() =>
+            none.ValueOrThrow(() => expectedException));
 
-        Assert.That(actual, Is.SameAs(expected));
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 
     /// <summary>
-    /// 6. exception factory が null の場合は ArgumentNullException が発生する
+    /// 6. OptionがNoneの場合でもexceptionFactoryがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_ValueOrThrow_null_exception_factory_should_throw()
+    public void None_ValueOrThrow_should_throw_argument_null_exception_when_exceptionFactory_is_null()
     {
         var none = Option<int>.None;
-        Func<Exception>? factory = null;
+        Func<Exception>? exceptionFactory = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            none.ValueOrThrow(factory!));
+        Assert.Throws<ArgumentNullException>(() => none.ValueOrThrow(exceptionFactory!));
     }
 
     /// <summary>
-    /// 7. Some でも exception factory が null の場合は ArgumentNullException が発生する
+    /// 7. OptionがSomeの場合でもexceptionFactoryがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_ValueOrThrow_null_exception_factory_should_throw()
+    public void Some_ValueOrThrow_should_throw_argument_null_exception_when_exceptionFactory_is_null()
     {
         var some = Option<int>.Some(5);
-        Func<Exception>? factory = null;
+        Func<Exception>? exceptionFactory = null;
 
-        Assert.Throws<ArgumentNullException>(() =>
-            some.ValueOrThrow(factory!));
+        Assert.Throws<ArgumentNullException>(() => some.ValueOrThrow(exceptionFactory!));
     }
 
     /// <summary>
-    /// 8. None.ValueOrThrow で exception factory が null を返した場合は InvalidOperationException が発生する
+    /// 8. OptionがNoneでexceptionFactoryがnullを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_ValueOrThrow_exception_factory_returning_null_should_throw()
+    public void None_ValueOrThrow_should_throw_invalid_operation_exception_when_exceptionFactory_returns_null()
     {
         var none = Option<int>.None;
+
         Assert.Throws<InvalidOperationException>(() =>
             none.ValueOrThrow(() => null!));
     }
 
     /// <summary>
-    /// 9. Some.ValueOrThrow では null を返す exception factory でも実行されない
+    /// 9. OptionがSomeの場合はnullを返すexceptionFactoryでも実行せず、Valueを返す。
     /// </summary>
     [Test]
-    public void Option_Some_ValueOrThrow_should_not_evaluate_null_returning_exception_factory()
+    public void Some_ValueOrThrow_should_return_value_without_invoking_null_returning_exceptionFactory()
     {
         var some = Option<int>.Some(5);
-        var value = some.ValueOrThrow(() => null!);
+        int count = 0;
 
-        Assert.That(value, Is.EqualTo(5));
+        var value = some.ValueOrThrow(() =>
+        {
+            count++;
+            return null!;
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(value, Is.EqualTo(5));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 10. Default Option は None と同様に factory が生成した例外を投げる
+    /// 10. default OptionはNoneと同様にexceptionFactoryが生成した例外をスローする。
     /// </summary>
     [Test]
-    public void Option_Default_ValueOrThrow_should_behave_as_none()
+    public void Default_ValueOrThrow_should_behave_as_none()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
 
         Assert.Throws<InvalidOperationException>(() =>
-            option.ValueOrThrow(() => new InvalidOperationException("error")));
+            defaultOption.ValueOrThrow(() => new InvalidOperationException("error")));
     }
 
     /// <summary>
-    /// 11. Default Option で exception factory が null を返した場合は InvalidOperationException が発生する
+    /// 11. default OptionでexceptionFactoryがnullを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Default_ValueOrThrow_exception_factory_returning_null_should_throw()
+    public void Default_ValueOrThrow_should_throw_invalid_operation_exception_when_exceptionFactory_returns_null()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
 
         Assert.Throws<InvalidOperationException>(() =>
-            option.ValueOrThrow(() => null!));
+            defaultOption.ValueOrThrow(() => null!));
+    }
+
+    /// <summary>
+    /// 12. default Optionの場合でもexceptionFactoryがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_ValueOrThrow_should_throw_argument_null_exception_when_exceptionFactory_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<Exception>? exceptionFactory = null;
+
+        Assert.Throws<ArgumentNullException>(() =>
+            defaultOption.ValueOrThrow(exceptionFactory!));
+    }
+
+    /// <summary>
+    /// 13. OptionがNoneでexceptionFactoryが例外を発生させた場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void None_ValueOrThrow_should_propagate_exception_when_exceptionFactory_throws()
+    {
+        var none = Option<int>.None;
+        var expectedException = new NotSupportedException("factory error");
+
+        Func<Exception> exceptionFactory = () => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            none.ValueOrThrow(exceptionFactory));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

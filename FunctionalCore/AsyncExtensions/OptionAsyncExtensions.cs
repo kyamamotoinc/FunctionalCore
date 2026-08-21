@@ -28,6 +28,75 @@ public static class OptionAsyncExtensions
     }
 
     /// <summary>
+    /// Matches Some or None asynchronously and returns a value.
+    /// <para>Some / None に応じた非同期関数を実行し、値を返す。</para>
+    /// </summary>
+    /// <typeparam name="T">
+    /// The value type.
+    /// <para>値の型。</para>
+    /// </typeparam>
+    /// <typeparam name="U">
+    /// The return type.
+    /// <para>戻り値の型。</para>
+    /// </typeparam>
+    /// <param name="optionTask">
+    /// A Task that produces the source Option.
+    /// <para>元の Option を生成する Task。</para>
+    /// </param>
+    /// <param name="onSome">
+    /// An asynchronous function to execute when the Option contains a value.
+    /// Must not return a null Task or a null value.
+    /// <para>
+    /// Option が値を保持している場合に実行する非同期関数。
+    /// null の Task または null の値を返してはならない。
+    /// </para>
+    /// </param>
+    /// <param name="onNone">
+    /// An asynchronous function to execute when the Option contains no value.
+    /// Must not return a null Task or a null value.
+    /// <para>
+    /// Option が値を保持していない場合に実行する非同期関数。
+    /// null の Task または null の値を返してはならない。
+    /// </para>
+    /// </param>
+    /// <returns>
+    /// A Task that produces the value returned by the selected function.
+    /// <para>選択された関数の戻り値を生成する Task。</para>
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if optionTask, onSome, or onNone is null.
+    /// <para>optionTask、onSome、または onNone が null の場合に投げられる。</para>
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the selected function returns a null Task,
+    /// or if the Task returns null.
+    /// <para>
+    /// 選択された関数が null の Task を返した、
+    /// または Task が null を返した場合に投げられる。
+    /// </para>
+    /// </exception>
+    public static async Task<U> MatchAsync<T, U>(this Task<Option<T>> optionTask, Func<T, Task<U>> onSome, Func<Task<U>> onNone)
+    {
+        ArgumentNullException.ThrowIfNull(optionTask);
+        ArgumentNullException.ThrowIfNull(onSome);
+        ArgumentNullException.ThrowIfNull(onNone);
+
+        var option = await optionTask.ConfigureAwait(false);
+
+        var valueTask = option.HasValue ? onSome(option.Value) : onNone();
+
+        if (valueTask is null)
+            throw new InvalidOperationException("Match function must not return a null Task.");
+
+        var value = await valueTask.ConfigureAwait(false);
+
+        if (value is null)
+            throw new InvalidOperationException("Match function must not return null.");
+
+        return value;
+    }
+
+    /// <summary>
     /// <para>値を持つ Option の値を使って、次の非同期 Option 処理へ接続する。</para>
     /// <para>Binds an Option value to the next asynchronous Option-producing operation when the Option has a value.</para>
     /// </summary>

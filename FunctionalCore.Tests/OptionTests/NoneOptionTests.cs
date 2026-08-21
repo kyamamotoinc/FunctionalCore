@@ -3,30 +3,32 @@
 public class NoneOptionTests
 {
     /// <summary>
-    /// 1. None は値を保持していない状態である
+    /// 1. Noneは値を保持していない状態である。
     /// </summary>
     [Test]
-    public void Option_None_should_not_have_value()
+    public void None_should_not_have_value()
     {
         var none = Option<int>.None;
+
         Assert.That(none.HasValue, Is.False);
     }
 
     /// <summary>
-    /// 2. None では Value にアクセスできない
+    /// 2. NoneでValueにアクセスした場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_accessing_value_should_throw()
+    public void None_should_throw_invalid_operation_exception_when_accessing_value()
     {
         var none = Option<int>.None;
+
         Assert.Throws<InvalidOperationException>(() => _ = none.Value);
     }
 
     /// <summary>
-    /// 3. None 同士は等しい
+    /// 3. None同士は等しい。
     /// </summary>
     [Test]
-    public void Two_None_options_should_be_equal()
+    public void None_should_equal_another_none()
     {
         var none = Option<int>.None;
         var other = Option<int>.None;
@@ -40,7 +42,7 @@ public class NoneOptionTests
     }
 
     /// <summary>
-    /// 4. None と Some は等しくない
+    /// 4. NoneとSomeは等しくない。
     /// </summary>
     [Test]
     public void None_and_Some_should_not_be_equal()
@@ -57,12 +59,13 @@ public class NoneOptionTests
     }
 
     /// <summary>
-    /// 5. None の ToString は "None" を返す
+    /// 5. NoneのToStringは"None"を返す。
     /// </summary>
     [Test]
-    public void None_ToString_should_return_None()
+    public void None_ToString_should_return_none()
     {
         var none = Option<int>.None;
+
         Assert.That(none.ToString(), Is.EqualTo("None"));
     }
 }

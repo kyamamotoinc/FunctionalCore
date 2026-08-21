@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 public class OptionOrTests
 {
     /// <summary>
-    /// 1. Some.Or は自身を返す
+    /// 1. OptionがSomeの場合は元のOptionをそのまま返す。
     /// </summary>
     [Test]
-    public void Option_Some_Or_should_return_original_option()
+    public void Some_Or_should_return_original_option()
     {
         var some = Option<int>.Some(5);
         var other = Option<int>.Some(10);
@@ -19,10 +19,10 @@ public class OptionOrTests
     }
 
     /// <summary>
-    /// 2. None.Or は代替 Option を返す
+    /// 2. OptionがNoneの場合は代替Optionを返す。
     /// </summary>
     [Test]
-    public void Option_None_Or_should_return_other_option()
+    public void None_Or_should_return_other_option()
     {
         var none = Option<int>.None;
         var other = Option<int>.Some(10);
@@ -33,25 +33,28 @@ public class OptionOrTests
     }
 
     /// <summary>
-    /// 3. None.Or に None を渡した場合は None を返す
+    /// 3. OptionがNoneで代替OptionもNoneの場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Option_None_Or_none_should_return_none()
+    public void None_Or_should_return_none_when_other_is_none()
     {
         var none = Option<int>.None;
+
         var result = none.Or(Option<int>.None);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
-    /// 4. Some.Or は代替 Option を採用しない
+    /// 4. OptionがSomeの場合は代替Optionを採用しない。
     /// </summary>
     [Test]
-    public void Option_Some_Or_should_ignore_other_option()
+    public void Some_Or_should_ignore_other_option()
     {
         var some = Option<int>.Some(5);
-        var result = some.Or(Option<int>.Some(10));
+        var other = Option<int>.Some(10);
+
+        var result = some.Or(other);
 
         Assert.Multiple(() =>
         {
@@ -61,10 +64,10 @@ public class OptionOrTests
     }
 
     /// <summary>
-    /// 5. Some.Or に Default Option を渡しても自身を返す
+    /// 5. OptionがSomeの場合は代替Optionがdefaultでも元のOptionを返す。
     /// </summary>
     [Test]
-    public void Option_Some_Or_default_should_return_original_option()
+    public void Some_Or_should_return_original_option_when_other_is_default()
     {
         var some = Option<int>.Some(5);
         var other = default(Option<int>);
@@ -75,10 +78,10 @@ public class OptionOrTests
     }
 
     /// <summary>
-    /// 6. None.Or に Default Option を渡した場合は None を返す
+    /// 6. OptionがNoneで代替Optionがdefaultの場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Option_None_Or_default_should_return_none()
+    public void None_Or_should_return_none_when_other_is_default()
     {
         var none = Option<int>.None;
         var other = default(Option<int>);
@@ -89,10 +92,10 @@ public class OptionOrTests
     }
 
     /// <summary>
-    /// 7. Some.Or(Func) は factory を実行しない
+    /// 7. OptionがSomeの場合はfactoryを実行せず、元のOptionを返す。
     /// </summary>
     [Test]
-    public void Option_Some_Or_factory_should_not_be_invoked()
+    public void Some_Or_factory_should_return_original_option_without_invoking_factory()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -105,16 +108,16 @@ public class OptionOrTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result, Is.EqualTo(some));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 8. None.Or(Func) は factory を1回だけ実行し、その Option を返す
+    /// 8. OptionがNoneの場合はfactoryを1回だけ実行し、そのOptionを返す。
     /// </summary>
     [Test]
-    public void Option_None_Or_factory_should_be_invoked_once()
+    public void None_Or_factory_should_invoke_factory_once_and_return_its_option()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -127,41 +130,43 @@ public class OptionOrTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(1));
             Assert.That(result.HasValue, Is.True);
             Assert.That(result.Value, Is.EqualTo(10));
+            Assert.That(count, Is.EqualTo(1));
         });
     }
 
     /// <summary>
-    /// 9. None.Or(Func) の factory が None を返した場合は None を返す
+    /// 9. OptionがNoneでfactoryがNoneを返した場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Option_None_Or_factory_returning_none_should_return_none()
+    public void None_Or_factory_should_return_none_when_factory_returns_none()
     {
         var none = Option<int>.None;
+
         var result = none.Or(() => Option<int>.None);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
-    /// 10. None.Or(Func) の factory が Default Option を返した場合は None を返す
+    /// 10. OptionがNoneでfactoryがdefault Optionを返した場合はNoneとして扱う。
     /// </summary>
     [Test]
-    public void Option_None_Or_factory_returning_default_should_return_none()
+    public void None_Or_factory_should_return_none_when_factory_returns_default_option()
     {
         var none = Option<int>.None;
+
         var result = none.Or(() => default(Option<int>));
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
 
     /// <summary>
-    /// 11. factory が null の場合は ArgumentNullException が発生する
+    /// 11. OptionがNoneの場合でもfactoryがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_Or_null_factory_should_throw()
+    public void None_Or_factory_should_throw_argument_null_exception_when_factory_is_null()
     {
         var none = Option<int>.None;
         Func<Option<int>>? factory = null;
@@ -170,10 +175,10 @@ public class OptionOrTests
     }
 
     /// <summary>
-    /// 12. Some でも factory が null の場合は ArgumentNullException が発生する
+    /// 12. OptionがSomeの場合でもfactoryがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_Or_null_factory_should_throw()
+    public void Some_Or_factory_should_throw_argument_null_exception_when_factory_is_null()
     {
         var some = Option<int>.Some(5);
         Func<Option<int>>? factory = null;
@@ -182,29 +187,29 @@ public class OptionOrTests
     }
 
     /// <summary>
-    /// 13. Default Option.Or は None と同様に代替 Option を返す
+    /// 13. default OptionはNoneと同様に代替Optionを返す。
     /// </summary>
     [Test]
-    public void Option_Default_Or_should_return_other_option()
+    public void Default_Or_should_return_other_option()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
         var other = Option<int>.Some(10);
 
-        var result = option.Or(other);
+        var result = defaultOption.Or(other);
 
         Assert.That(result, Is.EqualTo(other));
     }
 
     /// <summary>
-    /// 14. Default Option.Or(Func) は None と同様に factory を実行する
+    /// 14. default OptionはNoneと同様にfactoryを1回だけ実行し、そのOptionを返す。
     /// </summary>
     [Test]
-    public void Option_Default_Or_factory_should_be_invoked()
+    public void Default_Or_factory_should_invoke_factory_once_and_return_its_option()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
         int count = 0;
 
-        var result = option.Or(() =>
+        var result = defaultOption.Or(() =>
         {
             count++;
             return Option<int>.Some(10);
@@ -212,9 +217,37 @@ public class OptionOrTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(1));
             Assert.That(result.HasValue, Is.True);
             Assert.That(result.Value, Is.EqualTo(10));
+            Assert.That(count, Is.EqualTo(1));
         });
+    }
+
+    /// <summary>
+    /// 15. default Optionの場合でもfactoryがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_Or_factory_should_throw_argument_null_exception_when_factory_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<Option<int>>? factory = null;
+
+        Assert.Throws<ArgumentNullException>(() => defaultOption.Or(factory!));
+    }
+
+    /// <summary>
+    /// 16. OptionがNoneでfactoryが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void None_Or_factory_should_propagate_exception_when_factory_throws()
+    {
+        var none = Option<int>.None;
+        var expectedException = new NotSupportedException("factory error");
+
+        Func<Option<int>> factory = () => throw expectedException;
+
+        var actualException = Assert.Throws<NotSupportedException>(() => none.Or(factory));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

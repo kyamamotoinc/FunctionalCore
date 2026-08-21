@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 public class OptionSequenceTests
 {
     /// <summary>
-    /// 1. すべて Some の場合は、すべての値を持つ Some を返す
+    /// 1. すべてのOptionがSomeの場合は、すべての値を保持するSomeを返す。
     /// </summary>
     [Test]
-    public void Option_Sequence_all_some_should_return_some_collection()
+    public void Sequence_should_return_some_collection_when_all_options_are_some()
     {
         var some1 = Option<int>.Some(1);
         var some2 = Option<int>.Some(2);
@@ -31,14 +31,14 @@ public class OptionSequenceTests
     }
 
     /// <summary>
-    /// 2. None を含む場合は None を返す
+    /// 2. Noneを含む場合はNoneを返す。
     /// </summary>
     [Test]
-    public void Option_Sequence_containing_none_should_return_none()
+    public void Sequence_should_return_none_when_options_contain_none()
     {
         var some1 = Option<int>.Some(1);
-        var some3 = Option<int>.Some(3);
         var none = Option<int>.None;
+        var some3 = Option<int>.Some(3);
 
         var options = new[]
         {
@@ -53,13 +53,13 @@ public class OptionSequenceTests
     }
 
     /// <summary>
-    /// 3. 複数の None が含まれていても None を返す
+    /// 3. 複数のNoneを含む場合もNoneを返す。
     /// </summary>
     [Test]
-    public void Option_Sequence_containing_multiple_none_should_return_none()
+    public void Sequence_should_return_none_when_options_contain_multiple_none()
     {
-        var some2 = Option<int>.Some(2);
         var none = Option<int>.None;
+        var some2 = Option<int>.Some(2);
 
         var options = new[]
         {
@@ -74,10 +74,10 @@ public class OptionSequenceTests
     }
 
     /// <summary>
-    /// 4. 空のシーケンスの場合は、空のコレクションを持つ Some を返す
+    /// 4. 空のシーケンスの場合は、空のコレクションを保持するSomeを返す。
     /// </summary>
     [Test]
-    public void Option_Sequence_empty_collection_should_return_some_empty_collection()
+    public void Sequence_should_return_some_empty_collection_when_options_are_empty()
     {
         var options = Array.Empty<Option<int>>();
 
@@ -91,10 +91,10 @@ public class OptionSequenceTests
     }
 
     /// <summary>
-    /// 5. null のシーケンスを渡した場合は ArgumentNullException が発生する
+    /// 5. optionsがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Sequence_null_options_should_throw()
+    public void Sequence_should_throw_argument_null_exception_when_options_is_null()
     {
         IEnumerable<Option<int>> options = null!;
 
@@ -102,10 +102,10 @@ public class OptionSequenceTests
     }
 
     /// <summary>
-    /// 6. Some の値の順序は保持される
+    /// 6. すべてのOptionがSomeの場合は、値の順序を保持する。
     /// </summary>
     [Test]
-    public void Option_Sequence_should_preserve_order()
+    public void Sequence_should_preserve_value_order()
     {
         var some1 = Option<int>.Some(1);
         var some2 = Option<int>.Some(2);
@@ -128,18 +128,19 @@ public class OptionSequenceTests
     }
 
     /// <summary>
-    /// 7. Default Option を含む場合は None を返す
+    /// 7. default Optionを含む場合はNoneとして扱い、Noneを返す。
     /// </summary>
     [Test]
-    public void Option_Sequence_containing_default_option_should_return_none()
+    public void Sequence_should_return_none_when_options_contain_default_option()
     {
         var some1 = Option<int>.Some(1);
+        var defaultOption = default(Option<int>);
         var some3 = Option<int>.Some(3);
 
         var options = new[]
         {
             some1,
-            default(Option<int>),
+            defaultOption,
             some3
         };
 
@@ -149,10 +150,10 @@ public class OptionSequenceTests
     }
 
     /// <summary>
-    /// 8. None に到達した時点で後続要素の列挙を停止する
+    /// 8. Noneに到達した場合は、それ以降の要素を列挙せずNoneを返す。
     /// </summary>
     [Test]
-    public void Option_Sequence_should_stop_enumeration_after_none()
+    public void Sequence_should_return_none_without_enumerating_items_after_none()
     {
         int count = 0;
 
@@ -175,5 +176,24 @@ public class OptionSequenceTests
             Assert.That(result, Is.EqualTo(Option<IReadOnlyList<int>>.None));
             Assert.That(count, Is.EqualTo(2));
         });
+    }
+
+    /// <summary>
+    /// 9. optionsの列挙中に例外が発生した場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Sequence_should_propagate_exception_when_enumeration_throws()
+    {
+        var expectedException = new NotSupportedException("enumeration error");
+
+        IEnumerable<Option<int>> Options()
+        {
+            yield return Option<int>.Some(1);
+            throw expectedException;
+        }
+
+        var actualException = Assert.Throws<NotSupportedException>(() => Options().Sequence());
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

@@ -5,12 +5,13 @@ namespace FunctionalCore.Tests.OptionTests.AsyncExtensions;
 public class OptionMapAsyncTests
 {
     /// <summary>
-    /// 1. Some.MapAsync は selector を実行し、変換後の値を持つ Some を返す
+    /// 1. OptionがSomeの場合はselectorを実行し、変換後の値を保持するSomeを返す。
     /// </summary>
     [Test]
-    public async Task Option_Some_MapAsync_should_return_selector_result()
+    public async Task Some_MapAsync_should_return_mapped_option()
     {
         var some = Option<int>.Some(5);
+
         var result = await some.AsTask().MapAsync(x => Task.FromResult(x + 1));
 
         Assert.Multiple(() =>
@@ -21,12 +22,13 @@ public class OptionMapAsyncTests
     }
 
     /// <summary>
-    /// 2. Some.MapAsync は値の型を変更できる
+    /// 2. OptionがSomeの場合はselectorによって値の型を変更できる。
     /// </summary>
     [Test]
-    public async Task Option_Some_MapAsync_should_change_value_type()
+    public async Task Some_MapAsync_should_change_value_type()
     {
         var some = Option<int>.Some(5);
+
         var result = await some.AsTask().MapAsync(x => Task.FromResult($"value:{x}"));
 
         Assert.Multiple(() =>
@@ -37,10 +39,10 @@ public class OptionMapAsyncTests
     }
 
     /// <summary>
-    /// 3. Some.MapAsync は selector を1回だけ実行する
+    /// 3. OptionがSomeの場合はselectorを1回だけ実行する。
     /// </summary>
     [Test]
-    public async Task Option_Some_MapAsync_should_invoke_selector_once()
+    public async Task Some_MapAsync_should_invoke_selector_once()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -55,10 +57,10 @@ public class OptionMapAsyncTests
     }
 
     /// <summary>
-    /// 4. None.MapAsync は selector を実行しない
+    /// 4. OptionがNoneの場合はselectorを実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public async Task Option_None_MapAsync_should_not_invoke_selector()
+    public async Task None_MapAsync_should_return_none_without_invoking_selector()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -71,16 +73,16 @@ public class OptionMapAsyncTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 5. selector が null の場合は ArgumentNullException が発生する
+    /// 5. OptionがSomeの場合でもselectorがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_MapAsync_null_selector_should_throw()
+    public void Some_MapAsync_should_throw_argument_null_exception_when_selector_is_null()
     {
         var some = Option<int>.Some(5);
         Func<int, Task<string>>? selector = null;
@@ -90,10 +92,10 @@ public class OptionMapAsyncTests
     }
 
     /// <summary>
-    /// 6. None でも selector が null の場合は ArgumentNullException が発生する
+    /// 6. OptionがNoneの場合でもselectorがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_MapAsync_null_selector_should_throw()
+    public void None_MapAsync_should_throw_argument_null_exception_when_selector_is_null()
     {
         var none = Option<int>.None;
         Func<int, Task<string>>? selector = null;
@@ -103,10 +105,10 @@ public class OptionMapAsyncTests
     }
 
     /// <summary>
-    /// 7. optionTask が null の場合は ArgumentNullException が発生する
+    /// 7. optionTaskがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_MapAsync_null_option_task_should_throw()
+    public void MapAsync_should_throw_argument_null_exception_when_optionTask_is_null()
     {
         Task<Option<int>>? optionTask = null;
 
@@ -115,10 +117,10 @@ public class OptionMapAsyncTests
     }
 
     /// <summary>
-    /// 8. selector が null Task を返した場合は InvalidOperationException が発生する
+    /// 8. OptionがSomeでselectorがnullのTaskを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_MapAsync_selector_returning_null_task_should_throw()
+    public void Some_MapAsync_should_throw_invalid_operation_exception_when_selector_returns_null_task()
     {
         var some = Option<int>.Some(5);
         Func<int, Task<string>> selector = _ => null!;
@@ -128,53 +130,74 @@ public class OptionMapAsyncTests
     }
 
     /// <summary>
-    /// 9. selector の Task が null 値を返した場合は None を返す
+    /// 9. OptionがSomeでselectorのTaskがnullを返した場合はNoneを返す。
     /// </summary>
     [Test]
-    public async Task Option_Some_MapAsync_selector_returning_null_value_should_return_none()
+    public async Task Some_MapAsync_should_return_none_when_selector_task_returns_null()
     {
         var some = Option<int>.Some(5);
+
         var result = await some.AsTask().MapAsync(_ => Task.FromResult((string)null!));
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
 
     /// <summary>
-    /// 10. None.MapAsync では null Task を返す selector でも実行されない
+    /// 10. OptionがNoneの場合はnullのTaskを返すselectorでも実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public async Task Option_None_MapAsync_should_not_evaluate_null_task_selector()
+    public async Task None_MapAsync_should_return_none_without_invoking_null_task_selector()
     {
         var none = Option<int>.None;
-        Func<int, Task<string>> selector = _ => null!;
+        int count = 0;
+
+        Func<int, Task<string>> selector = _ =>
+        {
+            count++;
+            return null!;
+        };
 
         var result = await none.AsTask().MapAsync(selector);
 
-        Assert.That(result, Is.EqualTo(Option<string>.None));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(Option<string>.None));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 11. None.MapAsync では null 値を返す selector でも実行されない
+    /// 11. OptionがNoneの場合はnullを返すTaskを生成するselectorでも実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public async Task Option_None_MapAsync_should_not_evaluate_null_value_selector()
+    public async Task None_MapAsync_should_return_none_without_invoking_null_value_selector()
     {
         var none = Option<int>.None;
-        var result = await none.AsTask().MapAsync(_ => Task.FromResult((string)null!));
+        int count = 0;
 
-        Assert.That(result, Is.EqualTo(Option<string>.None));
+        var result = await none.AsTask().MapAsync(_ =>
+        {
+            count++;
+            return Task.FromResult((string)null!);
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(Option<string>.None));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 12. Default Option は None と同様に selector を実行しない
+    /// 12. default OptionはNoneと同様にselectorを実行せず、Noneを返す。
     /// </summary>
     [Test]
-    public async Task Option_Default_MapAsync_should_not_invoke_selector()
+    public async Task Default_MapAsync_should_return_none_without_invoking_selector()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
         int count = 0;
 
-        var result = await option.AsTask().MapAsync(x =>
+        var result = await defaultOption.AsTask().MapAsync(x =>
         {
             count++;
             return Task.FromResult(x + 1);
@@ -182,8 +205,77 @@ public class OptionMapAsyncTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(0));
+        });
+    }
+
+    /// <summary>
+    /// 13. default Optionの場合でもselectorがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_MapAsync_should_throw_argument_null_exception_when_selector_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<int, Task<string>>? selector = null;
+
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await defaultOption.AsTask().MapAsync(selector!));
+    }
+
+    /// <summary>
+    /// 14. OptionがSomeでselectorが同期的に例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_MapAsync_should_propagate_exception_when_selector_throws()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("selector error");
+        Func<int, Task<string>> selector = _ => throw expectedException;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await some.AsTask().MapAsync(selector));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 15. OptionがSomeでselectorが返したTaskが例外で完了した場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_MapAsync_should_propagate_exception_when_selector_task_faults()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("selector task error");
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await some.AsTask().MapAsync(_ => Task.FromException<string>(expectedException)));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 16. optionTaskが例外で完了した場合は、その例外をそのまま伝播させる。
+    /// selectorは実行しない。
+    /// </summary>
+    [Test]
+    public void MapAsync_should_propagate_exception_when_optionTask_faults()
+    {
+        var expectedException = new NotSupportedException("source task error");
+        Task<Option<int>> optionTask = Task.FromException<Option<int>>(expectedException);
+        int count = 0;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await optionTask.MapAsync(x =>
+            {
+                count++;
+                return Task.FromResult(x + 1);
+            }));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualException, Is.SameAs(expectedException));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 }

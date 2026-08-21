@@ -5,10 +5,10 @@ namespace FunctionalCore.Tests.OptionTests.AsyncExtensions;
 public class OptionTapNoneAsyncTests
 {
     /// <summary>
-    /// 1. None.TapNoneAsync は onNone を1回だけ実行する
+    /// 1. OptionがNoneの場合はonNoneを1回だけ実行する。
     /// </summary>
     [Test]
-    public async Task Option_None_TapNoneAsync_should_invoke_action_once()
+    public async Task None_TapNoneAsync_should_invoke_onNone_once()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -23,10 +23,10 @@ public class OptionTapNoneAsyncTests
     }
 
     /// <summary>
-    /// 2. Some.TapNoneAsync は onNone を実行しない
+    /// 2. OptionがSomeの場合はonNoneを実行せず、元のSomeを返す。
     /// </summary>
     [Test]
-    public async Task Option_Some_TapNoneAsync_should_not_invoke_action()
+    public async Task Some_TapNoneAsync_should_return_original_some_without_invoking_onNone()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -39,40 +39,42 @@ public class OptionTapNoneAsyncTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(0));
             Assert.That(result, Is.EqualTo(some));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 
     /// <summary>
-    /// 3. None.TapNoneAsync は元の Option を変更せずに返す
+    /// 3. OptionがNoneの場合は元のOptionをそのまま返す。
     /// </summary>
     [Test]
-    public async Task Option_None_TapNoneAsync_should_return_original_option()
+    public async Task None_TapNoneAsync_should_return_original_option()
     {
         var none = Option<int>.None;
+
         var result = await none.AsTask().TapNoneAsync(() => Task.CompletedTask);
 
         Assert.That(result, Is.EqualTo(none));
     }
 
     /// <summary>
-    /// 4. Some.TapNoneAsync は元の Option を変更せずに返す
+    /// 4. OptionがSomeの場合は元のOptionをそのまま返す。
     /// </summary>
     [Test]
-    public async Task Option_Some_TapNoneAsync_should_return_original_option()
+    public async Task Some_TapNoneAsync_should_return_original_option()
     {
         var some = Option<int>.Some(5);
+
         var result = await some.AsTask().TapNoneAsync(() => Task.CompletedTask);
 
         Assert.That(result, Is.EqualTo(some));
     }
 
     /// <summary>
-    /// 5. onNone が null の場合は ArgumentNullException が発生する
+    /// 5. OptionがNoneの場合でもonNoneがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_TapNoneAsync_null_action_should_throw()
+    public void None_TapNoneAsync_should_throw_argument_null_exception_when_onNone_is_null()
     {
         var none = Option<int>.None;
         Func<Task>? onNone = null;
@@ -82,10 +84,10 @@ public class OptionTapNoneAsyncTests
     }
 
     /// <summary>
-    /// 6. Some でも onNone が null の場合は ArgumentNullException が発生する
+    /// 6. OptionがSomeの場合でもonNoneがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_TapNoneAsync_null_action_should_throw()
+    public void Some_TapNoneAsync_should_throw_argument_null_exception_when_onNone_is_null()
     {
         var some = Option<int>.Some(5);
         Func<Task>? onNone = null;
@@ -95,10 +97,10 @@ public class OptionTapNoneAsyncTests
     }
 
     /// <summary>
-    /// 7. optionTask が null の場合は ArgumentNullException が発生する
+    /// 7. optionTaskがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_TapNoneAsync_null_option_task_should_throw()
+    public void TapNoneAsync_should_throw_argument_null_exception_when_optionTask_is_null()
     {
         Task<Option<int>>? optionTask = null;
 
@@ -107,10 +109,10 @@ public class OptionTapNoneAsyncTests
     }
 
     /// <summary>
-    /// 8. None.TapNoneAsync で onNone が null Task を返した場合は InvalidOperationException が発生する
+    /// 8. OptionがNoneでonNoneがnullのTaskを返した場合はInvalidOperationExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_TapNoneAsync_action_returning_null_task_should_throw()
+    public void None_TapNoneAsync_should_throw_invalid_operation_exception_when_onNone_returns_null_task()
     {
         var none = Option<int>.None;
         Func<Task> onNone = () => null!;
@@ -120,29 +122,39 @@ public class OptionTapNoneAsyncTests
     }
 
     /// <summary>
-    /// 9. Some.TapNoneAsync では null Task を返す onNone でも実行されない
+    /// 9. OptionがSomeの場合はnullのTaskを返すonNoneでも実行せず、元のSomeを返す。
     /// </summary>
     [Test]
-    public async Task Option_Some_TapNoneAsync_should_not_evaluate_null_task_action()
+    public async Task Some_TapNoneAsync_should_return_original_some_without_invoking_null_task_onNone()
     {
         var some = Option<int>.Some(5);
-        Func<Task> onNone = () => null!;
+        int count = 0;
+
+        Func<Task> onNone = () =>
+        {
+            count++;
+            return null!;
+        };
 
         var result = await some.AsTask().TapNoneAsync(onNone);
 
-        Assert.That(result, Is.EqualTo(some));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(some));
+            Assert.That(count, Is.EqualTo(0));
+        });
     }
 
     /// <summary>
-    /// 10. Default Option は None と同様に onNone を実行する
+    /// 10. default OptionはNoneと同様にonNoneを1回実行し、Noneを返す。
     /// </summary>
     [Test]
-    public async Task Option_Default_TapNoneAsync_should_invoke_action()
+    public async Task Default_TapNoneAsync_should_invoke_onNone_once_and_return_none()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
         int count = 0;
 
-        var result = await option.AsTask().TapNoneAsync(() =>
+        var result = await defaultOption.AsTask().TapNoneAsync(() =>
         {
             count++;
             return Task.CompletedTask;
@@ -150,8 +162,79 @@ public class OptionTapNoneAsyncTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(count, Is.EqualTo(1));
             Assert.That(result, Is.EqualTo(Option<int>.None));
+            Assert.That(count, Is.EqualTo(1));
+        });
+    }
+
+    /// <summary>
+    /// 11. default Optionの場合でもonNoneがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_TapNoneAsync_should_throw_argument_null_exception_when_onNone_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Func<Task>? onNone = null;
+
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await defaultOption.AsTask().TapNoneAsync(onNone!));
+    }
+
+    /// <summary>
+    /// 12. OptionがNoneでonNoneが同期的に例外を発生させた場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void None_TapNoneAsync_should_propagate_exception_when_onNone_throws()
+    {
+        var none = Option<int>.None;
+        var expectedException = new NotSupportedException("onNone error");
+        Func<Task> onNone = () => throw expectedException;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await none.AsTask().TapNoneAsync(onNone));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 13. OptionがNoneでonNoneが返したTaskが例外で完了した場合は、
+    /// その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void None_TapNoneAsync_should_propagate_exception_when_onNone_task_faults()
+    {
+        var none = Option<int>.None;
+        var expectedException = new NotSupportedException("onNone task error");
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await none.AsTask().TapNoneAsync(() => Task.FromException(expectedException)));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 14. optionTaskが例外で完了した場合は、その例外をそのまま伝播させる。
+    /// onNoneは実行しない。
+    /// </summary>
+    [Test]
+    public void TapNoneAsync_should_propagate_exception_when_optionTask_faults()
+    {
+        var expectedException = new NotSupportedException("source task error");
+        Task<Option<int>> optionTask = Task.FromException<Option<int>>(expectedException);
+        int count = 0;
+
+        var actualException = Assert.ThrowsAsync<NotSupportedException>(async () =>
+            await optionTask.TapNoneAsync(() =>
+            {
+                count++;
+                return Task.CompletedTask;
+            }));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualException, Is.SameAs(expectedException));
+            Assert.That(count, Is.EqualTo(0));
         });
     }
 }

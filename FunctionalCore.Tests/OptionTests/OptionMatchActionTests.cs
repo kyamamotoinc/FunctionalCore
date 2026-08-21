@@ -3,10 +3,10 @@
 public class OptionMatchActionTests
 {
     /// <summary>
-    /// 1. Some.Match は Some 側の action を1回だけ実行する
+    /// 1. OptionがSomeの場合はonSomeを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Option_Some_MatchAction_should_invoke_some_action_once()
+    public void Some_MatchAction_should_invoke_onSome_once()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -19,26 +19,26 @@ public class OptionMatchActionTests
     }
 
     /// <summary>
-    /// 2. Some.Match は Value を Some 側の action に渡す
+    /// 2. OptionがSomeの場合はValueをonSomeに渡す。
     /// </summary>
     [Test]
-    public void Option_Some_MatchAction_should_pass_value_to_some_action()
+    public void Some_MatchAction_should_pass_value_to_onSome()
     {
         var some = Option<int>.Some(5);
-        int received = 0;
+        int receivedValue = 0;
 
         some.Match(
-            value => received = value,
+            value => receivedValue = value,
             () => { });
 
-        Assert.That(received, Is.EqualTo(5));
+        Assert.That(receivedValue, Is.EqualTo(5));
     }
 
     /// <summary>
-    /// 3. Some.Match は None 側の action を実行しない
+    /// 3. OptionがSomeの場合はonNoneを実行しない。
     /// </summary>
     [Test]
-    public void Option_Some_MatchAction_should_not_invoke_none_action()
+    public void Some_MatchAction_should_not_invoke_onNone()
     {
         var some = Option<int>.Some(5);
         int count = 0;
@@ -51,10 +51,10 @@ public class OptionMatchActionTests
     }
 
     /// <summary>
-    /// 4. None.Match は None 側の action を1回だけ実行する
+    /// 4. OptionがNoneの場合はonNoneを1回だけ実行する。
     /// </summary>
     [Test]
-    public void Option_None_MatchAction_should_invoke_none_action_once()
+    public void None_MatchAction_should_invoke_onNone_once()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -67,10 +67,10 @@ public class OptionMatchActionTests
     }
 
     /// <summary>
-    /// 5. None.Match は Some 側の action を実行しない
+    /// 5. OptionがNoneの場合はonSomeを実行しない。
     /// </summary>
     [Test]
-    public void Option_None_MatchAction_should_not_invoke_some_action()
+    public void None_MatchAction_should_not_invoke_onSome()
     {
         var none = Option<int>.None;
         int count = 0;
@@ -83,10 +83,10 @@ public class OptionMatchActionTests
     }
 
     /// <summary>
-    /// 6. Some 側の action が null の場合は ArgumentNullException が発生する
+    /// 6. OptionがSomeの場合でもonSomeがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_MatchAction_null_some_action_should_throw()
+    public void Some_MatchAction_should_throw_argument_null_exception_when_onSome_is_null()
     {
         var some = Option<int>.Some(5);
         Action<int>? onSome = null;
@@ -96,10 +96,10 @@ public class OptionMatchActionTests
     }
 
     /// <summary>
-    /// 7. None 側の action が null の場合は ArgumentNullException が発生する
+    /// 7. OptionがNoneの場合でもonNoneがnullの場合はArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_MatchAction_null_none_action_should_throw()
+    public void None_MatchAction_should_throw_argument_null_exception_when_onNone_is_null()
     {
         var none = Option<int>.None;
         Action? onNone = null;
@@ -109,10 +109,10 @@ public class OptionMatchActionTests
     }
 
     /// <summary>
-    /// 8. Some でも未使用の None 側 action が null の場合は ArgumentNullException が発生する
+    /// 8. OptionがSomeの場合でも未使用のonNoneがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_Some_MatchAction_null_unused_none_action_should_throw()
+    public void Some_MatchAction_should_throw_argument_null_exception_when_unused_onNone_is_null()
     {
         var some = Option<int>.Some(5);
         Action? onNone = null;
@@ -122,10 +122,10 @@ public class OptionMatchActionTests
     }
 
     /// <summary>
-    /// 9. None でも未使用の Some 側 action が null の場合は ArgumentNullException が発生する
+    /// 9. OptionがNoneの場合でも未使用のonSomeがnullならArgumentNullExceptionを発生させる。
     /// </summary>
     [Test]
-    public void Option_None_MatchAction_null_unused_some_action_should_throw()
+    public void None_MatchAction_should_throw_argument_null_exception_when_unused_onSome_is_null()
     {
         var none = Option<int>.None;
         Action<int>? onSome = null;
@@ -135,16 +135,16 @@ public class OptionMatchActionTests
     }
 
     /// <summary>
-    /// 10. Default Option は None と同様に None 側の action を実行する
+    /// 10. default OptionはNoneと同様にonNoneを実行する。
     /// </summary>
     [Test]
-    public void Option_Default_MatchAction_should_behave_as_none()
+    public void Default_MatchAction_should_behave_as_none()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
         int someCount = 0;
         int noneCount = 0;
 
-        option.Match(
+        defaultOption.Match(
             _ => someCount++,
             () => noneCount++);
 
@@ -153,5 +153,61 @@ public class OptionMatchActionTests
             Assert.That(someCount, Is.EqualTo(0));
             Assert.That(noneCount, Is.EqualTo(1));
         });
+    }
+
+    /// <summary>
+    /// 11. default Optionの場合でもonSomeがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_MatchAction_should_throw_argument_null_exception_when_onSome_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Action<int>? onSome = null;
+
+        Assert.Throws<ArgumentNullException>(() =>
+            defaultOption.Match(onSome!, () => { }));
+    }
+
+    /// <summary>
+    /// 12. default Optionの場合でもonNoneがnullならArgumentNullExceptionを発生させる。
+    /// </summary>
+    [Test]
+    public void Default_MatchAction_should_throw_argument_null_exception_when_onNone_is_null()
+    {
+        var defaultOption = default(Option<int>);
+        Action? onNone = null;
+
+        Assert.Throws<ArgumentNullException>(() =>
+            defaultOption.Match(_ => { }, onNone!));
+    }
+
+    /// <summary>
+    /// 13. OptionがSomeでonSomeが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void Some_MatchAction_should_propagate_exception_when_onSome_throws()
+    {
+        var some = Option<int>.Some(5);
+        var expectedException = new NotSupportedException("onSome error");
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            some.Match(_ => throw expectedException, () => { }));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
+    }
+
+    /// <summary>
+    /// 14. OptionがNoneでonNoneが例外を発生させた場合は、その例外をそのまま伝播させる。
+    /// </summary>
+    [Test]
+    public void None_MatchAction_should_propagate_exception_when_onNone_throws()
+    {
+        var none = Option<int>.None;
+        var expectedException = new NotSupportedException("onNone error");
+
+        var actualException = Assert.Throws<NotSupportedException>(() =>
+            none.Match(_ => { }, () => throw expectedException));
+
+        Assert.That(actualException, Is.SameAs(expectedException));
     }
 }

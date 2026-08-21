@@ -5,12 +5,13 @@ namespace FunctionalCore.Tests.OptionTests.AsyncExtensions;
 public class OptionAsTaskTests
 {
     /// <summary>
-    /// 1. Some.AsTask は元の Some を保持する完了済み Task を返す
+    /// 1. OptionがSomeの場合は元のSomeを保持するTaskを返す。
     /// </summary>
     [Test]
-    public async Task Option_Some_AsTask_should_return_original_option()
+    public async Task Some_AsTask_should_return_original_option()
     {
         var some = Option<int>.Some(5);
+
         var result = await some.AsTask();
 
         Assert.Multiple(() =>
@@ -22,12 +23,13 @@ public class OptionAsTaskTests
     }
 
     /// <summary>
-    /// 2. None.AsTask は元の None を保持する完了済み Task を返す
+    /// 2. OptionがNoneの場合は元のNoneを保持するTaskを返す。
     /// </summary>
     [Test]
-    public async Task Option_None_AsTask_should_return_original_option()
+    public async Task None_AsTask_should_return_original_option()
     {
         var none = Option<int>.None;
+
         var result = await none.AsTask();
 
         Assert.Multiple(() =>
@@ -38,39 +40,46 @@ public class OptionAsTaskTests
     }
 
     /// <summary>
-    /// 3. Some.AsTask は完了済み Task を返す
+    /// 3. OptionがSomeの場合は完了済みTaskを返す。
     /// </summary>
     [Test]
-    public void Option_Some_AsTask_should_return_completed_task()
+    public void Some_AsTask_should_return_completed_task()
     {
         var some = Option<int>.Some(5);
+
         var task = some.AsTask();
 
         Assert.That(task.IsCompletedSuccessfully, Is.True);
     }
 
     /// <summary>
-    /// 4. None.AsTask は完了済み Task を返す
+    /// 4. OptionがNoneの場合は完了済みTaskを返す。
     /// </summary>
     [Test]
-    public void Option_None_AsTask_should_return_completed_task()
+    public void None_AsTask_should_return_completed_task()
     {
         var none = Option<int>.None;
+
         var task = none.AsTask();
 
         Assert.That(task.IsCompletedSuccessfully, Is.True);
     }
 
     /// <summary>
-    /// 5. Default Option.AsTask は None を保持する完了済み Task を返す
+    /// 5. default OptionはNoneを保持する完了済みTaskを返す。
     /// </summary>
     [Test]
-    public async Task Option_Default_AsTask_should_return_none()
+    public async Task Default_AsTask_should_return_none()
     {
-        var option = default(Option<int>);
+        var defaultOption = default(Option<int>);
 
-        var result = await option.AsTask();
+        var task = defaultOption.AsTask();
+        var result = await task;
 
-        Assert.That(result, Is.EqualTo(Option<int>.None));
+        Assert.Multiple(() =>
+        {
+            Assert.That(task.IsCompletedSuccessfully, Is.True);
+            Assert.That(result, Is.EqualTo(Option<int>.None));
+        });
     }
 }
