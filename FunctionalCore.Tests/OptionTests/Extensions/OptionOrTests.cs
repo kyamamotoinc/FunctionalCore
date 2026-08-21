@@ -4,27 +4,18 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 
 public class OptionOrTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.Or は自身を返す
     /// </summary>
     [Test]
     public void Option_Some_Or_should_return_original_option()
     {
+        var some = Option<int>.Some(5);
         var other = Option<int>.Some(10);
 
-        var result = _some.Or(other);
+        var result = some.Or(other);
 
-        Assert.That(result, Is.EqualTo(_some));
+        Assert.That(result, Is.EqualTo(some));
     }
 
     /// <summary>
@@ -33,9 +24,10 @@ public class OptionOrTests
     [Test]
     public void Option_None_Or_should_return_other_option()
     {
+        var none = Option<int>.None;
         var other = Option<int>.Some(10);
 
-        var result = _none.Or(other);
+        var result = none.Or(other);
 
         Assert.That(result, Is.EqualTo(other));
     }
@@ -46,7 +38,8 @@ public class OptionOrTests
     [Test]
     public void Option_None_Or_none_should_return_none()
     {
-        var result = _none.Or(Option<int>.None);
+        var none = Option<int>.None;
+        var result = none.Or(Option<int>.None);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -57,7 +50,8 @@ public class OptionOrTests
     [Test]
     public void Option_Some_Or_should_ignore_other_option()
     {
-        var result = _some.Or(Option<int>.Some(10));
+        var some = Option<int>.Some(5);
+        var result = some.Or(Option<int>.Some(10));
 
         Assert.Multiple(() =>
         {
@@ -72,11 +66,12 @@ public class OptionOrTests
     [Test]
     public void Option_Some_Or_default_should_return_original_option()
     {
+        var some = Option<int>.Some(5);
         var other = default(Option<int>);
 
-        var result = _some.Or(other);
+        var result = some.Or(other);
 
-        Assert.That(result, Is.EqualTo(_some));
+        Assert.That(result, Is.EqualTo(some));
     }
 
     /// <summary>
@@ -85,9 +80,10 @@ public class OptionOrTests
     [Test]
     public void Option_None_Or_default_should_return_none()
     {
+        var none = Option<int>.None;
         var other = default(Option<int>);
 
-        var result = _none.Or(other);
+        var result = none.Or(other);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -98,9 +94,10 @@ public class OptionOrTests
     [Test]
     public void Option_Some_Or_factory_should_not_be_invoked()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        var result = _some.Or(() =>
+        var result = some.Or(() =>
         {
             count++;
             return Option<int>.Some(10);
@@ -109,7 +106,7 @@ public class OptionOrTests
         Assert.Multiple(() =>
         {
             Assert.That(count, Is.EqualTo(0));
-            Assert.That(result, Is.EqualTo(_some));
+            Assert.That(result, Is.EqualTo(some));
         });
     }
 
@@ -119,9 +116,10 @@ public class OptionOrTests
     [Test]
     public void Option_None_Or_factory_should_be_invoked_once()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        var result = _none.Or(() =>
+        var result = none.Or(() =>
         {
             count++;
             return Option<int>.Some(10);
@@ -141,7 +139,8 @@ public class OptionOrTests
     [Test]
     public void Option_None_Or_factory_returning_none_should_return_none()
     {
-        var result = _none.Or(() => Option<int>.None);
+        var none = Option<int>.None;
+        var result = none.Or(() => Option<int>.None);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -152,7 +151,8 @@ public class OptionOrTests
     [Test]
     public void Option_None_Or_factory_returning_default_should_return_none()
     {
-        var result = _none.Or(() => default(Option<int>));
+        var none = Option<int>.None;
+        var result = none.Or(() => default(Option<int>));
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -163,9 +163,10 @@ public class OptionOrTests
     [Test]
     public void Option_None_Or_null_factory_should_throw()
     {
+        var none = Option<int>.None;
         Func<Option<int>>? factory = null;
 
-        Assert.Throws<ArgumentNullException>(() => _none.Or(factory!));
+        Assert.Throws<ArgumentNullException>(() => none.Or(factory!));
     }
 
     /// <summary>
@@ -174,9 +175,10 @@ public class OptionOrTests
     [Test]
     public void Option_Some_Or_null_factory_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<Option<int>>? factory = null;
 
-        Assert.Throws<ArgumentNullException>(() => _some.Or(factory!));
+        Assert.Throws<ArgumentNullException>(() => some.Or(factory!));
     }
 
     /// <summary>

@@ -4,23 +4,14 @@ namespace FunctionalCore.Tests.OptionTests.AsyncExtensions;
 
 public class OptionBindAsyncTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.BindAsync は binder を実行し、その Option を返す
     /// </summary>
     [Test]
     public async Task Option_Some_BindAsync_should_return_binder_result()
     {
-        var result = await _some.AsTask().BindAsync(x => Task.FromResult(Option<int>.Some(x + 1)));
+        var some = Option<int>.Some(5);
+        var result = await some.AsTask().BindAsync(x => Task.FromResult(Option<int>.Some(x + 1)));
 
         Assert.Multiple(() =>
         {
@@ -35,7 +26,8 @@ public class OptionBindAsyncTests
     [Test]
     public async Task Option_Some_BindAsync_should_change_value_type()
     {
-        var result = await _some.AsTask().BindAsync(x => Task.FromResult(Option<string>.Some($"value:{x}")));
+        var some = Option<int>.Some(5);
+        var result = await some.AsTask().BindAsync(x => Task.FromResult(Option<string>.Some($"value:{x}")));
 
         Assert.Multiple(() =>
         {
@@ -50,7 +42,8 @@ public class OptionBindAsyncTests
     [Test]
     public async Task Option_Some_BindAsync_binder_returning_none_should_return_none()
     {
-        var result = await _some.AsTask().BindAsync(_ => Task.FromResult(Option<int>.None));
+        var some = Option<int>.Some(5);
+        var result = await some.AsTask().BindAsync(_ => Task.FromResult(Option<int>.None));
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -61,9 +54,10 @@ public class OptionBindAsyncTests
     [Test]
     public async Task Option_Some_BindAsync_should_invoke_binder_once()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        await _some.AsTask().BindAsync(x =>
+        await some.AsTask().BindAsync(x =>
         {
             count++;
             return Task.FromResult(Option<int>.Some(x + 1));
@@ -78,9 +72,10 @@ public class OptionBindAsyncTests
     [Test]
     public async Task Option_None_BindAsync_should_not_invoke_binder()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        var result = await _none.AsTask().BindAsync(x =>
+        var result = await none.AsTask().BindAsync(x =>
         {
             count++;
             return Task.FromResult(Option<int>.Some(x + 1));
@@ -99,10 +94,11 @@ public class OptionBindAsyncTests
     [Test]
     public void Option_BindAsync_null_binder_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, Task<Option<string>>>? binder = null;
 
         Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _some.AsTask().BindAsync(binder!));
+            await some.AsTask().BindAsync(binder!));
     }
 
     /// <summary>
@@ -111,10 +107,11 @@ public class OptionBindAsyncTests
     [Test]
     public void Option_None_BindAsync_null_binder_should_throw()
     {
+        var none = Option<int>.None;
         Func<int, Task<Option<string>>>? binder = null;
 
         Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _none.AsTask().BindAsync(binder!));
+            await none.AsTask().BindAsync(binder!));
     }
 
     /// <summary>
@@ -135,10 +132,11 @@ public class OptionBindAsyncTests
     [Test]
     public void Option_Some_BindAsync_binder_returning_null_task_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, Task<Option<int>>> binder = _ => null!;
 
         Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _some.AsTask().BindAsync(binder));
+            await some.AsTask().BindAsync(binder));
     }
 
     /// <summary>
@@ -147,9 +145,10 @@ public class OptionBindAsyncTests
     [Test]
     public async Task Option_None_BindAsync_should_not_evaluate_null_task_binder()
     {
+        var none = Option<int>.None;
         Func<int, Task<Option<int>>> binder = _ => null!;
 
-        var result = await _none.AsTask().BindAsync(binder);
+        var result = await none.AsTask().BindAsync(binder);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -160,7 +159,8 @@ public class OptionBindAsyncTests
     [Test]
     public async Task Option_Some_BindAsync_binder_returning_default_option_should_return_none()
     {
-        var result = await _some.AsTask().BindAsync(_ => Task.FromResult(default(Option<string>)));
+        var some = Option<int>.Some(5);
+        var result = await some.AsTask().BindAsync(_ => Task.FromResult(default(Option<string>)));
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }

@@ -4,23 +4,14 @@ namespace FunctionalCore.Tests.OptionTests.Linq;
 
 public class OptionSelectManyTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. 元の Option と中間 Option がともに Some の場合は projector の結果を持つ Some を返す
     /// </summary>
     [Test]
     public void Option_Some_SelectMany_should_return_projected_value()
     {
-        var result = _some.SelectMany(
+        var some = Option<int>.Some(5);
+        var result = some.SelectMany(
             x => Option<int>.Some(x + 1),
             (x, y) => x + y);
 
@@ -37,7 +28,8 @@ public class OptionSelectManyTests
     [Test]
     public void Option_Some_SelectMany_should_change_value_type()
     {
-        var result = _some.SelectMany(
+        var some = Option<int>.Some(5);
+        var result = some.SelectMany(
             x => Option<int>.Some(x + 1),
             (x, y) => $"{x}:{y}");
 
@@ -54,9 +46,10 @@ public class OptionSelectManyTests
     [Test]
     public void Option_Some_SelectMany_should_invoke_selector_once()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        _some.SelectMany(
+        some.SelectMany(
             x =>
             {
                 count++;
@@ -73,9 +66,10 @@ public class OptionSelectManyTests
     [Test]
     public void Option_None_SelectMany_should_not_invoke_selector()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        var result = _none.SelectMany(
+        var result = none.SelectMany(
             x =>
             {
                 count++;
@@ -96,7 +90,8 @@ public class OptionSelectManyTests
     [Test]
     public void Option_Some_SelectMany_selector_returning_none_should_return_none()
     {
-        var result = _some.SelectMany(
+        var some = Option<int>.Some(5);
+        var result = some.SelectMany(
             _ => Option<int>.None,
             (x, y) => x + y);
 
@@ -109,9 +104,10 @@ public class OptionSelectManyTests
     [Test]
     public void Option_Some_SelectMany_selector_none_should_not_invoke_projector()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        var result = _some.SelectMany(
+        var result = some.SelectMany(
             _ => Option<int>.None,
             (x, y) =>
             {
@@ -132,9 +128,10 @@ public class OptionSelectManyTests
     [Test]
     public void Option_Some_SelectMany_should_invoke_projector_once()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        _some.SelectMany(
+        some.SelectMany(
             x => Option<int>.Some(x + 1),
             (x, y) =>
             {
@@ -151,10 +148,11 @@ public class OptionSelectManyTests
     [Test]
     public void Option_SelectMany_null_selector_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, Option<int>>? selector = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _some.SelectMany(selector!, (x, y) => x + y));
+            some.SelectMany(selector!, (x, y) => x + y));
     }
 
     /// <summary>
@@ -163,10 +161,11 @@ public class OptionSelectManyTests
     [Test]
     public void Option_SelectMany_null_projector_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, int, int>? projector = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _some.SelectMany(x => Option<int>.Some(x + 1), projector!));
+            some.SelectMany(x => Option<int>.Some(x + 1), projector!));
     }
 
     /// <summary>
@@ -175,10 +174,11 @@ public class OptionSelectManyTests
     [Test]
     public void Option_None_SelectMany_null_selector_should_throw()
     {
+        var none = Option<int>.None;
         Func<int, Option<int>>? selector = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _none.SelectMany(selector!, (x, y) => x + y));
+            none.SelectMany(selector!, (x, y) => x + y));
     }
 
     /// <summary>
@@ -187,10 +187,11 @@ public class OptionSelectManyTests
     [Test]
     public void Option_None_SelectMany_null_projector_should_throw()
     {
+        var none = Option<int>.None;
         Func<int, int, int>? projector = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _none.SelectMany(x => Option<int>.Some(x + 1), projector!));
+            none.SelectMany(x => Option<int>.Some(x + 1), projector!));
     }
 
     /// <summary>
@@ -199,7 +200,8 @@ public class OptionSelectManyTests
     [Test]
     public void Option_Some_SelectMany_selector_returning_default_should_return_none()
     {
-        var result = _some.SelectMany(
+        var some = Option<int>.Some(5);
+        var result = some.SelectMany(
             _ => default(Option<int>),
             (x, y) => x + y);
 
@@ -212,7 +214,8 @@ public class OptionSelectManyTests
     [Test]
     public void Option_Some_SelectMany_projector_returning_null_should_return_none()
     {
-        var result = _some.SelectMany(
+        var some = Option<int>.Some(5);
+        var result = some.SelectMany(
             x => Option<int>.Some(x + 1),
             (_, _) => (string)null!);
 
@@ -225,7 +228,8 @@ public class OptionSelectManyTests
     [Test]
     public void Option_SelectMany_selector_none_should_not_evaluate_null_returning_projector()
     {
-        var result = _some.SelectMany(
+        var some = Option<int>.Some(5);
+        var result = some.SelectMany(
             _ => Option<int>.None,
             (_, _) => (string)null!);
 
@@ -238,8 +242,9 @@ public class OptionSelectManyTests
     [Test]
     public void Option_SelectMany_should_support_query_syntax()
     {
+        var some = Option<int>.Some(5);
         var result =
-            from x in _some
+            from x in some
             from y in Option<int>.Some(x + 1)
             select x + y;
 
@@ -256,8 +261,9 @@ public class OptionSelectManyTests
     [Test]
     public void Option_SelectMany_query_syntax_intermediate_none_should_return_none()
     {
+        var some = Option<int>.Some(5);
         var result =
-            from x in _some
+            from x in some
             from y in Option<int>.None
             select x + y;
 
@@ -270,8 +276,9 @@ public class OptionSelectManyTests
     [Test]
     public void Option_SelectMany_query_syntax_source_none_should_return_none()
     {
+        var none = Option<int>.None;
         var result =
-            from x in _none
+            from x in none
             from y in Option<int>.Some(x + 1)
             select x + y;
 

@@ -2,21 +2,14 @@
 
 public class DefaultOptionTests
 {
-    private Option<int> _default;
-
-    [SetUp]
-    public void Setup()
-    {
-        _default = default;
-    }
-
     /// <summary>
     /// 1. Default Option は値を保持していない
     /// </summary>
     [Test]
     public void Default_Option_should_not_have_value()
     {
-        Assert.That(_default.HasValue, Is.False);
+        var def = default(Option<int>);
+        Assert.That(def.HasValue, Is.False);
     }
 
     /// <summary>
@@ -25,11 +18,12 @@ public class DefaultOptionTests
     [Test]
     public void Default_Option_should_equal_none()
     {
+        var def = default(Option<int>);
         Assert.Multiple(() =>
         {
-            Assert.That(_default, Is.EqualTo(Option<int>.None));
-            Assert.That(_default == Option<int>.None, Is.True);
-            Assert.That(_default.Equals(Option<int>.None), Is.True);
+            Assert.That(def, Is.EqualTo(Option<int>.None));
+            Assert.That(def == Option<int>.None, Is.True);
+            Assert.That(def.Equals(Option<int>.None), Is.True);
         });
     }
 
@@ -39,7 +33,8 @@ public class DefaultOptionTests
     [Test]
     public void Default_Option_accessing_value_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = _default.Value);
+        var def = default(Option<int>);
+        Assert.Throws<InvalidOperationException>(() => _ = def.Value);
     }
 
     /// <summary>
@@ -48,7 +43,8 @@ public class DefaultOptionTests
     [Test]
     public void Default_Option_ToString_should_return_none()
     {
-        Assert.That(_default.ToString(), Is.EqualTo("None"));
+        var def = default(Option<int>);
+        Assert.That(def.ToString(), Is.EqualTo("None"));
     }
 
     /// <summary>
@@ -57,13 +53,14 @@ public class DefaultOptionTests
     [Test]
     public void Two_default_Options_should_be_equal()
     {
+        var def = default(Option<int>);
         var other = default(Option<int>);
 
         Assert.Multiple(() =>
         {
-            Assert.That(_default == other, Is.True);
-            Assert.That(_default.Equals(other), Is.True);
-            Assert.That(_default.GetHashCode(), Is.EqualTo(other.GetHashCode()));
+            Assert.That(def == other, Is.True);
+            Assert.That(def.Equals(other), Is.True);
+            Assert.That(def.GetHashCode(), Is.EqualTo(other.GetHashCode()));
         });
     }
 

@@ -8,9 +8,9 @@ public class OptionEqualityTests
     [Test]
     public void Option_Equals_null_should_return_false()
     {
-        var option = Option<int>.Some(5);
+        var some = Option<int>.Some(5);
 
-        Assert.That(option.Equals(null), Is.False);
+        Assert.That(some.Equals(null), Is.False);
     }
 
     /// <summary>
@@ -19,9 +19,9 @@ public class OptionEqualityTests
     [Test]
     public void Option_Equals_different_type_should_return_false()
     {
-        var option = Option<int>.Some(5);
+        var some = Option<int>.Some(5);
 
-        Assert.That(option.Equals("not option"), Is.False);
+        Assert.That(some.Equals("not option"), Is.False);
     }
 
     /// <summary>
@@ -30,10 +30,10 @@ public class OptionEqualityTests
     [Test]
     public void Option_Some_Equals_object_with_same_value_should_return_true()
     {
-        var option = Option<int>.Some(5);
+        var some = Option<int>.Some(5);
         object other = Option<int>.Some(5);
 
-        Assert.That(option.Equals(other), Is.True);
+        Assert.That(some.Equals(other), Is.True);
     }
 
     /// <summary>
@@ -42,10 +42,10 @@ public class OptionEqualityTests
     [Test]
     public void Option_Some_Equals_object_with_different_value_should_return_false()
     {
-        var option = Option<int>.Some(5);
+        var some = Option<int>.Some(5);
         object other = Option<int>.Some(10);
 
-        Assert.That(option.Equals(other), Is.False);
+        Assert.That(some.Equals(other), Is.False);
     }
 
     /// <summary>
@@ -54,10 +54,10 @@ public class OptionEqualityTests
     [Test]
     public void Option_None_Equals_object_none_should_return_true()
     {
-        var option = Option<int>.None;
+        var none = Option<int>.None;
         object other = Option<int>.None;
 
-        Assert.That(option.Equals(other), Is.True);
+        Assert.That(none.Equals(other), Is.True);
     }
 
     /// <summary>
@@ -66,10 +66,10 @@ public class OptionEqualityTests
     [Test]
     public void Option_Default_Equals_object_none_should_return_true()
     {
-        var option = default(Option<int>);
+        var def = default(Option<int>);
         object other = Option<int>.None;
 
-        Assert.That(option.Equals(other), Is.True);
+        Assert.That(def.Equals(other), Is.True);
     }
 
     /// <summary>
@@ -78,10 +78,10 @@ public class OptionEqualityTests
     [Test]
     public void Option_Some_Equals_object_none_should_return_false()
     {
-        var option = Option<int>.Some(5);
+        var some = Option<int>.Some(5);
         object other = Option<int>.None;
 
-        Assert.That(option.Equals(other), Is.False);
+        Assert.That(some.Equals(other), Is.False);
     }
 
     /// <summary>

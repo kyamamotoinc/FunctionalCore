@@ -2,23 +2,14 @@
 
 public class OptionBindTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.Bind は binder を実行し、その Option を返す
     /// </summary>
     [Test]
     public void Option_Some_Bind_should_return_binder_result()
     {
-        var result = _some.Bind(x => Option<int>.Some(x + 1));
+        var some = Option<int>.Some(5);
+        var result = some.Bind(x => Option<int>.Some(x + 1));
 
         Assert.Multiple(() =>
         {
@@ -33,7 +24,8 @@ public class OptionBindTests
     [Test]
     public void Option_Some_Bind_should_change_value_type()
     {
-        var result = _some.Bind(x => Option<string>.Some($"value:{x}"));
+        var some = Option<int>.Some(5);
+        var result = some.Bind(x => Option<string>.Some($"value:{x}"));
 
         Assert.Multiple(() =>
         {
@@ -48,7 +40,8 @@ public class OptionBindTests
     [Test]
     public void Option_Some_Bind_binder_returning_none_should_return_none()
     {
-        var result = _some.Bind(_ => Option<int>.None);
+        var some = Option<int>.Some(5);
+        var result = some.Bind(_ => Option<int>.None);
 
         Assert.That(result.HasValue, Is.False);
     }
@@ -59,9 +52,10 @@ public class OptionBindTests
     [Test]
     public void Option_Some_Bind_should_invoke_binder_once()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        _some.Bind(x =>
+        some.Bind(x =>
         {
             count++;
             return Option<int>.Some(x + 1);
@@ -76,9 +70,10 @@ public class OptionBindTests
     [Test]
     public void Option_None_Bind_should_not_invoke_binder()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        var result = _none.Bind(x =>
+        var result = none.Bind(x =>
         {
             count++;
             return Option<int>.Some(x + 1);
@@ -97,7 +92,8 @@ public class OptionBindTests
     [Test]
     public void Option_None_Bind_should_return_none()
     {
-        var result = _none.Bind(x => Option<int>.Some(x + 1));
+        var none = Option<int>.None;
+        var result = none.Bind(x => Option<int>.Some(x + 1));
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -108,9 +104,10 @@ public class OptionBindTests
     [Test]
     public void Option_Bind_null_binder_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, Option<string>>? binder = null;
 
-        Assert.Throws<ArgumentNullException>(() => _some.Bind(binder!));
+        Assert.Throws<ArgumentNullException>(() => some.Bind(binder!));
     }
 
     /// <summary>
@@ -119,9 +116,10 @@ public class OptionBindTests
     [Test]
     public void Option_None_Bind_null_binder_should_throw()
     {
+        var none = Option<int>.None;
         Func<int, Option<string>>? binder = null;
 
-        Assert.Throws<ArgumentNullException>(() => _none.Bind(binder!));
+        Assert.Throws<ArgumentNullException>(() => none.Bind(binder!));
     }
 
     /// <summary>
@@ -130,7 +128,8 @@ public class OptionBindTests
     [Test]
     public void Option_Some_Bind_default_option_should_return_none()
     {
-        var result = _some.Bind(_ => default(Option<string>));
+        var some = Option<int>.Some(5);
+        var result = some.Bind(_ => default(Option<string>));
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
@@ -141,7 +140,8 @@ public class OptionBindTests
     [Test]
     public void Option_None_Bind_should_not_evaluate_default_binder_result()
     {
-        var result = _none.Bind(_ => default(Option<string>));
+        var none = Option<int>.None;
+        var result = none.Bind(_ => default(Option<string>));
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }

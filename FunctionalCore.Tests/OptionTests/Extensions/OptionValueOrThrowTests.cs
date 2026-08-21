@@ -4,23 +4,14 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 
 public class OptionValueOrThrowTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.ValueOrThrow は内部の Value を返す
     /// </summary>
     [Test]
     public void Option_Some_ValueOrThrow_should_return_inner_value()
     {
-        var value = _some.ValueOrThrow(() => new InvalidOperationException());
+        var some = Option<int>.Some(5);
+        var value = some.ValueOrThrow(() => new InvalidOperationException());
 
         Assert.That(value, Is.EqualTo(5));
     }
@@ -31,9 +22,10 @@ public class OptionValueOrThrowTests
     [Test]
     public void Option_Some_ValueOrThrow_should_not_invoke_exception_factory()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        var value = _some.ValueOrThrow(() =>
+        var value = some.ValueOrThrow(() =>
         {
             count++;
             return new InvalidOperationException();
@@ -52,8 +44,9 @@ public class OptionValueOrThrowTests
     [Test]
     public void Option_None_ValueOrThrow_should_throw_factory_exception()
     {
+        var none = Option<int>.None;
         Assert.Throws<InvalidOperationException>(() =>
-            _none.ValueOrThrow(() => new InvalidOperationException("error")));
+            none.ValueOrThrow(() => new InvalidOperationException("error")));
     }
 
     /// <summary>
@@ -62,10 +55,11 @@ public class OptionValueOrThrowTests
     [Test]
     public void Option_None_ValueOrThrow_should_invoke_exception_factory_once()
     {
+        var none = Option<int>.None;
         int count = 0;
 
         Assert.Throws<InvalidOperationException>(() =>
-            _none.ValueOrThrow(() =>
+            none.ValueOrThrow(() =>
             {
                 count++;
                 return new InvalidOperationException("error");
@@ -80,10 +74,11 @@ public class OptionValueOrThrowTests
     [Test]
     public void Option_None_ValueOrThrow_should_throw_same_exception_instance()
     {
+        var none = Option<int>.None;
         var expected = new InvalidOperationException("expected");
 
         var actual = Assert.Throws<InvalidOperationException>(() =>
-            _none.ValueOrThrow(() => expected));
+            none.ValueOrThrow(() => expected));
 
         Assert.That(actual, Is.SameAs(expected));
     }
@@ -94,10 +89,11 @@ public class OptionValueOrThrowTests
     [Test]
     public void Option_ValueOrThrow_null_exception_factory_should_throw()
     {
+        var none = Option<int>.None;
         Func<Exception>? factory = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _none.ValueOrThrow(factory!));
+            none.ValueOrThrow(factory!));
     }
 
     /// <summary>
@@ -106,10 +102,11 @@ public class OptionValueOrThrowTests
     [Test]
     public void Option_Some_ValueOrThrow_null_exception_factory_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<Exception>? factory = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _some.ValueOrThrow(factory!));
+            some.ValueOrThrow(factory!));
     }
 
     /// <summary>
@@ -118,8 +115,9 @@ public class OptionValueOrThrowTests
     [Test]
     public void Option_None_ValueOrThrow_exception_factory_returning_null_should_throw()
     {
+        var none = Option<int>.None;
         Assert.Throws<InvalidOperationException>(() =>
-            _none.ValueOrThrow(() => null!));
+            none.ValueOrThrow(() => null!));
     }
 
     /// <summary>
@@ -128,7 +126,8 @@ public class OptionValueOrThrowTests
     [Test]
     public void Option_Some_ValueOrThrow_should_not_evaluate_null_returning_exception_factory()
     {
-        var value = _some.ValueOrThrow(() => null!);
+        var some = Option<int>.Some(5);
+        var value = some.ValueOrThrow(() => null!);
 
         Assert.That(value, Is.EqualTo(5));
     }

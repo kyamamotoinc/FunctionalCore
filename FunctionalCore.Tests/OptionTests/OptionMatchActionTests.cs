@@ -2,25 +2,16 @@
 
 public class OptionMatchActionTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.Match は Some 側の action を1回だけ実行する
     /// </summary>
     [Test]
     public void Option_Some_MatchAction_should_invoke_some_action_once()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        _some.Match(
+        some.Match(
             _ => count++,
             () => { });
 
@@ -33,9 +24,10 @@ public class OptionMatchActionTests
     [Test]
     public void Option_Some_MatchAction_should_pass_value_to_some_action()
     {
+        var some = Option<int>.Some(5);
         int received = 0;
 
-        _some.Match(
+        some.Match(
             value => received = value,
             () => { });
 
@@ -48,9 +40,10 @@ public class OptionMatchActionTests
     [Test]
     public void Option_Some_MatchAction_should_not_invoke_none_action()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        _some.Match(
+        some.Match(
             _ => { },
             () => count++);
 
@@ -63,9 +56,10 @@ public class OptionMatchActionTests
     [Test]
     public void Option_None_MatchAction_should_invoke_none_action_once()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        _none.Match(
+        none.Match(
             _ => { },
             () => count++);
 
@@ -78,9 +72,10 @@ public class OptionMatchActionTests
     [Test]
     public void Option_None_MatchAction_should_not_invoke_some_action()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        _none.Match(
+        none.Match(
             _ => count++,
             () => { });
 
@@ -93,10 +88,11 @@ public class OptionMatchActionTests
     [Test]
     public void Option_MatchAction_null_some_action_should_throw()
     {
+        var some = Option<int>.Some(5);
         Action<int>? onSome = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _some.Match(onSome!, () => { }));
+            some.Match(onSome!, () => { }));
     }
 
     /// <summary>
@@ -105,10 +101,11 @@ public class OptionMatchActionTests
     [Test]
     public void Option_MatchAction_null_none_action_should_throw()
     {
+        var none = Option<int>.None;
         Action? onNone = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _none.Match(_ => { }, onNone!));
+            none.Match(_ => { }, onNone!));
     }
 
     /// <summary>
@@ -117,10 +114,11 @@ public class OptionMatchActionTests
     [Test]
     public void Option_Some_MatchAction_null_unused_none_action_should_throw()
     {
+        var some = Option<int>.Some(5);
         Action? onNone = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _some.Match(_ => { }, onNone!));
+            some.Match(_ => { }, onNone!));
     }
 
     /// <summary>
@@ -129,10 +127,11 @@ public class OptionMatchActionTests
     [Test]
     public void Option_None_MatchAction_null_unused_some_action_should_throw()
     {
+        var none = Option<int>.None;
         Action<int>? onSome = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _none.Match(onSome!, () => { }));
+            none.Match(onSome!, () => { }));
     }
 
     /// <summary>

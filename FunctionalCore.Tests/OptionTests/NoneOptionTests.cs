@@ -2,13 +2,13 @@
 
 public class NoneOptionTests
 {
-    private Option<int> _none;
+    //private Option<int> _none;
 
-    [SetUp]
-    public void Setup()
-    {
-        _none = Option<int>.None;
-    }
+    //[SetUp]
+    //public void Setup()
+    //{
+    //    var none = Option<int>.None;
+    //}
 
     /// <summary>
     /// 1. None は値を保持していない状態である
@@ -16,7 +16,8 @@ public class NoneOptionTests
     [Test]
     public void Option_None_should_not_have_value()
     {
-        Assert.That(_none.HasValue, Is.False);
+        var none = Option<int>.None;
+        Assert.That(none.HasValue, Is.False);
     }
 
     /// <summary>
@@ -25,7 +26,8 @@ public class NoneOptionTests
     [Test]
     public void Option_None_accessing_value_should_throw()
     {
-        Assert.Throws<InvalidOperationException>(() => _ = _none.Value);
+        var none = Option<int>.None;
+        Assert.Throws<InvalidOperationException>(() => _ = none.Value);
     }
 
     /// <summary>
@@ -34,13 +36,14 @@ public class NoneOptionTests
     [Test]
     public void Two_None_options_should_be_equal()
     {
+        var none = Option<int>.None;
         var other = Option<int>.None;
 
         Assert.Multiple(() =>
         {
-            Assert.That(_none == other, Is.True);
-            Assert.That(_none.Equals(other), Is.True);
-            Assert.That(_none.GetHashCode(), Is.EqualTo(other.GetHashCode()));
+            Assert.That(none == other, Is.True);
+            Assert.That(none.Equals(other), Is.True);
+            Assert.That(none.GetHashCode(), Is.EqualTo(other.GetHashCode()));
         });
     }
 
@@ -50,13 +53,14 @@ public class NoneOptionTests
     [Test]
     public void None_and_Some_should_not_be_equal()
     {
+        var none = Option<int>.None;
         var some = Option<int>.Some(5);
 
         Assert.Multiple(() =>
         {
-            Assert.That(_none == some, Is.False);
-            Assert.That(_none != some, Is.True);
-            Assert.That(_none.Equals(some), Is.False);
+            Assert.That(none == some, Is.False);
+            Assert.That(none != some, Is.True);
+            Assert.That(none.Equals(some), Is.False);
         });
     }
 
@@ -66,6 +70,7 @@ public class NoneOptionTests
     [Test]
     public void None_ToString_should_return_None()
     {
-        Assert.That(_none.ToString(), Is.EqualTo("None"));
+        var none = Option<int>.None;
+        Assert.That(none.ToString(), Is.EqualTo("None"));
     }
 }

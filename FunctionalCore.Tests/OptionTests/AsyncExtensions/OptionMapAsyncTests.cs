@@ -4,23 +4,14 @@ namespace FunctionalCore.Tests.OptionTests.AsyncExtensions;
 
 public class OptionMapAsyncTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.MapAsync は selector を実行し、変換後の値を持つ Some を返す
     /// </summary>
     [Test]
     public async Task Option_Some_MapAsync_should_return_selector_result()
     {
-        var result = await _some.AsTask().MapAsync(x => Task.FromResult(x + 1));
+        var some = Option<int>.Some(5);
+        var result = await some.AsTask().MapAsync(x => Task.FromResult(x + 1));
 
         Assert.Multiple(() =>
         {
@@ -35,7 +26,8 @@ public class OptionMapAsyncTests
     [Test]
     public async Task Option_Some_MapAsync_should_change_value_type()
     {
-        var result = await _some.AsTask().MapAsync(x => Task.FromResult($"value:{x}"));
+        var some = Option<int>.Some(5);
+        var result = await some.AsTask().MapAsync(x => Task.FromResult($"value:{x}"));
 
         Assert.Multiple(() =>
         {
@@ -50,9 +42,10 @@ public class OptionMapAsyncTests
     [Test]
     public async Task Option_Some_MapAsync_should_invoke_selector_once()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        await _some.AsTask().MapAsync(x =>
+        await some.AsTask().MapAsync(x =>
         {
             count++;
             return Task.FromResult(x + 1);
@@ -67,9 +60,10 @@ public class OptionMapAsyncTests
     [Test]
     public async Task Option_None_MapAsync_should_not_invoke_selector()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        var result = await _none.AsTask().MapAsync(x =>
+        var result = await none.AsTask().MapAsync(x =>
         {
             count++;
             return Task.FromResult(x + 1);
@@ -88,10 +82,11 @@ public class OptionMapAsyncTests
     [Test]
     public void Option_MapAsync_null_selector_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, Task<string>>? selector = null;
 
         Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _some.AsTask().MapAsync(selector!));
+            await some.AsTask().MapAsync(selector!));
     }
 
     /// <summary>
@@ -100,10 +95,11 @@ public class OptionMapAsyncTests
     [Test]
     public void Option_None_MapAsync_null_selector_should_throw()
     {
+        var none = Option<int>.None;
         Func<int, Task<string>>? selector = null;
 
         Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _none.AsTask().MapAsync(selector!));
+            await none.AsTask().MapAsync(selector!));
     }
 
     /// <summary>
@@ -124,10 +120,11 @@ public class OptionMapAsyncTests
     [Test]
     public void Option_Some_MapAsync_selector_returning_null_task_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, Task<string>> selector = _ => null!;
 
         Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _some.AsTask().MapAsync(selector));
+            await some.AsTask().MapAsync(selector));
     }
 
     /// <summary>
@@ -136,7 +133,8 @@ public class OptionMapAsyncTests
     [Test]
     public async Task Option_Some_MapAsync_selector_returning_null_value_should_return_none()
     {
-        var result = await _some.AsTask().MapAsync(_ => Task.FromResult((string)null!));
+        var some = Option<int>.Some(5);
+        var result = await some.AsTask().MapAsync(_ => Task.FromResult((string)null!));
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
@@ -147,9 +145,10 @@ public class OptionMapAsyncTests
     [Test]
     public async Task Option_None_MapAsync_should_not_evaluate_null_task_selector()
     {
+        var none = Option<int>.None;
         Func<int, Task<string>> selector = _ => null!;
 
-        var result = await _none.AsTask().MapAsync(selector);
+        var result = await none.AsTask().MapAsync(selector);
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
@@ -160,7 +159,8 @@ public class OptionMapAsyncTests
     [Test]
     public async Task Option_None_MapAsync_should_not_evaluate_null_value_selector()
     {
-        var result = await _none.AsTask().MapAsync(_ => Task.FromResult((string)null!));
+        var none = Option<int>.None;
+        var result = await none.AsTask().MapAsync(_ => Task.FromResult((string)null!));
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }

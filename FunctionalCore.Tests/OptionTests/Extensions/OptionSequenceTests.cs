@@ -4,19 +4,19 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 
 public class OptionSequenceTests
 {
-    private Option<int> _some1;
-    private Option<int> _some2;
-    private Option<int> _some3;
-    private Option<int> _none;
+    //private Option<int> _some1;
+    //private Option<int> _some2;
+    //private Option<int> _some3;
+    //private Option<int> _none;
 
-    [SetUp]
-    public void Setup()
-    {
-        _some1 = Option<int>.Some(1);
-        _some2 = Option<int>.Some(2);
-        _some3 = Option<int>.Some(3);
-        _none = Option<int>.None;
-    }
+    //[SetUp]
+    //public void Setup()
+    //{
+    //    var some1 = Option<int>.Some(1);
+    //    var some2 = Option<int>.Some(2);
+    //    var some3 = Option<int>.Some(3);
+    //    var none = Option<int>.None;
+    //}
 
     /// <summary>
     /// 1. すべて Some の場合は、すべての値を持つ Some を返す
@@ -24,11 +24,15 @@ public class OptionSequenceTests
     [Test]
     public void Option_Sequence_all_some_should_return_some_collection()
     {
+        var some1 = Option<int>.Some(1);
+        var some2 = Option<int>.Some(2);
+        var some3 = Option<int>.Some(3);
+
         var options = new[]
         {
-            _some1,
-            _some2,
-            _some3
+            some1,
+            some2,
+            some3
         };
 
         var result = options.Sequence();
@@ -46,11 +50,15 @@ public class OptionSequenceTests
     [Test]
     public void Option_Sequence_containing_none_should_return_none()
     {
+        var some1 = Option<int>.Some(1);
+        var some3 = Option<int>.Some(3);
+        var none = Option<int>.None;
+
         var options = new[]
         {
-            _some1,
-            _none,
-            _some3
+            some1,
+            none,
+            some3
         };
 
         var result = options.Sequence();
@@ -64,11 +72,14 @@ public class OptionSequenceTests
     [Test]
     public void Option_Sequence_containing_multiple_none_should_return_none()
     {
+        var some2 = Option<int>.Some(2);
+        var none = Option<int>.None;
+
         var options = new[]
         {
-            _none,
-            _some2,
-            _none
+            none,
+            some2,
+            none
         };
 
         var result = options.Sequence();
@@ -110,11 +121,15 @@ public class OptionSequenceTests
     [Test]
     public void Option_Sequence_should_preserve_order()
     {
+        var some1 = Option<int>.Some(1);
+        var some2 = Option<int>.Some(2);
+        var some3 = Option<int>.Some(3);
+
         var options = new[]
         {
-            _some3,
-            _some1,
-            _some2
+            some3,
+            some1,
+            some2
         };
 
         var result = options.Sequence();
@@ -132,11 +147,14 @@ public class OptionSequenceTests
     [Test]
     public void Option_Sequence_containing_default_option_should_return_none()
     {
+        var some1 = Option<int>.Some(1);
+        var some3 = Option<int>.Some(3);
+
         var options = new[]
         {
-            _some1,
+            some1,
             default(Option<int>),
-            _some3
+            some3
         };
 
         var result = options.Sequence();

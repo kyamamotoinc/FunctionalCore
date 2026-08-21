@@ -4,23 +4,14 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 
 public class OptionGetValueOrTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.GetValueOr は保持している値を返す
     /// </summary>
     [Test]
     public void Option_Some_GetValueOr_should_return_value()
     {
-        var value = _some.GetValueOr(10);
+        var some = Option<int>.Some(5);
+        var value = some.GetValueOr(10);
 
         Assert.That(value, Is.EqualTo(5));
     }
@@ -31,7 +22,8 @@ public class OptionGetValueOrTests
     [Test]
     public void Option_None_GetValueOr_should_return_default_value()
     {
-        var value = _none.GetValueOr(10);
+        var none = Option<int>.None;
+        var value = none.GetValueOr(10);
 
         Assert.That(value, Is.EqualTo(10));
     }
@@ -42,9 +34,8 @@ public class OptionGetValueOrTests
     [Test]
     public void Option_Some_GetValueOr_reference_type_should_return_value()
     {
-        var option = Option<string>.Some("value");
-
-        var value = option.GetValueOr("default");
+        var some = Option<string>.Some("value");
+        var value = some.GetValueOr("default");
 
         Assert.That(value, Is.EqualTo("value"));
     }
@@ -55,9 +46,8 @@ public class OptionGetValueOrTests
     [Test]
     public void Option_None_GetValueOr_reference_type_should_return_default_value()
     {
-        var option = Option<string>.None;
-
-        var value = option.GetValueOr("default");
+        var none = Option<string>.None;
+        var value = none.GetValueOr("default");
 
         Assert.That(value, Is.EqualTo("default"));
     }
@@ -68,9 +58,8 @@ public class OptionGetValueOrTests
     [Test]
     public void Option_Some_GetValueOr_null_default_value_should_return_value()
     {
-        var option = Option<string>.Some("value");
-
-        var value = option.GetValueOr(null!);
+        var some = Option<string>.Some("value");
+        var value = some.GetValueOr(null!);
 
         Assert.That(value, Is.EqualTo("value"));
     }
@@ -81,9 +70,8 @@ public class OptionGetValueOrTests
     [Test]
     public void Option_None_GetValueOr_null_default_value_should_return_null()
     {
-        var option = Option<string>.None;
-
-        var value = option.GetValueOr(null!);
+        var none = Option<string>.None;
+        var value = none.GetValueOr(null!);
 
         Assert.That(value, Is.Null);
     }
@@ -94,9 +82,8 @@ public class OptionGetValueOrTests
     [Test]
     public void Option_Default_GetValueOr_should_return_default_value()
     {
-        var option = default(Option<int>);
-
-        var value = option.GetValueOr(10);
+        var def = default(Option<int>);
+        var value = def.GetValueOr(10);
 
         Assert.That(value, Is.EqualTo(10));
     }
@@ -107,9 +94,8 @@ public class OptionGetValueOrTests
     [Test]
     public void Option_Default_GetValueOr_null_default_value_should_return_null()
     {
-        var option = default(Option<string>);
-
-        var value = option.GetValueOr(null!);
+        var def = default(Option<string>);
+        var value = def.GetValueOr(null!);
 
         Assert.That(value, Is.Null);
     }

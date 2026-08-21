@@ -2,25 +2,16 @@
 
 public class OptionTapNoneTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. None.TapNone は action を1回だけ実行する
     /// </summary>
     [Test]
     public void Option_None_TapNone_should_invoke_action_once()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        _none.TapNone(() => count++);
+        none.TapNone(() => count++);
 
         Assert.That(count, Is.EqualTo(1));
     }
@@ -31,9 +22,10 @@ public class OptionTapNoneTests
     [Test]
     public void Option_Some_TapNone_should_not_invoke_action()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        _some.TapNone(() => count++);
+        some.TapNone(() => count++);
 
         Assert.That(count, Is.EqualTo(0));
     }
@@ -44,9 +36,10 @@ public class OptionTapNoneTests
     [Test]
     public void Option_None_TapNone_should_return_original_option()
     {
-        var result = _none.TapNone(() => { });
+        var none = Option<int>.None;
+        var result = none.TapNone(() => { });
 
-        Assert.That(result, Is.EqualTo(_none));
+        Assert.That(result, Is.EqualTo(none));
     }
 
     /// <summary>
@@ -55,9 +48,10 @@ public class OptionTapNoneTests
     [Test]
     public void Option_Some_TapNone_should_return_original_option()
     {
-        var result = _some.TapNone(() => { });
+        var some = Option<int>.Some(5);
+        var result = some.TapNone(() => { });
 
-        Assert.That(result, Is.EqualTo(_some));
+        Assert.That(result, Is.EqualTo(some));
     }
 
     /// <summary>
@@ -66,9 +60,10 @@ public class OptionTapNoneTests
     [Test]
     public void Option_TapNone_null_action_should_throw()
     {
+        var none = Option<int>.None;
         Action? action = null;
 
-        Assert.Throws<ArgumentNullException>(() => _none.TapNone(action!));
+        Assert.Throws<ArgumentNullException>(() => none.TapNone(action!));
     }
 
     /// <summary>
@@ -77,9 +72,10 @@ public class OptionTapNoneTests
     [Test]
     public void Option_Some_TapNone_null_action_should_throw()
     {
+        var some = Option<int>.Some(5);
         Action? action = null;
 
-        Assert.Throws<ArgumentNullException>(() => _some.TapNone(action!));
+        Assert.Throws<ArgumentNullException>(() => some.TapNone(action!));
     }
 
     /// <summary>

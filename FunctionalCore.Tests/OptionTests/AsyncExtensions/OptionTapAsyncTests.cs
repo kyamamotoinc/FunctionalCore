@@ -4,25 +4,16 @@ namespace FunctionalCore.Tests.OptionTests.AsyncExtensions;
 
 public class OptionTapAsyncTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.TapAsync は onSome を1回だけ実行する
     /// </summary>
     [Test]
     public async Task Option_Some_TapAsync_should_invoke_action_once()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        await _some.AsTask().TapAsync(_ =>
+        await some.AsTask().TapAsync(_ =>
         {
             count++;
             return Task.CompletedTask;
@@ -37,9 +28,10 @@ public class OptionTapAsyncTests
     [Test]
     public async Task Option_Some_TapAsync_should_pass_value_to_action()
     {
+        var some = Option<int>.Some(5);
         int received = 0;
 
-        await _some.AsTask().TapAsync(value =>
+        await some.AsTask().TapAsync(value =>
         {
             received = value;
             return Task.CompletedTask;
@@ -54,9 +46,10 @@ public class OptionTapAsyncTests
     [Test]
     public async Task Option_None_TapAsync_should_not_invoke_action()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        var result = await _none.AsTask().TapAsync(_ =>
+        var result = await none.AsTask().TapAsync(_ =>
         {
             count++;
             return Task.CompletedTask;
@@ -75,9 +68,10 @@ public class OptionTapAsyncTests
     [Test]
     public async Task Option_Some_TapAsync_should_return_original_option()
     {
-        var result = await _some.AsTask().TapAsync(_ => Task.CompletedTask);
+        var some = Option<int>.Some(5);
+        var result = await some.AsTask().TapAsync(_ => Task.CompletedTask);
 
-        Assert.That(result, Is.EqualTo(_some));
+        Assert.That(result, Is.EqualTo(some));
     }
 
     /// <summary>
@@ -86,9 +80,10 @@ public class OptionTapAsyncTests
     [Test]
     public async Task Option_None_TapAsync_should_return_original_option()
     {
-        var result = await _none.AsTask().TapAsync(_ => Task.CompletedTask);
+        var none = Option<int>.None;
+        var result = await none.AsTask().TapAsync(_ => Task.CompletedTask);
 
-        Assert.That(result, Is.EqualTo(_none));
+        Assert.That(result, Is.EqualTo(none));
     }
 
     /// <summary>
@@ -97,10 +92,11 @@ public class OptionTapAsyncTests
     [Test]
     public void Option_TapAsync_null_action_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, Task>? onSome = null;
 
         Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _some.AsTask().TapAsync(onSome!));
+            await some.AsTask().TapAsync(onSome!));
     }
 
     /// <summary>
@@ -109,10 +105,11 @@ public class OptionTapAsyncTests
     [Test]
     public void Option_None_TapAsync_null_action_should_throw()
     {
+        var none = Option<int>.None;
         Func<int, Task>? onSome = null;
 
         Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _none.AsTask().TapAsync(onSome!));
+            await none.AsTask().TapAsync(onSome!));
     }
 
     /// <summary>
@@ -133,10 +130,11 @@ public class OptionTapAsyncTests
     [Test]
     public void Option_Some_TapAsync_action_returning_null_task_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, Task> onSome = _ => null!;
 
         Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _some.AsTask().TapAsync(onSome));
+            await some.AsTask().TapAsync(onSome));
     }
 
     /// <summary>
@@ -145,9 +143,10 @@ public class OptionTapAsyncTests
     [Test]
     public async Task Option_None_TapAsync_should_not_evaluate_null_task_action()
     {
+        var none = Option<int>.None;
         Func<int, Task> onSome = _ => null!;
 
-        var result = await _none.AsTask().TapAsync(onSome);
+        var result = await none.AsTask().TapAsync(onSome);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }

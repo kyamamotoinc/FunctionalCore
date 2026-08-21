@@ -4,27 +4,18 @@ namespace FunctionalCore.Tests.OptionTests.AsyncExtensions;
 
 public class OptionAsTaskTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.AsTask は元の Some を保持する完了済み Task を返す
     /// </summary>
     [Test]
     public async Task Option_Some_AsTask_should_return_original_option()
     {
-        var result = await _some.AsTask();
+        var some = Option<int>.Some(5);
+        var result = await some.AsTask();
 
         Assert.Multiple(() =>
         {
-            Assert.That(result, Is.EqualTo(_some));
+            Assert.That(result, Is.EqualTo(some));
             Assert.That(result.HasValue, Is.True);
             Assert.That(result.Value, Is.EqualTo(5));
         });
@@ -36,11 +27,12 @@ public class OptionAsTaskTests
     [Test]
     public async Task Option_None_AsTask_should_return_original_option()
     {
-        var result = await _none.AsTask();
+        var none = Option<int>.None;
+        var result = await none.AsTask();
 
         Assert.Multiple(() =>
         {
-            Assert.That(result, Is.EqualTo(_none));
+            Assert.That(result, Is.EqualTo(none));
             Assert.That(result.HasValue, Is.False);
         });
     }
@@ -51,7 +43,8 @@ public class OptionAsTaskTests
     [Test]
     public void Option_Some_AsTask_should_return_completed_task()
     {
-        var task = _some.AsTask();
+        var some = Option<int>.Some(5);
+        var task = some.AsTask();
 
         Assert.That(task.IsCompletedSuccessfully, Is.True);
     }
@@ -62,7 +55,8 @@ public class OptionAsTaskTests
     [Test]
     public void Option_None_AsTask_should_return_completed_task()
     {
-        var task = _none.AsTask();
+        var none = Option<int>.None;
+        var task = none.AsTask();
 
         Assert.That(task.IsCompletedSuccessfully, Is.True);
     }

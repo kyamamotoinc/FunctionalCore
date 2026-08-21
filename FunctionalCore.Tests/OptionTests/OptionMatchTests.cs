@@ -2,23 +2,14 @@
 
 public class OptionMatchTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.Match は Some 側の関数を実行し、その結果を返す
     /// </summary>
     [Test]
     public void Option_Some_Match_should_return_some_func_result()
     {
-        var result = _some.Match(value => value + 1, () => -1);
+        var some = Option<int>.Some(5);
+        var result = some.Match(value => value + 1, () => -1);
 
         Assert.That(result, Is.EqualTo(6));
     }
@@ -29,9 +20,10 @@ public class OptionMatchTests
     [Test]
     public void Option_Some_Match_should_invoke_some_func_once()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        _some.Match(value =>
+        some.Match(value =>
         {
             count++;
             return value + 1;
@@ -46,9 +38,10 @@ public class OptionMatchTests
     [Test]
     public void Option_Some_Match_should_not_invoke_none_func()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        _some.Match(
+        some.Match(
             value => value + 1,
             () =>
             {
@@ -65,7 +58,8 @@ public class OptionMatchTests
     [Test]
     public void Option_None_Match_should_return_none_func_result()
     {
-        var result = _none.Match(value => value + 1, () => -1);
+        var none = Option<int>.None;
+        var result = none.Match(value => value + 1, () => -1);
 
         Assert.That(result, Is.EqualTo(-1));
     }
@@ -76,9 +70,10 @@ public class OptionMatchTests
     [Test]
     public void Option_None_Match_should_invoke_none_func_once()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        _none.Match(
+        none.Match(
             value => value + 1,
             () =>
             {
@@ -95,9 +90,10 @@ public class OptionMatchTests
     [Test]
     public void Option_None_Match_should_not_invoke_some_func()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        _none.Match(value =>
+        none.Match(value =>
         {
             count++;
             return value + 1;
@@ -112,10 +108,11 @@ public class OptionMatchTests
     [Test]
     public void Option_Match_null_some_func_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, int>? onSome = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _some.Match(onSome!, () => -1));
+            some.Match(onSome!, () => -1));
     }
 
     /// <summary>
@@ -124,10 +121,11 @@ public class OptionMatchTests
     [Test]
     public void Option_Match_null_none_func_should_throw()
     {
+        var none = Option<int>.None;
         Func<int>? onNone = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _none.Match(value => value + 1, onNone!));
+            none.Match(value => value + 1, onNone!));
     }
 
     /// <summary>
@@ -136,10 +134,11 @@ public class OptionMatchTests
     [Test]
     public void Option_Some_Match_null_unused_none_func_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int>? onNone = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _some.Match(value => value + 1, onNone!));
+            some.Match(value => value + 1, onNone!));
     }
 
     /// <summary>
@@ -148,10 +147,11 @@ public class OptionMatchTests
     [Test]
     public void Option_None_Match_null_unused_some_func_should_throw()
     {
+        var none = Option<int>.None;
         Func<int, int>? onSome = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _none.Match(onSome!, () => -1));
+            none.Match(onSome!, () => -1));
     }
 
     /// <summary>
@@ -160,8 +160,9 @@ public class OptionMatchTests
     [Test]
     public void Option_Some_Match_some_func_returning_null_should_throw()
     {
+        var some = Option<int>.Some(5);
         Assert.Throws<InvalidOperationException>(() =>
-            _some.Match(_ => (string)null!, () => "fallback"));
+            some.Match(_ => (string)null!, () => "fallback"));
     }
 
     /// <summary>
@@ -170,8 +171,9 @@ public class OptionMatchTests
     [Test]
     public void Option_None_Match_none_func_returning_null_should_throw()
     {
+        var none = Option<int>.None;
         Assert.Throws<InvalidOperationException>(() =>
-            _none.Match(_ => "value", () => (string)null!));
+            none.Match(_ => "value", () => (string)null!));
     }
 
     /// <summary>
@@ -180,7 +182,8 @@ public class OptionMatchTests
     [Test]
     public void Option_Some_Match_should_not_evaluate_null_returning_none_func()
     {
-        var result = _some.Match(value => $"value:{value}", () => (string)null!);
+        var some = Option<int>.Some(5);
+        var result = some.Match(value => $"value:{value}", () => (string)null!);
 
         Assert.That(result, Is.EqualTo("value:5"));
     }
@@ -191,7 +194,8 @@ public class OptionMatchTests
     [Test]
     public void Option_None_Match_should_not_evaluate_null_returning_some_func()
     {
-        var result = _none.Match(_ => (string)null!, () => "none");
+        var none = Option<int>.None;
+        var result = none.Match(_ => (string)null!, () => "none");
 
         Assert.That(result, Is.EqualTo("none"));
     }

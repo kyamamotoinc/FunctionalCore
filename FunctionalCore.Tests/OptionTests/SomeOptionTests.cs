@@ -2,21 +2,14 @@
 
 public class SomeOptionTests
 {
-    private Option<int> _some;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-    }
-
     /// <summary>
     /// 1. Some は内部の Value をそのまま返す
     /// </summary>
     [Test]
     public void Option_Some_should_return_inner_value()
     {
-        Assert.That(_some.Value, Is.EqualTo(5));
+        var some = Option<int>.Some(5);
+        Assert.That(some.Value, Is.EqualTo(5));
     }
 
     /// <summary>
@@ -25,7 +18,8 @@ public class SomeOptionTests
     [Test]
     public void Option_Some_should_have_value()
     {
-        Assert.That(_some.HasValue, Is.True);
+        var some = Option<int>.Some(5);
+        Assert.That(some.HasValue, Is.True);
     }
 
     /// <summary>
@@ -71,13 +65,14 @@ public class SomeOptionTests
     [Test]
     public void Some_with_same_value_should_be_equal()
     {
+        var some = Option<int>.Some(5);
         var other = Option<int>.Some(5);
 
         Assert.Multiple(() =>
         {
-            Assert.That(_some == other, Is.True);
-            Assert.That(_some.Equals(other), Is.True);
-            Assert.That(_some.GetHashCode(), Is.EqualTo(other.GetHashCode()));
+            Assert.That(some == other, Is.True);
+            Assert.That(some.Equals(other), Is.True);
+            Assert.That(some.GetHashCode(), Is.EqualTo(other.GetHashCode()));
         });
     }
 
@@ -87,12 +82,13 @@ public class SomeOptionTests
     [Test]
     public void Some_with_different_value_should_not_be_equal()
     {
+        var some = Option<int>.Some(5);
         var other = Option<int>.Some(10);
 
         Assert.Multiple(() =>
         {
-            Assert.That(_some != other, Is.True);
-            Assert.That(_some.Equals(other), Is.False);
+            Assert.That(some != other, Is.True);
+            Assert.That(some.Equals(other), Is.False);
         });
     }
 
@@ -102,13 +98,14 @@ public class SomeOptionTests
     [Test]
     public void Some_and_None_should_not_be_equal()
     {
+        var some = Option<int>.Some(5);
         var none = Option<int>.None;
 
         Assert.Multiple(() =>
         {
-            Assert.That(_some == none, Is.False);
-            Assert.That(_some != none, Is.True);
-            Assert.That(_some.Equals(none), Is.False);
+            Assert.That(some == none, Is.False);
+            Assert.That(some != none, Is.True);
+            Assert.That(some.Equals(none), Is.False);
         });
     }
 
@@ -118,6 +115,7 @@ public class SomeOptionTests
     [Test]
     public void Some_ToString_should_return_formatted_value()
     {
-        Assert.That(_some.ToString(), Is.EqualTo("Some(5)"));
+        var some = Option<int>.Some(5);
+        Assert.That(some.ToString(), Is.EqualTo("Some(5)"));
     }
 }

@@ -4,23 +4,14 @@ namespace FunctionalCore.Tests.OptionTests.Linq;
 
 public class OptionSelectTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.Select は selector を実行し、変換後の値を持つ Some を返す
     /// </summary>
     [Test]
     public void Option_Some_Select_should_return_selector_result()
     {
-        var result = _some.Select(x => x + 1);
+        var some = Option<int>.Some(5);
+        var result = some.Select(x => x + 1);
 
         Assert.Multiple(() =>
         {
@@ -35,7 +26,8 @@ public class OptionSelectTests
     [Test]
     public void Option_Some_Select_should_change_value_type()
     {
-        var result = _some.Select(x => $"value:{x}");
+        var some = Option<int>.Some(5);
+        var result = some.Select(x => $"value:{x}");
 
         Assert.Multiple(() =>
         {
@@ -50,9 +42,10 @@ public class OptionSelectTests
     [Test]
     public void Option_Some_Select_should_invoke_selector_once()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        _some.Select(x =>
+        some.Select(x =>
         {
             count++;
             return x + 1;
@@ -67,9 +60,10 @@ public class OptionSelectTests
     [Test]
     public void Option_None_Select_should_not_invoke_selector()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        var result = _none.Select(x =>
+        var result = none.Select(x =>
         {
             count++;
             return x + 1;
@@ -88,7 +82,8 @@ public class OptionSelectTests
     [Test]
     public void Option_None_Select_should_return_none()
     {
-        var result = _none.Select(x => x + 1);
+        var none = Option<int>.None;
+        var result = none.Select(x => x + 1);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -99,9 +94,10 @@ public class OptionSelectTests
     [Test]
     public void Option_Select_null_selector_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, string>? selector = null;
 
-        Assert.Throws<ArgumentNullException>(() => _some.Select(selector!));
+        Assert.Throws<ArgumentNullException>(() => some.Select(selector!));
     }
 
     /// <summary>
@@ -110,9 +106,10 @@ public class OptionSelectTests
     [Test]
     public void Option_None_Select_null_selector_should_throw()
     {
+        var none = Option<int>.None;
         Func<int, string>? selector = null;
 
-        Assert.Throws<ArgumentNullException>(() => _none.Select(selector!));
+        Assert.Throws<ArgumentNullException>(() => none.Select(selector!));
     }
 
     /// <summary>
@@ -121,7 +118,8 @@ public class OptionSelectTests
     [Test]
     public void Option_Some_Select_selector_returning_null_should_return_none()
     {
-        var result = _some.Select(_ => (string)null!);
+        var some = Option<int>.Some(5);
+        var result = some.Select(_ => (string)null!);
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
@@ -132,7 +130,8 @@ public class OptionSelectTests
     [Test]
     public void Option_None_Select_should_not_evaluate_null_returning_selector()
     {
-        var result = _none.Select(_ => (string)null!);
+        var none = Option<int>.None;
+        var result = none.Select(_ => (string)null!);
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
@@ -143,8 +142,9 @@ public class OptionSelectTests
     [Test]
     public void Option_Select_should_support_query_syntax()
     {
+        var some = Option<int>.Some(5);
         var result =
-            from x in _some
+            from x in some
             select x + 1;
 
         Assert.Multiple(() =>
@@ -160,8 +160,9 @@ public class OptionSelectTests
     [Test]
     public void Option_None_Select_query_syntax_should_return_none()
     {
+        var none = Option<int>.None;
         var result =
-            from x in _none
+            from x in none
             select x + 1;
 
         Assert.That(result, Is.EqualTo(Option<int>.None));

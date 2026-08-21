@@ -2,23 +2,14 @@
 
 public class OptionMapTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.Map は selector を実行し、変換後の値を持つ Some を返す
     /// </summary>
     [Test]
     public void Option_Some_Map_should_return_selector_result()
     {
-        var result = _some.Map(x => x + 1);
+        var some = Option<int>.Some(5);
+        var result = some.Map(x => x + 1);
 
         Assert.Multiple(() =>
         {
@@ -33,7 +24,8 @@ public class OptionMapTests
     [Test]
     public void Option_Some_Map_should_change_value_type()
     {
-        var result = _some.Map(x => $"value:{x}");
+        var some = Option<int>.Some(5);
+        var result = some.Map(x => $"value:{x}");
 
         Assert.Multiple(() =>
         {
@@ -48,9 +40,10 @@ public class OptionMapTests
     [Test]
     public void Option_Some_Map_should_invoke_selector_once()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        _some.Map(x =>
+        some.Map(x =>
         {
             count++;
             return x + 1;
@@ -65,9 +58,10 @@ public class OptionMapTests
     [Test]
     public void Option_None_Map_should_not_invoke_selector()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        var result = _none.Map(x =>
+        var result = none.Map(x =>
         {
             count++;
             return x + 1;
@@ -86,7 +80,8 @@ public class OptionMapTests
     [Test]
     public void Option_None_Map_should_return_none()
     {
-        var result = _none.Map(x => x + 1);
+        var none = Option<int>.None;
+        var result = none.Map(x => x + 1);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -97,9 +92,10 @@ public class OptionMapTests
     [Test]
     public void Option_Map_null_selector_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<int, string>? selector = null;
 
-        Assert.Throws<ArgumentNullException>(() => _some.Map(selector!));
+        Assert.Throws<ArgumentNullException>(() => some.Map(selector!));
     }
 
     /// <summary>
@@ -108,9 +104,10 @@ public class OptionMapTests
     [Test]
     public void Option_None_Map_null_selector_should_throw()
     {
+        var none = Option<int>.None;
         Func<int, string>? selector = null;
 
-        Assert.Throws<ArgumentNullException>(() => _none.Map(selector!));
+        Assert.Throws<ArgumentNullException>(() => none.Map(selector!));
     }
 
     /// <summary>
@@ -119,7 +116,8 @@ public class OptionMapTests
     [Test]
     public void Option_Some_Map_selector_returning_null_should_return_none()
     {
-        var result = _some.Map(_ => (string)null!);
+        var some = Option<int>.Some(5);
+        var result = some.Map(_ => (string)null!);
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
@@ -130,7 +128,8 @@ public class OptionMapTests
     [Test]
     public void Option_None_Map_should_not_evaluate_null_returning_selector()
     {
-        var result = _none.Map(_ => (string)null!);
+        var none = Option<int>.None;
+        var result = none.Map(_ => (string)null!);
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }

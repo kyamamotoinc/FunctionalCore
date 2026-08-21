@@ -4,25 +4,16 @@ namespace FunctionalCore.Tests.OptionTests.AsyncExtensions;
 
 public class OptionTapNoneAsyncTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. None.TapNoneAsync は onNone を1回だけ実行する
     /// </summary>
     [Test]
     public async Task Option_None_TapNoneAsync_should_invoke_action_once()
     {
+        var none = Option<int>.None;
         int count = 0;
 
-        await _none.AsTask().TapNoneAsync(() =>
+        await none.AsTask().TapNoneAsync(() =>
         {
             count++;
             return Task.CompletedTask;
@@ -37,9 +28,10 @@ public class OptionTapNoneAsyncTests
     [Test]
     public async Task Option_Some_TapNoneAsync_should_not_invoke_action()
     {
+        var some = Option<int>.Some(5);
         int count = 0;
 
-        var result = await _some.AsTask().TapNoneAsync(() =>
+        var result = await some.AsTask().TapNoneAsync(() =>
         {
             count++;
             return Task.CompletedTask;
@@ -48,7 +40,7 @@ public class OptionTapNoneAsyncTests
         Assert.Multiple(() =>
         {
             Assert.That(count, Is.EqualTo(0));
-            Assert.That(result, Is.EqualTo(_some));
+            Assert.That(result, Is.EqualTo(some));
         });
     }
 
@@ -58,9 +50,10 @@ public class OptionTapNoneAsyncTests
     [Test]
     public async Task Option_None_TapNoneAsync_should_return_original_option()
     {
-        var result = await _none.AsTask().TapNoneAsync(() => Task.CompletedTask);
+        var none = Option<int>.None;
+        var result = await none.AsTask().TapNoneAsync(() => Task.CompletedTask);
 
-        Assert.That(result, Is.EqualTo(_none));
+        Assert.That(result, Is.EqualTo(none));
     }
 
     /// <summary>
@@ -69,9 +62,10 @@ public class OptionTapNoneAsyncTests
     [Test]
     public async Task Option_Some_TapNoneAsync_should_return_original_option()
     {
-        var result = await _some.AsTask().TapNoneAsync(() => Task.CompletedTask);
+        var some = Option<int>.Some(5);
+        var result = await some.AsTask().TapNoneAsync(() => Task.CompletedTask);
 
-        Assert.That(result, Is.EqualTo(_some));
+        Assert.That(result, Is.EqualTo(some));
     }
 
     /// <summary>
@@ -80,10 +74,11 @@ public class OptionTapNoneAsyncTests
     [Test]
     public void Option_TapNoneAsync_null_action_should_throw()
     {
+        var none = Option<int>.None;
         Func<Task>? onNone = null;
 
         Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _none.AsTask().TapNoneAsync(onNone!));
+            await none.AsTask().TapNoneAsync(onNone!));
     }
 
     /// <summary>
@@ -92,10 +87,11 @@ public class OptionTapNoneAsyncTests
     [Test]
     public void Option_Some_TapNoneAsync_null_action_should_throw()
     {
+        var some = Option<int>.Some(5);
         Func<Task>? onNone = null;
 
         Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _some.AsTask().TapNoneAsync(onNone!));
+            await some.AsTask().TapNoneAsync(onNone!));
     }
 
     /// <summary>
@@ -116,10 +112,11 @@ public class OptionTapNoneAsyncTests
     [Test]
     public void Option_None_TapNoneAsync_action_returning_null_task_should_throw()
     {
+        var none = Option<int>.None;
         Func<Task> onNone = () => null!;
 
         Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _none.AsTask().TapNoneAsync(onNone));
+            await none.AsTask().TapNoneAsync(onNone));
     }
 
     /// <summary>
@@ -128,11 +125,12 @@ public class OptionTapNoneAsyncTests
     [Test]
     public async Task Option_Some_TapNoneAsync_should_not_evaluate_null_task_action()
     {
+        var some = Option<int>.Some(5);
         Func<Task> onNone = () => null!;
 
-        var result = await _some.AsTask().TapNoneAsync(onNone);
+        var result = await some.AsTask().TapNoneAsync(onNone);
 
-        Assert.That(result, Is.EqualTo(_some));
+        Assert.That(result, Is.EqualTo(some));
     }
 
     /// <summary>

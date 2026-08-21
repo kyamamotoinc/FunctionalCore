@@ -4,25 +4,16 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 
 public class OptionCombineTests
 {
-    private Option<int> _some3;
-    private Option<int> _some5;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some3 = Option<int>.Some(3);
-        _some5 = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. 両方が Some の場合は selector を実行し、組み合わせた値を持つ Some を返す
     /// </summary>
     [Test]
     public void Option_Some_Some_Combine_should_return_combined_value()
     {
-        var result = _some3.Combine(_some5, (x, y) => x + y);
+        var some3 = Option<int>.Some(3);
+        var some5 = Option<int>.Some(5);
+
+        var result = some3.Combine(some5, (x, y) => x + y);
 
         Assert.Multiple(() =>
         {
@@ -37,7 +28,10 @@ public class OptionCombineTests
     [Test]
     public void Option_Some_Some_Combine_should_change_value_type()
     {
-        var result = _some3.Combine(_some5, (x, y) => $"{x}:{y}");
+        var some3 = Option<int>.Some(3);
+        var some5 = Option<int>.Some(5);
+
+        var result = some3.Combine(some5, (x, y) => $"{x}:{y}");
 
         Assert.Multiple(() =>
         {
@@ -52,9 +46,12 @@ public class OptionCombineTests
     [Test]
     public void Option_Some_Some_Combine_should_invoke_selector_once()
     {
+        var some3 = Option<int>.Some(3);
+        var some5 = Option<int>.Some(5);
+
         int count = 0;
 
-        _some3.Combine(_some5, (x, y) =>
+        some3.Combine(some5, (x, y) =>
         {
             count++;
             return x + y;
@@ -69,7 +66,10 @@ public class OptionCombineTests
     [Test]
     public void Option_None_Some_Combine_should_return_none()
     {
-        var result = _none.Combine(_some5, (x, y) => x + y);
+        var none = Option<int>.None;
+        var some5 = Option<int>.Some(5);
+
+        var result = none.Combine(some5, (x, y) => x + y);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -80,7 +80,10 @@ public class OptionCombineTests
     [Test]
     public void Option_Some_None_Combine_should_return_none()
     {
-        var result = _some3.Combine(_none, (x, y) => x + y);
+        var some3 = Option<int>.Some(3);
+        var none = Option<int>.None;
+
+        var result = some3.Combine(none, (x, y) => x + y);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -91,7 +94,8 @@ public class OptionCombineTests
     [Test]
     public void Option_None_None_Combine_should_return_none()
     {
-        var result = _none.Combine(_none, (x, y) => x + y);
+        var none = Option<int>.None;
+        var result = none.Combine(none, (x, y) => x + y);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -102,9 +106,11 @@ public class OptionCombineTests
     [Test]
     public void Option_None_Some_Combine_should_not_invoke_selector()
     {
+        var none = Option<int>.None;
+        var some5 = Option<int>.Some(5);
         int count = 0;
 
-        _none.Combine(_some5, (x, y) =>
+        none.Combine(some5, (x, y) =>
         {
             count++;
             return x + y;
@@ -119,9 +125,11 @@ public class OptionCombineTests
     [Test]
     public void Option_Some_None_Combine_should_not_invoke_selector()
     {
+        var some3 = Option<int>.Some(3);
+        var none = Option<int>.None;
         int count = 0;
 
-        _some3.Combine(_none, (x, y) =>
+        some3.Combine(none, (x, y) =>
         {
             count++;
             return x + y;
@@ -136,10 +144,13 @@ public class OptionCombineTests
     [Test]
     public void Option_Combine_null_selector_should_throw()
     {
+        var some3 = Option<int>.Some(3);
+        var some5 = Option<int>.Some(5);
+
         Func<int, int, int>? selector = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _some3.Combine(_some5, selector!));
+            some3.Combine(some5, selector!));
     }
 
     /// <summary>
@@ -148,7 +159,10 @@ public class OptionCombineTests
     [Test]
     public void Option_Some_Some_Combine_selector_returning_null_should_return_none()
     {
-        var result = _some3.Combine(_some5, (_, _) => (string)null!);
+        var some3 = Option<int>.Some(3);
+        var some5 = Option<int>.Some(5);
+
+        var result = some3.Combine(some5, (_, _) => (string)null!);
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
@@ -159,7 +173,11 @@ public class OptionCombineTests
     [Test]
     public void Option_None_Some_Combine_should_not_evaluate_null_returning_selector()
     {
-        var result = _none.Combine(_some5, (_, _) => (string)null!);
+
+        var none = Option<int>.None;
+        var some5 = Option<int>.Some(5);
+
+        var result = none.Combine(some5, (_, _) => (string)null!);
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
@@ -170,7 +188,10 @@ public class OptionCombineTests
     [Test]
     public void Option_Some_None_Combine_should_not_evaluate_null_returning_selector()
     {
-        var result = _some3.Combine(_none, (_, _) => (string)null!);
+        var some3 = Option<int>.Some(3);
+        var none = Option<int>.None;
+
+        var result = some3.Combine(none, (_, _) => (string)null!);
 
         Assert.That(result, Is.EqualTo(Option<string>.None));
     }
@@ -181,9 +202,10 @@ public class OptionCombineTests
     [Test]
     public void Option_Default_Some_Combine_should_return_none()
     {
-        var option = default(Option<int>);
+        var def = default(Option<int>);
+        var some5 = Option<int>.Some(5);
 
-        var result = option.Combine(_some5, (x, y) => x + y);
+        var result = def.Combine(some5, (x, y) => x + y);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -194,9 +216,10 @@ public class OptionCombineTests
     [Test]
     public void Option_Some_Default_Combine_should_return_none()
     {
-        var option = default(Option<int>);
+        var some3 = Option<int>.Some(3);
+        var def = default(Option<int>);
 
-        var result = _some3.Combine(option, (x, y) => x + y);
+        var result = some3.Combine(def, (x, y) => x + y);
 
         Assert.That(result, Is.EqualTo(Option<int>.None));
     }
@@ -207,9 +230,12 @@ public class OptionCombineTests
     [Test]
     public void Option_None_Combine_null_selector_should_throw()
     {
+        var none = Option<int>.None;
+        var some5 = Option<int>.Some(5);
+
         Func<int, int, int>? selector = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _none.Combine(_some5, selector!));
+            none.Combine(some5, selector!));
     }
 }

@@ -4,26 +4,17 @@ namespace FunctionalCore.Tests.OptionTests.Extensions;
 
 public class OptionTapBothTests
 {
-    private Option<int> _some;
-    private Option<int> _none;
-
-    [SetUp]
-    public void Setup()
-    {
-        _some = Option<int>.Some(5);
-        _none = Option<int>.None;
-    }
-
     /// <summary>
     /// 1. Some.TapBoth は Some 側の action だけを実行する
     /// </summary>
     [Test]
     public void Option_Some_TapBoth_should_invoke_only_some_action()
     {
+        var some = Option<int>.Some(5);
         int someCount = 0;
         int noneCount = 0;
 
-        _some.TapBoth(_ => someCount++, () => noneCount++);
+        some.TapBoth(_ => someCount++, () => noneCount++);
 
         Assert.Multiple(() =>
         {
@@ -38,10 +29,11 @@ public class OptionTapBothTests
     [Test]
     public void Option_None_TapBoth_should_invoke_only_none_action()
     {
+        var none = Option<int>.None;
         int someCount = 0;
         int noneCount = 0;
 
-        _none.TapBoth(_ => someCount++, () => noneCount++);
+        none.TapBoth(_ => someCount++, () => noneCount++);
 
         Assert.Multiple(() =>
         {
@@ -56,9 +48,10 @@ public class OptionTapBothTests
     [Test]
     public void Option_Some_TapBoth_should_pass_value_to_some_action()
     {
+        var some = Option<int>.Some(5);
         int received = 0;
 
-        _some.TapBoth(value => received = value, () => { });
+        some.TapBoth(value => received = value, () => { });
 
         Assert.That(received, Is.EqualTo(5));
     }
@@ -69,9 +62,10 @@ public class OptionTapBothTests
     [Test]
     public void Option_Some_TapBoth_should_return_original_option()
     {
-        var result = _some.TapBoth(_ => { }, () => { });
+        var some = Option<int>.Some(5);
+        var result = some.TapBoth(_ => { }, () => { });
 
-        Assert.That(result, Is.EqualTo(_some));
+        Assert.That(result, Is.EqualTo(some));
     }
 
     /// <summary>
@@ -80,9 +74,10 @@ public class OptionTapBothTests
     [Test]
     public void Option_None_TapBoth_should_return_original_option()
     {
-        var result = _none.TapBoth(_ => { }, () => { });
+        var none = Option<int>.None;
+        var result = none.TapBoth(_ => { }, () => { });
 
-        Assert.That(result, Is.EqualTo(_none));
+        Assert.That(result, Is.EqualTo(none));
     }
 
     /// <summary>
@@ -91,10 +86,11 @@ public class OptionTapBothTests
     [Test]
     public void Option_TapBoth_null_some_action_should_throw()
     {
+        var some = Option<int>.Some(5);
         Action<int>? onSome = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _some.TapBoth(onSome!, () => { }));
+            some.TapBoth(onSome!, () => { }));
     }
 
     /// <summary>
@@ -103,10 +99,11 @@ public class OptionTapBothTests
     [Test]
     public void Option_TapBoth_null_none_action_should_throw()
     {
+        var none = Option<int>.None;
         Action? onNone = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _none.TapBoth(_ => { }, onNone!));
+            none.TapBoth(_ => { }, onNone!));
     }
 
     /// <summary>
@@ -115,10 +112,11 @@ public class OptionTapBothTests
     [Test]
     public void Option_Some_TapBoth_null_unused_none_action_should_throw()
     {
+        var some = Option<int>.Some(5);
         Action? onNone = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _some.TapBoth(_ => { }, onNone!));
+            some.TapBoth(_ => { }, onNone!));
     }
 
     /// <summary>
@@ -127,10 +125,11 @@ public class OptionTapBothTests
     [Test]
     public void Option_None_TapBoth_null_unused_some_action_should_throw()
     {
+        var none = Option<int>.None;
         Action<int>? onSome = null;
 
         Assert.Throws<ArgumentNullException>(() =>
-            _none.TapBoth(onSome!, () => { }));
+            none.TapBoth(onSome!, () => { }));
     }
 
     /// <summary>
