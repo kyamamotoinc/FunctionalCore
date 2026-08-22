@@ -13,7 +13,7 @@ public static class Sample_20_BindAsync
     {
         Console.WriteLine("=== Option Sample 20 : BindAsync ===");
 
-        var result = await GetFirstCharacter("123")
+        var result = await GetFirstCharacter("Hello")
             .AsTask()
             .BindAsync(ParseDigitAsync);
 

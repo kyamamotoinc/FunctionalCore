@@ -15,7 +15,7 @@ public static class Sample_17_Where
         Console.WriteLine("=== Option Sample 17 : Where ===");
 
         var result =
-            from c in GetFirstCharacter("Hello")
+            from c in GetFirstCharacter("123")
             where char.IsLetter(c)
             select c;
 

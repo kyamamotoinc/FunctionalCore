@@ -15,7 +15,7 @@ public static class Sample_04_Bind
         var some = GetFirstCharacter("123")
             .Bind(ParseDigit);
 
-        var none = GetFirstCharacter("")
+        var none = GetFirstCharacter("Hello")
             .Bind(ParseDigit);
 
         some.Match(

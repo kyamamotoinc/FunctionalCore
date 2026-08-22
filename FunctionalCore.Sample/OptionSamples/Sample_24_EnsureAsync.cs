@@ -13,7 +13,7 @@ public static class Sample_24_EnsureAsync
     {
         Console.WriteLine("=== Option Sample 24 : EnsureAsync ===");
 
-        var result = await GetFirstCharacter("Hello")
+        var result = await GetFirstCharacter("123")
             .AsTask()
             .EnsureAsync(IsLetterAsync);
 
