@@ -10,13 +10,11 @@
         {
             Console.WriteLine("=== Sample 01 : Basic Result ===");
 
-            var result = Divide(10, 0);
+            var ok = Divide(10, 2);
+            var fail = Divide(10, 0);
 
-            result.Match(
-                value => Console.WriteLine($"結果: {value}"),
-                error => Console.WriteLine($"エラー: {error}"));
-
-            Console.WriteLine();
+            Console.WriteLine(ok);
+            Console.WriteLine(fail);
         }
 
         private static Result<string, int> Divide(int x, int y)
