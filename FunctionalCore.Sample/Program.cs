@@ -27,7 +27,7 @@ public class Program
         ResultSamples.Sample_09_Sequence.Run();
         ResultSamples.Sample_10_Traverse.Run();
 
-        // 回復・変換
+        // 回復・代替
         ResultSamples.Sample_11_Recover.Run();
         ResultSamples.Sample_12_RecoverWith.Run();
         ResultSamples.Sample_13_Or.Run();
