@@ -13,7 +13,7 @@ public static class Sample_12_RecoverWith
         Console.WriteLine("=== Result Sample 12 : RecoverWith ===");
 
         var result = Divide(10, 0)
-            .RecoverWith(error => Divide(10, 2));
+            .RecoverWith(_ => Divide(10, 2));
 
         result.Match(
             value => Console.WriteLine($"結果: {value}"),
