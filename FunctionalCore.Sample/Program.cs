@@ -13,7 +13,7 @@ public class Program
 
     static async Task ResultSampleRun()
     {
-        // Result 基本
+        // 基本
         ResultSamples.Sample_01_BasicResult.Run();
         ResultSamples.Sample_02_Match.Run();
         ResultSamples.Sample_03_Map.Run();
@@ -22,7 +22,7 @@ public class Program
         ResultSamples.Sample_06_Tap.Run();
         ResultSamples.Sample_07_TapError.Run();
 
-        // Resultの合成
+        // 合成
         ResultSamples.Sample_08_Combine.Run();
         ResultSamples.Sample_09_Sequence.Run();
         ResultSamples.Sample_10_Traverse.Run();
@@ -70,10 +70,14 @@ public class Program
         OptionSamples.Sample_09_Sequence.Run();
         OptionSamples.Sample_10_Traverse.Run();
 
-        // 回復・変換
+        // 代替
         OptionSamples.Sample_11_Or.Run();
+
+        // 値の取り出し
         OptionSamples.Sample_12_GetValueOr.Run();
         OptionSamples.Sample_13_ValueOrThrow.Run();
+
+        // 型変換
         OptionSamples.Sample_14_ToResult.Run();
 
         // LINQ
