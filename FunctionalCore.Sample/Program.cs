@@ -31,6 +31,8 @@ public class Program
         ResultSamples.Sample_11_Recover.Run();
         ResultSamples.Sample_12_RecoverWith.Run();
         ResultSamples.Sample_13_Or.Run();
+
+        // エラー変換
         ResultSamples.Sample_14_MapError.Run();
 
         // 値の取り出し
