@@ -10,7 +10,7 @@ public static class Sample_10_Traverse
 {
     public static void Run()
     {
-        Console.WriteLine("=== Sample 10 : Traverse ===");
+        Console.WriteLine("=== Result Sample 10 : Traverse ===");
 
         var values = new[] { 10, 20, 30 };
 

@@ -10,7 +10,7 @@ public static class Sample_09_Sequence
 {
     public static void Run()
     {
-        Console.WriteLine("=== Sample 09 : Sequence ===");
+        Console.WriteLine("=== Result Sample 09 : Sequence ===");
 
         var results = new[]
         {

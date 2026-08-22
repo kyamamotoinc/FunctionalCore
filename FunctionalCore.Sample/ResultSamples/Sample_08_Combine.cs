@@ -10,7 +10,7 @@ public static class Sample_08_Combine
 {
     public static void Run()
     {
-        Console.WriteLine("=== Sample 08 : Combine ===");
+        Console.WriteLine("=== Result Sample 08 : Combine ===");
 
         var width = CreatePositiveNumber(10);
         var height = CreatePositiveNumber(5);

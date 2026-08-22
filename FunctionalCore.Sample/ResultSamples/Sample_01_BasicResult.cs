@@ -8,7 +8,7 @@
     {
         public static void Run()
         {
-            Console.WriteLine("=== Sample 01 : Basic Result ===");
+            Console.WriteLine("=== Result Sample 01 : Basic Result ===");
 
             var ok = Divide(10, 2);
             var fail = Divide(10, 0);

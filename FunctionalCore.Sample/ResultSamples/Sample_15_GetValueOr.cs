@@ -10,7 +10,7 @@ public static class Sample_15_GetValueOr
 {
     public static void Run()
     {
-        Console.WriteLine("=== Sample 15 : GetValueOr ===");
+        Console.WriteLine("=== Result Sample 15 : GetValueOr ===");
 
         var successValue = Divide(10, 2)
             .GetValueOr(0);

@@ -8,7 +8,7 @@ public static class Sample_07_TapError
 {
     public static void Run()
     {
-        Console.WriteLine("=== Sample 07 : TapError ===");
+        Console.WriteLine("=== Result Sample 07 : TapError ===");
 
         var result = Divide(10, 0)
             .TapError(error => Console.WriteLine($"エラーを記録: {error}"));

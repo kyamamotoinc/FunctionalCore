@@ -10,7 +10,7 @@ public static class Sample_17_ToOption
 {
     public static void Run()
     {
-        Console.WriteLine("=== Sample 17 : ToOption ===");
+        Console.WriteLine("=== Result Sample 17 : ToOption ===");
 
         var success = Divide(10, 2)
             .ToOption();

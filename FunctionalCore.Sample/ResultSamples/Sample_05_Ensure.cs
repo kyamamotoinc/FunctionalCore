@@ -8,9 +8,9 @@
     {
         public static void Run()
         {
-            Console.WriteLine("=== Sample 04 : Ensure ===");
+            Console.WriteLine("=== Result Sample 05 : Ensure ===");
 
-            var result = Divide(10, 2)
+            var result = Divide(4, 2)
                 .Ensure(x => x >= 3, x => $"結果 {x} は3未満です。");
 
             result.Match(

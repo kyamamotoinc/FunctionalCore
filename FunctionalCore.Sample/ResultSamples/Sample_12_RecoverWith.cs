@@ -10,14 +10,10 @@ public static class Sample_12_RecoverWith
 {
     public static void Run()
     {
-        Console.WriteLine("=== Sample 12 : RecoverWith ===");
+        Console.WriteLine("=== Result Sample 12 : RecoverWith ===");
 
         var result = Divide(10, 0)
-            .RecoverWith(error =>
-            {
-                Console.WriteLine($"回復処理: {error}");
-                return Divide(10, 2);
-            });
+            .RecoverWith(error => Divide(10, 2));
 
         result.Match(
             value => Console.WriteLine($"結果: {value}"),

@@ -10,7 +10,7 @@ public static class Sample_16_ValueOrThrow
 {
     public static void Run()
     {
-        Console.WriteLine("=== Sample 16 : ValueOrThrow ===");
+        Console.WriteLine("=== Result Sample 16 : ValueOrThrow ===");
 
         try
         {

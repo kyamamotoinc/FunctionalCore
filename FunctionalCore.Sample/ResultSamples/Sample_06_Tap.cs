@@ -13,7 +13,6 @@
             var result = Divide(10, 2)
                 .Tap(value => Console.WriteLine($"成功値を確認: {value}"));
 
-
             result.Match(
                 value => Console.WriteLine($"最終結果: {value}"),
                 error => Console.WriteLine($"最終エラー: {error}"));

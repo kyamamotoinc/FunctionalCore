@@ -8,7 +8,7 @@
     {
         public static void Run()
         {
-            Console.WriteLine("=== Sample 02 : Map ===");
+            Console.WriteLine("=== Result Sample 03 : Map ===");
 
             var result = Divide(10, 2)
                 .Map(x => x * 2);

@@ -8,7 +8,7 @@
     {
         public static void Run()
         {
-            Console.WriteLine("=== Sample 02 : Match ===");
+            Console.WriteLine("=== Result Sample 02 : Match ===");
 
             var success = Divide(10, 2);
             var failure = Divide(10, 0);

@@ -8,7 +8,7 @@
     {
         public static void Run()
         {
-            Console.WriteLine("=== Sample 03 : Bind ===");
+            Console.WriteLine("=== Result Sample 04 : Bind ===");
 
             var result = ParseInt("10")
                 .Bind(x => Divide(x, 2));

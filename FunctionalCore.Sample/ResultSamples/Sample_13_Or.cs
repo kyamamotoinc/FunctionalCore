@@ -10,7 +10,7 @@ public static class Sample_13_Or
 {
     public static void Run()
     {
-        Console.WriteLine("=== Sample 13 : Or ===");
+        Console.WriteLine("=== Result Sample 13 : Or ===");
 
         var result = Divide(10, 0)
             .Or(Divide(10, 2));

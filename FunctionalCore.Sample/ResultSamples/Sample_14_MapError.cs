@@ -8,7 +8,7 @@ public static class Sample_14_MapError
 {
     public static void Run()
     {
-        Console.WriteLine("=== Sample 13 : MapError ===");
+        Console.WriteLine("=== Result Sample 14 : MapError ===");
 
         var result = Divide(10, 0)
             .MapError(error => $"計算エラー: {error}");
