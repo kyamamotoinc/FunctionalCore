@@ -201,6 +201,60 @@ public static class OptionAsyncExtensions
     }
 
     /// <summary>
+    /// Ensures that the value contained in an Option satisfies an asynchronous predicate.
+    /// <para>Option が保持する値が非同期の条件を満たすことを保証する。</para>
+    /// </summary>
+    /// <typeparam name="T">
+    /// The value type.
+    /// <para>値の型。</para>
+    /// </typeparam>
+    /// <param name="optionTask">
+    /// A Task that produces the source Option.
+    /// <para>元の Option を生成する Task。</para>
+    /// </param>
+    /// <param name="predicate">
+    /// An asynchronous predicate used to validate the value.
+    /// <para>値を検証する非同期条件関数。</para>
+    /// </param>
+    /// <returns>
+    /// The original Some when the predicate returns true,
+    /// or None when it returns false or the source Option is None.
+    /// <para>
+    /// 条件が true の場合は元の Some、
+    /// false または元の Option が None の場合は None。
+    /// </para>
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="optionTask"/> or <paramref name="predicate"/> is null.
+    /// <para>
+    /// <paramref name="optionTask"/> または <paramref name="predicate"/> が null の場合にスローされる。
+    /// </para>
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when <paramref name="predicate"/> returns a null Task.
+    /// <para><paramref name="predicate"/> が null の Task を返した場合にスローされる。</para>
+    /// </exception>
+    public static async Task<Option<T>> EnsureAsync<T>(this Task<Option<T>> optionTask, Func<T, Task<bool>> predicate)
+    {
+        ArgumentNullException.ThrowIfNull(optionTask);
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        var option = await optionTask.ConfigureAwait(false);
+
+        if (!option.HasValue)
+            return Option<T>.None;
+
+        var predicateTask = predicate(option.Value);
+
+        if (predicateTask is null)
+            throw new InvalidOperationException("Predicate must not return a null Task.");
+
+        return await predicateTask.ConfigureAwait(false)
+            ? option
+            : Option<T>.None;
+    }
+
+    /// <summary>
     /// <para>値を持つ Option に対して、非同期の副作用を実行する。</para>
     /// <para>Executes an asynchronous side effect when the Option has a value.</para>
     /// </summary>
