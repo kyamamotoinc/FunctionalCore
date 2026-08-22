@@ -13,7 +13,7 @@ public static class Sample_26_EnsureAsync
     {
         Console.WriteLine("=== Result Sample 26 : EnsureAsync ===");
 
-        var result = await Divide(10, 2)
+        var result = await Divide(4, 2)
             .AsTask()
             .EnsureAsync(
                 IsLargeEnoughAsync,
