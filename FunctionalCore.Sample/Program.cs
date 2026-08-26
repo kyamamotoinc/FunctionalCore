@@ -9,6 +9,9 @@ public class Program
     {
         await ResultSampleRun();
         await OptionSampleRun();
+
+        PipelineSamples.ResultPipeline.Run();
+        PipelineSamples.OptionPipeline.Run();
     }
 
     static async Task ResultSampleRun()
