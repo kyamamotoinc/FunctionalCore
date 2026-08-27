@@ -141,7 +141,7 @@ public readonly struct Option<T> : IEquatable<Option<T>>
         var value = HasValue ? onSome(_value) : onNone();
 
         if (value is null)
-            throw new InvalidOperationException("Match must not return null.");
+            throw new InvalidOperationException("Match function must not return null.");
 
         return value;
     }
