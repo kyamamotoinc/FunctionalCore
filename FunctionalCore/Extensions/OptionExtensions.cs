@@ -112,9 +112,18 @@ public static class OptionExtensions
     /// The type of the value.
     /// <para>値の型。</para>
     /// </typeparam>
-    /// <param name="option"></param>
-    /// <param name="other"></param>
-    /// <returns></returns>
+    /// <param name="option">
+    /// The source Option.
+    /// <para>元の Option。</para>
+    /// </param>
+    /// <param name="other">
+    /// The fallback Option returned when <paramref name="option"/> is None.
+    /// <para><paramref name="option"/> が None の場合に返す代替 Option。</para>
+    /// </param>
+    /// <returns>
+    /// <paramref name="option"/> when it is Some; otherwise <paramref name="other"/>.
+    /// <para><paramref name="option"/> が Some の場合は自身、それ以外は <paramref name="other"/>。</para>
+    /// </returns>
     public static Option<T> Or<T>(this Option<T> option, Option<T> other)
     {
         return option.HasValue ? option : other;
@@ -128,9 +137,18 @@ public static class OptionExtensions
     /// The type of the value.
     /// <para>値の型。</para>
     /// </typeparam>
-    /// <param name="option"></param>
-    /// <param name="otherFactory"></param>
-    /// <returns></returns>
+    /// <param name="option">
+    /// The source Option.
+    /// <para>元の Option。</para>
+    /// </param>
+    /// <param name="otherFactory">
+    /// A function that creates the fallback Option when <paramref name="option"/> is None.
+    /// <para><paramref name="option"/> が None の場合に代替 Option を生成する関数。</para>
+    /// </param>
+    /// <returns>
+    /// <paramref name="option"/> when it is Some; otherwise the Option produced by <paramref name="otherFactory"/>.
+    /// <para><paramref name="option"/> が Some の場合は自身、それ以外は <paramref name="otherFactory"/> が生成した Option。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="otherFactory"/> is null.
     /// <para><paramref name="otherFactory"/> が null の場合にスローされる。</para>
@@ -158,8 +176,14 @@ public static class OptionExtensions
     /// The type of the value.
     /// <para>値の型。</para>
     /// </typeparam>
-    /// <param name="result"></param>
-    /// <returns></returns>
+    /// <param name="result">
+    /// The Result to convert.
+    /// <para>変換する Result。</para>
+    /// </param>
+    /// <returns>
+    /// Some containing the successful value when <paramref name="result"/> is successful; otherwise None.
+    /// <para><paramref name="result"/> が成功の場合は成功値を保持する Some、それ以外は None。</para>
+    /// </returns>
     /// <exception cref="InvalidOperationException">
     /// Thrown when <paramref name="result"/> is uninitialized.
     /// <para><paramref name="result"/> が未初期化の場合にスローされる。</para>
@@ -179,8 +203,14 @@ public static class OptionExtensions
     /// The type of the value.
     /// <para>値の型。</para>
     /// </typeparam>
-    /// <param name="value"></param>
-    /// <returns></returns>
+    /// <param name="value">
+    /// The value to convert. A null value is converted to None.
+    /// <para>変換する値。null の場合は None に変換される。</para>
+    /// </param>
+    /// <returns>
+    /// Some containing <paramref name="value"/> when it is non-null; otherwise None.
+    /// <para><paramref name="value"/> が null でない場合はその値を保持する Some、それ以外は None。</para>
+    /// </returns>
     public static Option<T> ToOption<T>(this T value)
     {
         if (value is null)
@@ -201,8 +231,18 @@ public static class OptionExtensions
     /// The type of the value.
     /// <para>値の型。</para>
     /// </typeparam>
-    /// <param name="options"></param>
-    /// <returns></returns>
+    /// <param name="options">
+    /// The sequence of Options to combine.
+    /// <para>まとめる Option のシーケンス。</para>
+    /// </param>
+    /// <returns>
+    /// Some containing all values when every Option is Some; otherwise None.
+    /// Returns None immediately when a None is encountered.
+    /// <para>
+    /// すべての Option が Some の場合は全ての値を保持する Some、それ以外は None。
+    /// None が見つかった時点で直ちに None を返す。
+    /// </para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="options"/> is null.
     /// <para><paramref name="options"/> が null の場合にスローされる。</para>
@@ -236,23 +276,32 @@ public static class OptionExtensions
     /// The type of the output values.
     /// <para>出力値の型。</para>
     /// </typeparam>
-    /// <param name="items"></param>
-    /// <param name="f"></param>
-    /// <returns></returns>
+    /// <param name="items">
+    /// The sequence of input values.
+    /// <para>入力値のシーケンス。</para>
+    /// </param>
+    /// <param name="selector">
+    /// A function that converts each input value to an Option.
+    /// <para>各入力値を Option に変換する関数。</para>
+    /// </param>
+    /// <returns>
+    /// Some containing all converted values when every application of <paramref name="selector"/> returns Some; otherwise None.
+    /// <para><paramref name="selector"/> のすべての適用結果が Some の場合は変換後の全値を保持する Some、それ以外は None。</para>
+    /// </returns>
     /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="items"/> or <paramref name="f"/> is null.
-    /// <para><paramref name="items"/> または <paramref name="f"/> が null の場合にスローされる。</para>
+    /// Thrown when <paramref name="items"/> or <paramref name="selector"/> is null.
+    /// <para><paramref name="items"/> または <paramref name="selector"/> が null の場合にスローされる。</para>
     /// </exception>
-    public static Option<IReadOnlyList<U>> Traverse<T, U>(this IEnumerable<T> items, Func<T, Option<U>> f)
+    public static Option<IReadOnlyList<U>> Traverse<T, U>(this IEnumerable<T> items, Func<T, Option<U>> selector)
     {
         ArgumentNullException.ThrowIfNull(items);
-        ArgumentNullException.ThrowIfNull(f);
+        ArgumentNullException.ThrowIfNull(selector);
 
         var lst = new List<U>();
 
         foreach (var item in items)
         {
-            var opt = f(item);
+            var opt = selector(item);
 
             if (!opt.HasValue)
                 return Option<IReadOnlyList<U>>.None;
@@ -292,8 +341,10 @@ public static class OptionExtensions
     /// <para>値を組み合わせる関数。</para>
     /// </param>
     /// <returns>
-    /// The combined option.
-    /// <para>組み合わされた Option。</para>
+    /// Some containing the combined value when both Options are Some and <paramref name="selector"/> returns a non-null value; otherwise None.
+    /// <para>
+    /// 両方の Option が Some で、かつ <paramref name="selector"/> が null ではない値を返した場合は組み合わせた値を保持する Some。それ以外は None。
+    /// </para>
     /// </returns>
     /// <exception cref="ArgumentNullException">
     /// Thrown if selector is null.
