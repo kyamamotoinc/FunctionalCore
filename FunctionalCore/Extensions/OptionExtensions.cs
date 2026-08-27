@@ -13,6 +13,10 @@ public static class OptionExtensions
     /// Does not change the Option.
     /// <para>状態は変更しない</para>
     /// </summary>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="onSome"/> or <paramref name="onNone"/> is null.
+    /// <para><paramref name="onSome"/> または <paramref name="onNone"/> が null の場合にスローされる。</para>
+    /// </exception>
     public static Option<T> TapBoth<T>(this Option<T> option, Action<T> onSome, Action onNone)
     {
         ArgumentNullException.ThrowIfNull(onSome);
@@ -127,6 +131,10 @@ public static class OptionExtensions
     /// <param name="option"></param>
     /// <param name="otherFactory"></param>
     /// <returns></returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="otherFactory"/> is null.
+    /// <para><paramref name="otherFactory"/> が null の場合にスローされる。</para>
+    /// </exception>
     public static Option<T> Or<T>(this Option<T> option, Func<Option<T>> otherFactory)
     {
         ArgumentNullException.ThrowIfNull(otherFactory);
@@ -152,6 +160,10 @@ public static class OptionExtensions
     /// </typeparam>
     /// <param name="result"></param>
     /// <returns></returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when <paramref name="result"/> is uninitialized.
+    /// <para><paramref name="result"/> が未初期化の場合にスローされる。</para>
+    /// </exception>
     public static Option<T> ToOption<E, T>(this Result<E, T> result)
     {
         result.ThrowIfNotInitialized();
@@ -191,6 +203,10 @@ public static class OptionExtensions
     /// </typeparam>
     /// <param name="options"></param>
     /// <returns></returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="options"/> is null.
+    /// <para><paramref name="options"/> が null の場合にスローされる。</para>
+    /// </exception>
     public static Option<IReadOnlyList<T>> Sequence<T>(this IEnumerable<Option<T>> options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -223,7 +239,10 @@ public static class OptionExtensions
     /// <param name="items"></param>
     /// <param name="f"></param>
     /// <returns></returns>
-    /// <exception cref="ArgumentNullException">Thrown if items or f is null. / items または f が null の場合に投げられる。</exception>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="items"/> or <paramref name="f"/> is null.
+    /// <para><paramref name="items"/> または <paramref name="f"/> が null の場合にスローされる。</para>
+    /// </exception>
     public static Option<IReadOnlyList<U>> Traverse<T, U>(this IEnumerable<T> items, Func<T, Option<U>> f)
     {
         ArgumentNullException.ThrowIfNull(items);
