@@ -141,7 +141,7 @@ public static class OptionAsyncExtensions
         var nextTask = binder(option.Value);
 
         if (nextTask is null)
-            throw new InvalidOperationException("Binder must not return null task.");
+            throw new InvalidOperationException("Binder must not return a null Task.");
 
         return await nextTask.ConfigureAwait(false);
     }
@@ -191,7 +191,7 @@ public static class OptionAsyncExtensions
         var valueTask = selector(option.Value);
 
         if (valueTask is null)
-            throw new InvalidOperationException("Selector must not return null task.");
+            throw new InvalidOperationException("Selector must not return a null Task.");
 
         var value = await valueTask.ConfigureAwait(false);
 
@@ -294,7 +294,7 @@ public static class OptionAsyncExtensions
             var actionTask = onSome(option.Value);
 
             if (actionTask is null)
-                throw new InvalidOperationException("OnSome must not return null task.");
+                throw new InvalidOperationException("OnSome must not return a null Task.");
 
             await actionTask.ConfigureAwait(false);
         }
@@ -342,7 +342,7 @@ public static class OptionAsyncExtensions
             var actionTask = onNone();
 
             if (actionTask is null)
-                throw new InvalidOperationException("OnNone must not return null task.");
+                throw new InvalidOperationException("OnNone must not return a null Task.");
 
             await actionTask.ConfigureAwait(false);
         }
