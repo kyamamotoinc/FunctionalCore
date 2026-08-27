@@ -1,8 +1,8 @@
 namespace FunctionalCore.Extensions;
 
 /// <summary>
-/// Provides extension methods for <c>Option&lt;T&gt;</c>.
-/// <para><c>Option&lt;T&gt;</c> に対する拡張メソッドを提供する。</para>
+/// Provides extension methods for <see cref="Option{T}"/>.
+/// <para><see cref="Option{T}"/> に対する拡張メソッドを提供する。</para>
 /// </summary>
 public static class OptionExtensions
 {
@@ -178,8 +178,8 @@ public static class OptionExtensions
     #region Conversions / 変換
 
     /// <summary>
-    /// Converts a <c>Result&lt;E, T&gt;</c> to an <c>Option&lt;T&gt;</c>, discarding the error when the Result is failed.
-    /// <para><c>Result&lt;E, T&gt;</c> を <c>Option&lt;T&gt;</c> に変換し、Result が失敗している場合はエラーを破棄する。</para>
+    /// Converts a <see cref="Result{E, T}"/> to an <see cref="Option{T}"/>, discarding the error when the Result is failed.
+    /// <para><see cref="Result{E, T}"/> を <see cref="Option{T}"/> に変換し、Result が失敗している場合はエラーを破棄する。</para>
     /// </summary>
     /// <typeparam name="E">
     /// The error type.
