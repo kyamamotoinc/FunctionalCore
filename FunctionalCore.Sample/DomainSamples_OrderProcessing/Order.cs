@@ -1,5 +1,9 @@
 ﻿namespace FunctionalCore.Sample.DomainSamples.OrderProcessing
 {
+    /// <summary>
+    /// 注文番号と確定状態を保持するサンプル用の注文クラス。
+    /// 確定操作では新しい注文を生成し、保存前に元の注文の状態を変更しない。
+    /// </summary>
     public sealed class Order
     {
         public int Id { get; private set; }

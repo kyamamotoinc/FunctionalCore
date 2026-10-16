@@ -3,6 +3,11 @@
 namespace FunctionalCore.Sample.DomainSamples.OrderProcessing
 {
     // DB不要のサンプル用リポジトリ。保存失敗も明示的に再現できる。
+    /// <summary>
+    /// 注文の検索と保存をメモリ上で行うサンプル用リポジトリ。
+    /// 検索結果の不在をOption、保存の成否をResultで表し、呼び出し回数で短絡処理を確認できる。
+    /// 保存失敗を明示的に再現でき、DBや外部サービスへの接続を必要としない。
+    /// </summary>
     public sealed class OrderRepository
     {
         private readonly Dictionary<int, Order> orders = new Dictionary<int, Order>();

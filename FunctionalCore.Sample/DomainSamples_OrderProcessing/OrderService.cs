@@ -3,6 +3,10 @@ using FunctionalCore.Extensions;
 
 namespace FunctionalCore.Sample.DomainSamples.OrderProcessing
 {
+    /// <summary>
+    /// 注文番号の検証、検索、確定条件の確認、確定、保存を連結するサービス。
+    /// 共通のOrderErrorを保持したまま成功値を変換し、成功時だけログを記録する。
+    /// </summary>
     public sealed class OrderService
     {
         private readonly OrderRepository repository;

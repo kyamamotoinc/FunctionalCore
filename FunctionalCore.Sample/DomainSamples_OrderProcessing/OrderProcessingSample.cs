@@ -2,6 +2,11 @@
 
 namespace FunctionalCore.Sample.DomainSamples.OrderProcessing
 {
+    /// <summary>
+    /// 独自エラー型を使った注文確定処理を実行するサンプル。
+    /// 成功、入力不正、注文未検出、確定済み、保存失敗の5ケースについて、
+    /// 結果の型、後続処理の呼び出し回数、保存状態を検証する。
+    /// </summary>
     public static class OrderProcessingSample
     {
         public static void Run()
