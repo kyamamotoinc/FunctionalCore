@@ -12,6 +12,7 @@ public class Program
 
         PipelineSamples.ResultPipeline.Run();
         PipelineSamples.OptionPipeline.Run();
+        DomainSamples.OrderProcessing.OrderProcessingSample.Run();
     }
 
     static async Task ResultSampleRun()
