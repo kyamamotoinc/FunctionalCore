@@ -146,7 +146,7 @@ MIT
 
 ## 独自エラー型を使った業務サンプル
 
-`FunctionalCore.Sample/DomainSamples/OrderProcessing`は、注文の検証・検索・確定・保存をつなぐ例です。サンプルを起動すると既存の例に続けて実行されます。
+`FunctionalCore.Sample/DomainSamples_OrderProcessing`は、注文の検証・検索・確定・保存をつなぐ例です。サンプルを起動すると既存の例に続けて実行されます。
 
 - `OrderError`を共通のエラー型にし、入力不正・注文未検出・確定済み・保存失敗を派生型で表します。呼び出し側は文字列比較ではなく型で対応を選びます。
 - 検索の不在は`Option<Order>`。注文が必須となるサービス内で`ToResult`により失敗へ変換します。
